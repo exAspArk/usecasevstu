@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="diagramscene"
-	ProjectGUID="{FDEFF2DB-F9F8-3B21-9269-B1F76368EBDB}"
+	ProjectGUID="{B8B6E1C2-F1DD-3943-BFFC-8A46BBFAD555}"
 	Keyword="Qt4VSv1.0"
 	TargetFrameworkVersion="0"
 	>

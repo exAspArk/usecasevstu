@@ -171,7 +171,7 @@ void MainWindow::itemInserted(DiagramItem *item)
 //! [8]
 void MainWindow::textInserted(QGraphicsTextItem *)
 {
-    buttonGroup->button(InsertTextButton)->setChecked(false);
+    //buttonGroup->button(InsertTextButton)->setChecked(false);
     scene->setMode(DiagramScene::Mode(pointerTypeGroup->checkedId()));
 }
 //! [8]
@@ -276,11 +276,11 @@ void MainWindow::itemSelected(QGraphicsItem *item)
 
     QFont font = textItem->font();
     QColor color = textItem->defaultTextColor();
-    fontCombo->setCurrentFont(font);
-    fontSizeCombo->setEditText(QString().setNum(font.pointSize()));
-    boldAction->setChecked(font.weight() == QFont::Bold);
-    italicAction->setChecked(font.italic());
-    underlineAction->setChecked(font.underline());
+    //fontCombo->setCurrentFont(font);
+    //fontSizeCombo->setEditText(QString().setNum(font.pointSize()));
+    //boldAction->setChecked(font.weight() == QFont::Bold);
+    //italicAction->setChecked(font.italic());
+    //underlineAction->setChecked(font.underline());
 }
 //! [19]
 
@@ -501,7 +501,7 @@ void MainWindow::on_actorAction()
 }
 void MainWindow::on_commAction()
 {
-	int id = 0;
+	int id = InsertTextButton;
 	if (id == InsertTextButton)
 	{
 		scene->setMode(DiagramScene::InsertText);

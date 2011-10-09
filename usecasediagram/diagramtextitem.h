@@ -5,6 +5,7 @@
 #include <QLinearGradient>
 #include <QPen>
 #include <QPainter>
+#include <QStyleOptionGraphicsItem>
 
 QT_BEGIN_NAMESPACE
 class QPainter;
@@ -38,7 +39,19 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
-		painter->setBrush(QBrush(QLinearGradient()));
+		QRectF rectf = option->exposedRect;
+		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
+		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*3.0/4.0,rectf.topLeft().y());
+		painter->drawLine(rectf.topLeft(),rectf.topRight());
+		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
+		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
+		painter->drawLine(rectf.topRight(),rectf.bottomRight());
+		// градиент
+		QLinearGradient linearGrad(rectf.topLeft(), rectf.bottomRight());
+		linearGrad.setColorAt(0, Qt::white);
+		linearGrad.setColorAt(1, Qt::red);
+		painter->fillRect(rectf,QBrush(linearGrad));
+		QGraphicsTextItem::paint(painter,option,widget);
 	}
 };
 //! [0]
