@@ -12,14 +12,13 @@ const int InsertTextButton = 10;
 //! [0]
 MainWindow::MainWindow()
 {
-	// создаём экшены
+    // создаём экшены
     createActions();
 
-	// createToolBox();
+    // createToolBox();
 
-	// создадим менюшки
+    // создадим менюшки
     createMenus();
-
 	//сцена
     scene = new DiagramScene(itemMenu, this);
     scene->setSceneRect(QRectF(0, 0, 5000, 5000));
@@ -45,12 +44,8 @@ MainWindow::MainWindow()
     setCentralWidget(widget);
     setWindowTitle(tr("UseCase Diagram"));
     setUnifiedTitleAndToolBarOnMac(true);
-	sceneScaleChanged(QString("150%"));
-	// пример
-	DiagramTextItem* item = new DiagramTextItem(0,this->scene);
-	item->setPos(0,0);
-	this->scene->addItem(item);
-	this->scene->update();
+    sceneScaleChanged(QString("50%"));
+    this->view->setRenderHint(QPainter::Antialiasing,true);
 }
 //! [0]
 
