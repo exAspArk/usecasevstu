@@ -28,9 +28,11 @@ DiagramItem::DiagramItem(DiagramType diagramType, QMenu *contextMenu,
                       << QPointF(-100, 0);
             break;
         case Step:
-            myPolygon << QPointF(-100, -100) << QPointF(100, -100)
+            path.addEllipse(0,0,350,200);
+            this->myPolygon = path.toFillPolygon();
+          /*myPolygon << QPointF(-100, -100) << QPointF(100, -100)
                       << QPointF(100, 100) << QPointF(-100, 100)
-                      << QPointF(-100, -100);
+                      << QPointF(-100, -100);*/
             break;
         default:
             myPolygon << QPointF(-120, -80) << QPointF(-70, 80)
