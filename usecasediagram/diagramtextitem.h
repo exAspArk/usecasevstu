@@ -40,18 +40,21 @@ protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
 		QRectF rectf = option->exposedRect;
-		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
-		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*3.0/4.0,rectf.topLeft().y());
-		painter->drawLine(rectf.topLeft(),rectf.topRight());
-		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
-		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
-		painter->drawLine(rectf.topRight(),rectf.bottomRight());
-		//painter->drawEllipse(rectf);
-		// градиент
 		QLinearGradient linearGrad(rectf.topLeft(), rectf.bottomRight());
 		linearGrad.setColorAt(0, Qt::white);
 		linearGrad.setColorAt(1, QColor(255,130,80));
 		painter->fillRect(rectf,QBrush(linearGrad));
+		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
+		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*5.0/6.0,
+			rectf.topLeft().y());
+		QPointF newPointBottomRight  = QPointF(rectf.topRight().x(),
+			(rectf.bottomRight().y() - rectf.topRight().y())*1.0/4.0);
+		painter->drawLine(rectf.topLeft(),newPointTopRight);
+		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
+		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
+		// отрисовка половины линии 
+		painter->drawLine(rectf.bottomRight(),newPointBottomRight);
+		painter->drawLine(newPointTopRight,newPointBottomRight);
 		QGraphicsTextItem::paint(painter,option,widget);
 	}
 };
