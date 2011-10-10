@@ -40,15 +40,15 @@ protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
 		QRectF rectf = option->exposedRect;
-		QLinearGradient linearGrad(rectf.topLeft(), rectf.bottomRight());
-		linearGrad.setColorAt(0, Qt::white);
-		linearGrad.setColorAt(1, QColor(255,130,80));
-		painter->fillRect(rectf,QBrush(linearGrad));
 		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
 		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*5.0/6.0,
 			rectf.topLeft().y());
 		QPointF newPointBottomRight  = QPointF(rectf.topRight().x(),
 			(rectf.bottomRight().y() - rectf.topRight().y())*1.0/4.0);
+		QLinearGradient linearGrad(newPointBottomRight, rectf.bottomLeft());
+		linearGrad.setColorAt(0, Qt::white);
+		linearGrad.setColorAt(1, QColor(255,130,80));
+		painter->fillRect(rectf,QBrush(linearGrad));
 		painter->drawLine(rectf.topLeft(),newPointTopRight);
 		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
 		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
