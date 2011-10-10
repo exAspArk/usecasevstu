@@ -51,6 +51,8 @@ private:
     QPolygonF myPolygon;
     QMenu *myContextMenu;
     QList<Arrow *> arrows;
+	const int width = 100;
+	const int height = 50;
 };
 //! [0]
 
