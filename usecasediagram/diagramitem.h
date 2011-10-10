@@ -41,6 +41,8 @@ public:
     QPixmap image() const;
     int type() const
         { return Type;}
+	static const int width = 100;
+	static const int height = 50;
 
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -51,8 +53,6 @@ private:
     QPolygonF myPolygon;
     QMenu *myContextMenu;
     QList<Arrow *> arrows;
-	const int width = 100;
-	const int height = 50;
 };
 //! [0]
 

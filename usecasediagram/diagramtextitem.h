@@ -46,10 +46,11 @@ protected:
 		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
 		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
 		painter->drawLine(rectf.topRight(),rectf.bottomRight());
+		//painter->drawEllipse(rectf);
 		// градиент
 		QLinearGradient linearGrad(rectf.topLeft(), rectf.bottomRight());
 		linearGrad.setColorAt(0, Qt::white);
-		linearGrad.setColorAt(1, Qt::red);
+		linearGrad.setColorAt(1, QColor(255,130,80));
 		painter->fillRect(rectf,QBrush(linearGrad));
 		QGraphicsTextItem::paint(painter,option,widget);
 	}
