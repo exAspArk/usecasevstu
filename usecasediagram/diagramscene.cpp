@@ -103,12 +103,25 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     DiagramItem *item;
     switch (myMode) {
         case InsertItem:
-            item = new DiagramItem(myItemType, myItemMenu);
+            /*item = new DiagramItem(myItemType, myItemMenu);
             item->setBrush(myItemColor);
             addItem(item);
             item->setPos(mouseEvent->scenePos());
             emit itemInserted(item);
-            break;
+            break;*/
+			this->ellipseItem = new DiagramEllipseItem();
+			ellipseItem->setFont(myFont);
+			ellipseItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+			ellipseItem->setZValue(1000.0);
+			/*connect(ellipseItem, SIGNAL(lostFocus(DiagramEllipseItem*)),
+				this, SLOT(editorLostFocus(DiagramEllipseItem*)));
+			connect(ellipseItem, SIGNAL(selectedChange(QGraphicsItem*)),
+				this, SIGNAL(itemSelected(QGraphicsItem*)));*/
+			addItem(ellipseItem);
+			ellipseItem->setDefaultTextColor(myTextColor);
+			ellipseItem->setPos(mouseEvent->scenePos());
+			/*emit textInserted(ellipseItem);*/
+			break;
 //! [6] //! [7]
         case InsertLine:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),

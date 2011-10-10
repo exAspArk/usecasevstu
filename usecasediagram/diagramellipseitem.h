@@ -9,7 +9,7 @@ class DiagramEllipseItem : public QGraphicsTextItem
 	Q_OBJECT
 public:
 	enum {Type = UserType + 5};
-	DiagramEllipseItem(QGraphicsItem *parent, QGraphicsScene *scene = 0);
+	DiagramEllipseItem(QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
 	~DiagramEllipseItem();
 	int type() const
 	{ return Type; }
@@ -26,7 +26,7 @@ protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
-	
+		
 		QGraphicsTextItem::paint(painter,option,widget);
 	}
 private:

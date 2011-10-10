@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include "diagramitem.h"
 #include "diagramtextitem.h"
+#include "diagramellipseitem.h"
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
@@ -63,6 +64,7 @@ private:
     QGraphicsLineItem *line;
     QFont myFont;
     DiagramTextItem *textItem;
+	DiagramEllipseItem *ellipseItem;
     QColor myTextColor;
     QColor myItemColor;
     QColor myLineColor;
