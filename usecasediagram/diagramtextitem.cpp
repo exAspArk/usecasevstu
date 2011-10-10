@@ -9,10 +9,7 @@ DiagramTextItem::DiagramTextItem(QGraphicsItem *parent, QGraphicsScene *scene)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
-	/*QTextCursor c = this->textCursor();
-	int x = c.verticalMovementX();
-	c.setVisualNavigation(false);
-	this->setTextCursor(c);*/
+	this->typeElementData = TypeElement::Comment;
 
 }
 //! [0]

@@ -6,6 +6,7 @@
 #include <QPen>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include "declarationdatatypes.h"
 
 QT_BEGIN_NAMESPACE
 class QPainter;
@@ -27,6 +28,7 @@ public:
 
     int type() const
         { return Type; }
+	int typeElement() {return this->typeElementData;}
 
 signals:
     void lostFocus(DiagramTextItem *item);
@@ -57,6 +59,8 @@ protected:
 		painter->drawLine(newPointTopRight,newPointBottomRight);
 		QGraphicsTextItem::paint(painter,option,widget);
 	}
+private:
+	enum TypeElement typeElementData;
 };
 //! [0]
 
