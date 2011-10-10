@@ -2,6 +2,9 @@
 #define DIAGRAMELLIPSEITEM_H
 
 #include <QGraphicsTextItem>
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
+#include <QPainterPath>
 #include "declarationdatatypes.h"
 
 class DiagramEllipseItem : public QGraphicsTextItem
@@ -26,7 +29,13 @@ protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
-		
+		QRadialGradient radialGrad(option->exposedRect.center(), option->exposedRect.height());
+		radialGrad.setColorAt(1, Qt::yellow);
+		radialGrad.setColorAt(0, Qt::white);
+		QPainterPath _path;
+		_path.addEllipse(option->exposedRect);
+		painter->fillPath(_path,QBrush(radialGrad));
+		painter->drawEllipse(option->exposedRect);
 		QGraphicsTextItem::paint(painter,option,widget);
 	}
 private:
