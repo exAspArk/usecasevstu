@@ -35,8 +35,14 @@ protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
 		this->rectF = option->exposedRect;
-		QRadialGradient radialGrad(option->exposedRect.center(), option->exposedRect.height());
-		radialGrad.setColorAt(1, Qt::yellow);
+		qreal x1=0;
+		qreal y1=0;
+		qreal x2=0;
+		qreal y2=0;
+		option->exposedRect.getCoords(&x1,&y1,&x2,&y2);
+		QRadialGradient radialGrad(QPointF(x1,y1), option->exposedRect.height());
+		radialGrad.setColorAt(1, QColor(255,160,25));
+		radialGrad.setColorAt(0.5,Qt::yellow);
 		radialGrad.setColorAt(0, Qt::white);
 		QPainterPath _path;
 		_path.addEllipse(option->exposedRect);
