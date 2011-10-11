@@ -201,17 +201,19 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 //! [11] //! [12]
 
         if (startItems.count() > 0 && endItems.count() > 0 &&
-            startItems.first()->type() == DiagramItem::Type &&
-            endItems.first()->type() == DiagramItem::Type &&
+            /*startItems.first()->type() == DiagramItem::Type &&
+            endItems.first()->type() == DiagramItem::Type &&*/
             startItems.first() != endItems.first()) {
-            DiagramItem *startItem =
-                qgraphicsitem_cast<DiagramItem *>(startItems.first());
-            DiagramItem *endItem =
-                qgraphicsitem_cast<DiagramItem *>(endItems.first());
+           // QGraphicsTextItem *startItem =
+           //     qgraphicsitem_cast<QGraphicsTextItem *>(startItems.first());
+           // QGraphicsTextItem *endItem =
+           //     qgraphicsitem_cast<QGraphicsTextItem *>(endItems.first());
+           QGraphicsTextItem *startItem = (QGraphicsTextItem*)startItems[0];
+		   QGraphicsTextItem *endItem  = (QGraphicsTextItem*)endItems[0];
             Arrow *arrow = new Arrow(startItem, endItem);
             arrow->setColor(myLineColor);
-            startItem->addArrow(arrow);
-            endItem->addArrow(arrow);
+            //startItem->addArrow(arrow);
+           // endItem->addArrow(arrow);
             arrow->setZValue(-1000.0);
             addItem(arrow);
             arrow->updatePosition();

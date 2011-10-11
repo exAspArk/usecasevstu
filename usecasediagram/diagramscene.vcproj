@@ -210,7 +210,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\diagramactorimageitem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\diagramellipseitem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\diagramimageitem.cpp"
 				>
 			</File>
 			<File
@@ -270,6 +278,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\diagramactorimageitem.h"
+				>
+			</File>
+			<File
 				RelativePath=".\diagramellipseitem.h"
 				>
 				<FileConfiguration
@@ -294,6 +306,10 @@
 						Outputs="&quot;$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\diagramimageitem.h"
+				>
 			</File>
 			<File
 				RelativePath="diagramitem.h"

@@ -1,12 +1,12 @@
 #include <QtGui>
 
 #include "arrow.h"
-#include <math.h>
+//#include <math.h>
 
 const qreal Pi = 3.14;
 
 //! [0]
-Arrow::Arrow(DiagramItem *startItem, DiagramItem *endItem,
+Arrow::Arrow(QGraphicsTextItem *startItem, QGraphicsTextItem *endItem,
          QGraphicsItem *parent, QGraphicsScene *scene)
     : QGraphicsLineItem(parent, scene)
 {
@@ -47,6 +47,41 @@ void Arrow::updatePosition()
 }
 //! [3]
 
+QPair<QPointF, QPointF> getPoints(int calcType, QPointF center1, QPointF center2, float width1, float width2, float height1, float height2) 
+{
+	QPair<QPointF, QPointF> result;
+	Arrow::LineCircleCalculation calc11 = Arrow::LineCircleCalculation(center1, center2, width1, height1);
+	Arrow::LineCircleCalculation calc12 = Arrow::LineCircleCalculation(center2, center1, width2, height2);
+	Arrow::LineCircleCalculation calc21 = Arrow::LineCircleCalculation(center1, center2, width1, height1);
+	Arrow::LineRectCalculation calc22 = Arrow::LineRectCalculation(center2, center1, width2, height2);
+	Arrow::LineRectCalculation calc31 = Arrow::LineRectCalculation(center1, center2, width1, height1);
+	Arrow::LineCircleCalculation calc32 = Arrow::LineCircleCalculation(center2, center1, width2, height2);
+	Arrow::LineRectCalculation calc41 = Arrow::LineRectCalculation(center1, center2, width1, height1);
+	Arrow::LineRectCalculation calc42 = Arrow::LineRectCalculation(center2, center1, width2, height2)	;
+	
+	switch(calcType)
+	{
+		case 1://circle-circle
+			result.first = calc11.getResult();
+			result.second = calc12.getResult();			
+		break;
+		case 2://circle-rect
+			result.first = calc21.getResult();
+			result.second = calc22.getResult();
+		break;
+		case 3://rect-circle
+			result.first = calc31.getResult();
+			result.second = calc32.getResult();
+		break;
+		case 4://rect-rect
+			result.first = calc41.getResult();
+			result.second = calc42.getResult();
+		break;
+	}
+	
+	
+	return result;
+}
 //! [4]
 void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
           QWidget *)
@@ -60,9 +95,36 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     painter->setPen(myPen);
     painter->setBrush(myColor);
 //! [4] //! [5]
+	int calcType = 1;
 
-    QLineF centerLine(myStartItem->pos(), myEndItem->pos());
-    QPolygonF endPolygon = myEndItem->polygon();
+	//-----------исправить после апдейта
+
+	//if(myStartItem->diagramType() == DiagramType::Step && myEndItem->diagramType() == DiagramType::Step)
+			calcType = 1;
+	//if(myStartItem->diagramType() == DiagramType::Step && myEndItem->diagramType() == DiagramType::Conditional)
+	//		calcType = 2;
+	//if(myStartItem->diagramType() == DiagramType::Conditional && myEndItem->diagramType() == DiagramType::Step)
+	//		calcType = 3;
+	//if(myStartItem->diagramType() == DiagramType::Conditional && myEndItem->diagramType() == DiagramType::Conditional)
+	//		calcType = 4;
+
+
+
+
+	//-----------
+
+	QPair<QPointF, QPointF> points = getPoints(calcType, mapFromItem(myStartItem, ellipseItem(myStartItem)->polygon().boundingRect().center()), 
+								   mapFromItem(myEndItem, ellipseItem(myStartItem)->polygon().boundingRect().center()),
+								   ellipseItem(myStartItem)->polygon().boundingRect().width(), ellipseItem(myEndItem)->polygon().boundingRect().width(), 
+								   ellipseItem(myStartItem)->polygon().boundingRect().height(), ellipseItem(myEndItem)->polygon().boundingRect().height());
+    //QLineF centerLine(myStartItem->pos(), myEndItem->pos());
+	QLineF centerLine(points.first, points.second);
+	
+	
+
+
+
+    /*QPolygonF endPolygon = myEndItem->polygon();
     QPointF p1 = endPolygon.first() + myEndItem->pos();
     QPointF p2;
     QPointF intersectPoint;
@@ -75,9 +137,10 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     if (intersectType == QLineF::BoundedIntersection)
         break;
         p1 = p2;
-    }
+    }*/
 
-    setLine(QLineF(intersectPoint, myStartItem->pos()));
+    //setLine(QLineF(intersectPoint, myStartItem->pos()));
+	setLine(centerLine);
 //! [5] //! [6]
 
     double angle = ::acos(line().dx() / line().length());
@@ -102,5 +165,6 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
         myLine.translate(0,-8.0);
         painter->drawLine(myLine);
     }
+	this->scene()->update();
 }
 //! [7]

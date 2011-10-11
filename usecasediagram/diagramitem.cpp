@@ -60,12 +60,12 @@ void DiagramItem::removeArrow(Arrow *arrow)
 //! [2]
 void DiagramItem::removeArrows()
 {
-    foreach (Arrow *arrow, arrows) {
+   /* foreach (Arrow *arrow, arrows) {
         arrow->startItem()->removeArrow(arrow);
         arrow->endItem()->removeArrow(arrow);
         scene()->removeItem(arrow);
         delete arrow;
-    }
+    }*/
 }
 //! [2]
 
