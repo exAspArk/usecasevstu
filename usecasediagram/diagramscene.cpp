@@ -70,7 +70,10 @@ void DiagramScene::setFont(const QFont &font)
     }
 }
 //! [4]
-
+void DiagramScene::setImage(QString filename)
+{
+    image=QImage(filename);
+}
 void DiagramScene::setMode(Mode mode)
 {
     myMode = mode;
@@ -96,6 +99,13 @@ void DiagramScene::editorLostFocus(DiagramTextItem *item)
 //! [5]
 
 //! [6]
+void DiagramScene::imageOnScene()
+{
+    this->imageItem = new DiagramImageItem(this->image);
+    addItem(imageItem);
+	imageItem->setPos(0,0);
+    this->update();
+}
 void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseEvent->button() != Qt::LeftButton)
@@ -145,12 +155,14 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             textItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
             break;
-             case InsertActor:
-                 this->actorImageItem = new DiagramActorImageItem(QImage(":/images/actor.png"));
-			//actorImageItem->setZValue(1000.0);
+            
+        case InsertActor:
+            this->actorImageItem = new DiagramActorImageItem(QImage(":/images/actor.png"));
 			addItem(actorImageItem);
 			actorImageItem->setPos(mouseEvent->scenePos());
             break;
+        
+        
 //! [8] //! [9]
     default:
         ;

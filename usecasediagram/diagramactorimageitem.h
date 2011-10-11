@@ -1,7 +1,6 @@
 #ifndef DIAGRAMACTORIMAGEITEM_H
 #define DIAGRAMACTORIMAGEITEM_H
 
-#include <QGraphicsRectItem>
 
 #include <QGraphicsRectItem>
 #include <QPainter>
@@ -22,11 +21,7 @@ class DiagramActorImageItem: public QGraphicsRectItem
      //int rtti () const { return imageRTTI; }
 
  protected:
-    
-
-	
-
-     void paint( QPainter *, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    void paint( QPainter *, const QStyleOptionGraphicsItem *option, QWidget *widget );
  private:
      QImage image;
      QPixmap pixmap;

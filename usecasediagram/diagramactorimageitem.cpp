@@ -5,7 +5,7 @@ DiagramActorImageItem::DiagramActorImageItem(QGraphicsItem *parent,QGraphicsScen
 {
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
-	this->typeElementData = TypeElement::Ellipse;
+	this->typeElementData = TypeElement::Actor;
 }
 
 DiagramActorImageItem::DiagramActorImageItem(QImage img)

@@ -1,10 +1,19 @@
 #include "diagramimageitem.h"
 
+DiagramImageItem::DiagramImageItem(QGraphicsItem *parent,QGraphicsScene *scene )
+	: QGraphicsRectItem(parent,scene)
+{
+	setFlag(QGraphicsItem::ItemIsMovable);
+	setFlag(QGraphicsItem::ItemIsSelectable);
+	this->typeElementData = TypeElement::Image;
+}
+
 DiagramImageItem::DiagramImageItem(QImage img)
     : image(img)
 {
     setRect(0, 0, image.width(), image.height());
-     setFlag(ItemIsMovable);
+    setFlag(ItemIsMovable);
+    setFlag(QGraphicsItem::ItemIsSelectable);
  #if !defined(Q_WS_QWS)
      pixmap.convertFromImage(image, Qt::OrderedAlphaDither);
  #endif

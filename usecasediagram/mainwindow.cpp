@@ -46,7 +46,7 @@ MainWindow::MainWindow()
     setCentralWidget(widget);
     setWindowTitle(tr("UseCase Diagram"));
     setUnifiedTitleAndToolBarOnMac(true);
-    sceneScaleChanged(QString("50%"));
+    sceneScaleChanged(QString("100%"));
     this->view->setRenderHint(QPainter::Antialiasing,true);
 }
 //! [0]
@@ -488,9 +488,18 @@ void MainWindow::on_rectAction()
 }
 void MainWindow::on_actorAction()
 {
-	scene->setItemType(DiagramItem::Step);
-	scene->setMode(DiagramScene::InsertActor);
-	
+	int id = 0;
+	if (id == InsertTextButton)
+	{
+		scene->setMode(DiagramScene::InsertActor);
+	}
+	else 
+	{
+		scene->setItemType(DiagramItem::Step);
+	    scene->setMode(DiagramScene::InsertActor);
+	}
+    scene->update();
+    view->update();
 }
 void MainWindow::on_commAction()
 {
@@ -507,7 +516,14 @@ void MainWindow::on_commAction()
 }
 void MainWindow::on_picAction()
 {
-	
+    QString filename=QFileDialog::getOpenFileName(this,QString(tr("Открыть файл с изображением")),QString(),QString("Images (*.png);;Все файлы(*.*)"));
+   if(QFile::exists(filename))
+	{
+        scene->setImage(filename);
+        scene->imageOnScene();
+        scene->update();
+        view->update();
+    }
 }
 void MainWindow::on_saveToPicAction()
 {

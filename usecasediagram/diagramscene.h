@@ -24,7 +24,7 @@ class DiagramScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    enum Mode { InsertItem, InsertLine, InsertText, MoveItem, InsertActor };
+    enum Mode { InsertItem, InsertLine, InsertText, MoveItem, InsertActor, InsertImage };
 
     DiagramScene(QMenu *itemMenu, QObject *parent = 0);
     QFont font() const
@@ -39,6 +39,8 @@ public:
     void setTextColor(const QColor &color);
     void setItemColor(const QColor &color);
     void setFont(const QFont &font);
+    void setImage(QString filename);
+    void imageOnScene();
 
 public slots:
     void setMode(Mode mode);
@@ -73,6 +75,7 @@ private:
 
     DiagramImageItem *imageItem;
     DiagramActorImageItem *actorImageItem;
+    QImage image;
 };
 //! [0]
 
