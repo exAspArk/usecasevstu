@@ -5,7 +5,7 @@ DiagramEllipseItem::DiagramEllipseItem(QGraphicsItem *parent,QGraphicsScene *sce
 {
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
-	this->typeElementData = TypeElement::Ellipse;
+	this->typeElementData = Ellipse;
 }
 
 DiagramEllipseItem::~DiagramEllipseItem()

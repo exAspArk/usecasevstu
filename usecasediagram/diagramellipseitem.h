@@ -17,7 +17,12 @@ public:
 	int type() const
 	{ return Type; }
 	int typeElement() {return this->typeElementData;}
-
+	QPolygonF polygon() const
+	{
+		QPainterPath _path;
+		_path.addEllipse(this->rectF);
+		return _path.toFillPolygon();
+	}
 signals:
 	void lostFocus(DiagramEllipseItem *item);
 	void selectedChange(QGraphicsItem *item);
@@ -29,6 +34,7 @@ protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
+		this->rectF = option->exposedRect;
 		QRadialGradient radialGrad(option->exposedRect.center(), option->exposedRect.height());
 		radialGrad.setColorAt(1, Qt::yellow);
 		radialGrad.setColorAt(0, Qt::white);
@@ -40,8 +46,7 @@ protected:
 	}
 private:
 	enum TypeElement typeElementData;
-
-	
+	QRectF rectF;
 };
 
 #endif // DIAGRAMELLIPSEITEM_H
