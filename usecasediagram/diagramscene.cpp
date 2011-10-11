@@ -131,6 +131,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			addItem(ellipseItem);
 			ellipseItem->setDefaultTextColor(myTextColor);
 			ellipseItem->setPos(mouseEvent->scenePos());
+            emit textInserted(textItem);
 			/*emit textInserted(ellipseItem);*/
 			break;
 //! [6] //! [7]
@@ -160,6 +161,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             this->actorImageItem = new DiagramActorImageItem(QImage(":/images/actor.png"));
 			addItem(actorImageItem);
 			actorImageItem->setPos(mouseEvent->scenePos());
+            emit textInserted(textItem);
             break;
         
         
