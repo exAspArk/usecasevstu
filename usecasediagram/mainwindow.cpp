@@ -507,6 +507,10 @@ void MainWindow::on_commAction()
 }
 void MainWindow::on_picAction()
 {
+	
+}
+void MainWindow::on_saveToPicAction()
+{
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Сохранение в картинку"),
 													"",
@@ -516,10 +520,6 @@ void MainWindow::on_picAction()
 	QPainter painter(&image);
 	scene->render(&painter);
 	image.save(fileName);
-}
-void MainWindow::on_saveToPicAction()
-{
-	
 }
 void MainWindow::on_saveAction()
 {
