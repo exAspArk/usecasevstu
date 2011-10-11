@@ -23,7 +23,7 @@ MainWindow::MainWindow()
     createMenus();
 	//сцена
     scene = new DiagramScene(itemMenu, this);
-    scene->setSceneRect(QRectF(0, 0, 5000, 5000));
+	scene->setSceneRect(QRectF(0, 0, 1280, 1024));
 	// сигнал при нажатии на сцену передаёт объект который доюавляем
     connect(scene, SIGNAL(itemInserted(DiagramItem*)),
             this, SLOT(itemInserted(DiagramItem*)));
@@ -507,16 +507,15 @@ void MainWindow::on_commAction()
 }
 void MainWindow::on_picAction()
 {
-	int id = 0;
-	if (id == InsertTextButton)
-	{
-		scene->setMode(DiagramScene::InsertText);
-	}
-	else 
-	{
-		scene->setItemType(DiagramItem::Step);
-		scene->setMode(DiagramScene::InsertItem);
-	}
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Сохранение в картинку"),
+													"",
+													tr("Images (*.png)"));
+	QImage image(scene->width(), scene->height(), QImage::Format_ARGB32_Premultiplied);
+	image.fill(NULL);
+	QPainter painter(&image);
+	scene->render(&painter);
+	image.save(fileName);
 }
 void MainWindow::on_saveToPicAction()
 {

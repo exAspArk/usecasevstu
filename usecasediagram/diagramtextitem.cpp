@@ -9,7 +9,7 @@ DiagramTextItem::DiagramTextItem(QGraphicsItem *parent, QGraphicsScene *scene)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
-	this->typeElementData = TypeElement::Comment;
+	this->typeElementData = Comment;
 
 }
 //! [0]
