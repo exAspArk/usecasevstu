@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
+#include <QFileDialog>
 #include "diagramitem.h"
 
 class DiagramScene;
