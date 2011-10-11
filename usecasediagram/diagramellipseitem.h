@@ -40,7 +40,7 @@ protected:
 		qreal x2=0;
 		qreal y2=0;
 		option->exposedRect.getCoords(&x1,&y1,&x2,&y2);
-		QRadialGradient radialGrad(QPointF(x1,y1), option->exposedRect.height());
+		QRadialGradient radialGrad(QPointF(x1,y1), option->exposedRect.width());
 		radialGrad.setColorAt(1, QColor(255,160,25));
 		radialGrad.setColorAt(0.5,Qt::yellow);
 		radialGrad.setColorAt(0, Qt::white);
