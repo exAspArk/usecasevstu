@@ -5,7 +5,7 @@ DiagramImageItem::DiagramImageItem(QGraphicsItem *parent,QGraphicsScene *scene )
 {
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
-	this->typeElementData = TypeElement::Image;
+	this->typeElementData = Image;
 }
 
 DiagramImageItem::DiagramImageItem(QImage img)

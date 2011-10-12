@@ -4,14 +4,19 @@ HEADERS	    =   mainwindow.h \
 		arrow.h \
 		diagramtextitem.h \
     diagramellipseitem.h \
-    declarationdatatypes.h
+    declarationdatatypes.h \
+    diagramimageitem.h \
+    diagramactorimageitem.h \
+    diagramactorimageitem.h
 SOURCES	    =   mainwindow.cpp \
 		diagramitem.cpp \
 		main.cpp \
 		arrow.cpp \
 		diagramtextitem.cpp \
 		diagramscene.cpp \
-    diagramellipseitem.cpp
+    diagramellipseitem.cpp \
+    diagramimageitem.cpp \
+    diagramactorimageitem.cpp
 RESOURCES   =	diagramscene.qrc
 
 
