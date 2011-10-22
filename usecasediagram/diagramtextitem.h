@@ -42,7 +42,7 @@ protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
 		QRectF rectf = option->exposedRect;
-		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
+		// РѕС‚СЂРёСЃРѕРІРєР° РїРѕ Р»РёРЅРёСЏРј РїРѕРєР° РґСѓРјР°РµРј РєР°Рє СЃРґРµР»Р°С‚СЊ СЃРєРѕС€РµРЅРЅС‹Р№ СѓРіРѕР» Рё РЅСѓР¶РµРЅ РѕРЅ РІРѕРѕР±С‰Рµ
 		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*9.0/10.0,
 			rectf.topLeft().y());
 		QPointF newPointBottomRight  = QPointF(rectf.topRight().x(),
@@ -54,7 +54,7 @@ protected:
 		painter->drawLine(rectf.topLeft(),newPointTopRight);
 		painter->drawLine(rectf.topLeft(),rectf.bottomLeft());
 		painter->drawLine(rectf.bottomLeft(),rectf.bottomRight());
-		// отрисовка половины линии 
+		// РѕС‚СЂРёСЃРѕРІРєР° РїРѕР»РѕРІРёРЅС‹ Р»РёРЅРёРё 
 		painter->drawLine(rectf.bottomRight(),newPointBottomRight);
 		painter->drawLine(newPointTopRight,newPointBottomRight);
 		QGraphicsTextItem::paint(painter,option,widget);
