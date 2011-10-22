@@ -47,7 +47,7 @@ void Arrow::updatePosition()
 }
 //! [3]
 
-QPair<QPointF, QPointF> getPoints(int calcType, QPointF center1, QPointF center2, float width1, float width2, float height1, float height2) 
+QPair<QPointF, QPointF> getPoints(int calcType, QPointF center2, QPointF center1, float width2, float width1, float height2, float height1) 
 {
 	QPair<QPointF, QPointF> result;
 	Arrow::LineCircleCalculation calc11 = Arrow::LineCircleCalculation(center1, center2, width1, height1);
@@ -91,7 +91,7 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 
     QPen myPen = pen();
     myPen.setColor(myColor);
-    qreal arrowSize = 20;
+    qreal arrowSize = 7;
     painter->setPen(myPen);
     painter->setBrush(myColor);
 //! [4] //! [5]
@@ -153,10 +153,12 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
                                         cos(angle + Pi - Pi / 3) * arrowSize);
 
         arrowHead.clear();
-        arrowHead << line().p1() << arrowP1 << arrowP2;
+        arrowHead << arrowP1 << line().p1() <<  arrowP2;
 //! [6] //! [7]
         painter->drawLine(line());
-        painter->drawPolygon(arrowHead);
+		painter->drawLine(QLineF(line().p1(), arrowP1));
+		painter->drawLine(QLineF(line().p1(), arrowP2));
+		//painter->drawPolygon(arrowHead);
         if (isSelected()) {
             painter->setPen(QPen(myColor, 1, Qt::DashLine));
         QLineF myLine = line();
