@@ -6,7 +6,7 @@
 #include "diagramtextitem.h"
 #include "diagramellipseitem.h"
 #include "diagramimageitem.h"
-#include "diagramactorimageitem.h"
+#include "diagramactoritem.h"
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
@@ -74,7 +74,7 @@ private:
     QColor myLineColor;
 
     DiagramImageItem *imageItem;
-    DiagramActorImageItem *actorImageItem;
+    DiagramActorItem *actorItem;
     QImage image;
 };
 //! [0]

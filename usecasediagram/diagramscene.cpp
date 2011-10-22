@@ -158,11 +158,24 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             break;
             
         case InsertActor:
-            this->actorImageItem = new DiagramActorImageItem(QImage(":/images/actor.png"));
-			addItem(actorImageItem);
-			actorImageItem->setPos(mouseEvent->scenePos());
+            actorItem = new DiagramActorItem();
+            //actorItem->setFont(myFont);
+            //actorItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+            actorItem->setZValue(1000.0);
+            actorItem->setTextWidth(50);
+            actorItem->setHtml(QString("<img src=\":/images/actor.png\" /><p>Actor</p>"));
+            //actorItem->setTextInteractionFlags (Qt::NoTextInteraction);
+            //textItem->setPlainText(QString("\n\n\n"));
+            //connect(actorItem, SIGNAL(lostFocus(DiagramTextItem*)),
+             //       this, SLOT(editorLostFocus(DiagramTextItem*)));
+            //connect(actorItem, SIGNAL(selectedChange(QGraphicsItem*)),
+            //        this, SIGNAL(itemSelected(QGraphicsItem*)));
+            addItem(actorItem);
+            //actorItem->setDefaultTextColor(myTextColor);
+            actorItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
             break;
+
         
         
 //! [8] //! [9]
