@@ -866,6 +866,12 @@ void MainWindow::createToolbars()
 
     linePointerButton->setIcon(QIcon(":/images/linepointer.png"));
 
+    QToolButton *linePointer2Button = new QToolButton;
+
+    linePointer2Button->setCheckable(true);
+
+    linePointer2Button->setIcon(QIcon(":/images/line2pointer.png"));
+
 
 
     pointerTypeGroup = new QButtonGroup(this);
@@ -873,6 +879,9 @@ void MainWindow::createToolbars()
     pointerTypeGroup->addButton(pointerButton, int(DiagramScene::MoveItem));
 
     pointerTypeGroup->addButton(linePointerButton,
+
+                                int(DiagramScene::InsertLine));
+    pointerTypeGroup->addButton(linePointer2Button,
 
                                 int(DiagramScene::InsertLine));
 
@@ -906,9 +915,10 @@ void MainWindow::createToolbars()
 
     editToolBar->addWidget(pointerButton);
 
-    editToolBar->addAction(deleteAction);
-
     editToolBar->addWidget(linePointerButton);
+    editToolBar->addWidget(linePointer2Button);
+
+    editToolBar->addAction(deleteAction);
 
     editToolBar->addAction(this->rectAction);
 
