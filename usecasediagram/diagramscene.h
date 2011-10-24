@@ -24,7 +24,8 @@ class DiagramScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    enum Mode { InsertItem, InsertLine, InsertText, MoveItem, InsertActor, InsertImage };
+    enum Mode { InsertItem, InsertLine, InsertLine2, InsertText, MoveItem, InsertActor, InsertImage };
+    enum TypeLine {AssociationLine, GeneralizationLine};
 
     DiagramScene(QMenu *itemMenu, QObject *parent = 0);
     QFont font() const
@@ -66,6 +67,7 @@ private:
     bool leftButtonDown;
     QPointF startPoint;
     QGraphicsLineItem *line;
+    TypeLine myLine;
     QFont myFont;
     DiagramTextItem *textItem;
 	DiagramEllipseItem *ellipseItem;
@@ -76,6 +78,7 @@ private:
     DiagramImageItem *imageItem;
     DiagramActorItem *actorItem;
     QImage image;
+    
 };
 //! [0]
 

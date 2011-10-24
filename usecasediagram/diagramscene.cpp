@@ -14,8 +14,7 @@ DiagramScene::DiagramScene(QMenu *itemMenu, QObject *parent)
     textItem = 0;
     myItemColor = Qt::white;
     myTextColor = Qt::black;
-    myLineColor = Qt::black;
-   
+    myLineColor = Qt::black;  
 }
 //! [0]
 
@@ -139,6 +138,14 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
                                         mouseEvent->scenePos()));
             line->setPen(QPen(myLineColor, 2));
+            myLine= DiagramScene::AssociationLine;
+            addItem(line);
+            break;
+        case InsertLine2:
+            line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
+                                        mouseEvent->scenePos()));
+            line->setPen(QPen(myLineColor, 2));
+            myLine= DiagramScene::GeneralizationLine;
             addItem(line);
             break;
 //! [7] //! [8]
@@ -189,7 +196,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 //! [10]
 void DiagramScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if (myMode == InsertLine && line != 0) {
+    if ((myMode == InsertLine || myMode == InsertLine2) && line != 0) {
         QLineF newLine(line->line().p1(), mouseEvent->scenePos());
         line->setLine(newLine);
     } else if (myMode == MoveItem) {
@@ -201,7 +208,7 @@ void DiagramScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 //! [11]
 void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if (line != 0 && myMode == InsertLine) {
+    if (line != 0 && (myMode == InsertLine || myMode == InsertLine2)) {
         QList<QGraphicsItem *> startItems = items(line->line().p1());
         if (startItems.count() && startItems.first() == line)
             startItems.removeFirst();

@@ -883,7 +883,7 @@ void MainWindow::createToolbars()
                                 int(DiagramScene::InsertLine));
     pointerTypeGroup->addButton(linePointer2Button,
 
-                                int(DiagramScene::InsertLine));
+                                int(DiagramScene::InsertLine2));
 
     connect(pointerTypeGroup, SIGNAL(buttonClicked(int)),
 
