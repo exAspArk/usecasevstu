@@ -162,6 +162,8 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 //! [5] //! [6]
 
     double angle = ::acos(line().dx() / line().length());
+	if(line().dy() >= 0)
+		angle = 2*Pi - angle;
     QPointF arrowP1;
 	QPointF arrowP2;
 	
