@@ -659,6 +659,9 @@ void MainWindow::on_rectAction()
 		scene->setMode(DiagramScene::InsertItem);
 
 	}
+        scene->update();
+
+    view->update();
 
 }
 
@@ -715,6 +718,9 @@ void MainWindow::on_commAction()
 		scene->setMode(DiagramScene::InsertItem);
 
 	}
+    scene->update();
+
+    view->update();
 
 }
 
@@ -904,11 +910,11 @@ void MainWindow::createToolbars()
 
     QStringList scales;
 
-    scales << tr("50%") << tr("75%") << tr("100%") << tr("125%") << tr("150%");
+    scales << tr("50%") << tr("100%") << tr("150%") << tr("200%");
 
     sceneScaleCombo->addItems(scales);
 
-    sceneScaleCombo->setCurrentIndex(2);
+    sceneScaleCombo->setCurrentIndex(1);
 
     connect(sceneScaleCombo, SIGNAL(currentIndexChanged(QString)),
 
