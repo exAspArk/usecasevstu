@@ -36,12 +36,21 @@ signals:
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-
+	QRecrtF boudinRect() const
+	{
+		qreal penW = 1;
+		QRectF oldR = QGraphicsTextItem::boundingRect();
+		QRectF newR = QRectF(-2-penW/2,-2-penW/2,50+penW,20+penW);
+		if(oldR.width() < newR.width())
+			return newR;
+		else
+			return oldR;
+	}
     void focusOutEvent(QFocusEvent *event);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 	{
-		QRectF rectf = option->exposedRect;
+		QRectF rectf = boundingRect();
 		// отрисовка по линиям пока думаем как сделать скошенный угол и нужен он вообще
 		QPointF newPointTopRight = QPointF((rectf.topRight().x()- rectf.topLeft().x())*9.0/10.0,
 			rectf.topLeft().y());
