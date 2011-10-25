@@ -138,21 +138,21 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
                                         mouseEvent->scenePos()));
             line->setPen(QPen(myLineColor, 2));
-            myLine= DiagramScene::AssociationLine;
+            myLine= AssociationLine;
             addItem(line);
             break;
         case InsertLineGeneral:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
                                         mouseEvent->scenePos()));
             line->setPen(QPen(myLineColor, 2));
-            myLine= DiagramScene::GeneralizationLine;
+            myLine= GeneralizationLine;
             addItem(line);
             break;
         case InsertLineDotted:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
                                         mouseEvent->scenePos()));
             line->setPen(QPen(myLineColor, 2));
-            myLine= DiagramScene::DottedLine;
+            myLine= DottedLine;
             addItem(line);
             break;
 //! [7] //! [8]
@@ -231,13 +231,13 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
             /*startItems.first()->type() == DiagramItem::Type &&
             endItems.first()->type() == DiagramItem::Type &&*/
             startItems.first() != endItems.first()) {
-           // QGraphicsTextItem *startItem =
-           //     qgraphicsitem_cast<QGraphicsTextItem *>(startItems.first());
-           // QGraphicsTextItem *endItem =
-           //     qgraphicsitem_cast<QGraphicsTextItem *>(endItems.first());
+           //DiagramEllipseItem *startItem =
+            //    qgraphicsitem_cast<DiagramEllipseItem *>(startItems.first());
+            //DiagramEllipseItem *endItem =
+             //   qgraphicsitem_cast<DiagramEllipseItem *>(endItems.first());
            QGraphicsTextItem *startItem = (QGraphicsTextItem*)startItems[0];
 		   QGraphicsTextItem *endItem  = (QGraphicsTextItem*)endItems[0];
-            Arrow *arrow = new Arrow(startItem, endItem);
+            Arrow *arrow = new Arrow(startItem, endItem, 0, 0, myLine);
             arrow->setColor(myLineColor);
             //startItem->addArrow(arrow);
            // endItem->addArrow(arrow);

@@ -7,6 +7,7 @@
 #include "diagramellipseitem.h"
 #include "diagramimageitem.h"
 #include "diagramactoritem.h"
+#include "declarationdatatypes.h"
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
@@ -25,9 +26,8 @@ class DiagramScene : public QGraphicsScene
 
 public:
     enum Mode { InsertItem, InsertLine, InsertLineGeneral, InsertLineDotted, InsertText, MoveItem, InsertActor, InsertImage };
-    enum TypeLine {AssociationLine, GeneralizationLine, DottedLine};
-
-    DiagramScene(QMenu *itemMenu, QObject *parent = 0);
+    
+	DiagramScene(QMenu *itemMenu, QObject *parent = 0);
     QFont font() const
         { return myFont; }
     QColor textColor() const

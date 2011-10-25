@@ -7,4 +7,5 @@ enum TypeElement
 	Actor = 2,
     Image = 3
 };
+enum TypeLine {AssociationLine, GeneralizationLine, DottedLine};
 #endif

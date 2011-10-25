@@ -5,6 +5,12 @@
 #include "math.h"
 #include "diagramitem.h"
 #include "diagramellipseitem.h"
+#include "declarationdatatypes.h"
+#include "diagramtextitem.h"
+#include "diagramellipseitem.h"
+#include "diagramimageitem.h"
+#include "diagramactoritem.h"
+
 #include <QPair>
 QT_BEGIN_NAMESPACE
 class QGraphicsPolygonItem;
@@ -21,7 +27,7 @@ class Arrow : public QGraphicsLineItem
 public:
     enum { Type = UserType + 4 };
 	enum DiagramType { Step, Conditional, StartEnd, Io };
-
+	//enum TypeLine {AssociationLine, GeneralizationLine, DottedLine};
 	class LineCircleCalculation 
 	{
 	public:
@@ -148,8 +154,8 @@ public:
 
 
     Arrow(QGraphicsTextItem *startItem, QGraphicsTextItem *endItem,
-      QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
-
+      QGraphicsItem *parent = 0, QGraphicsScene *scene = 0, TypeLine linetype = AssociationLine);
+void setLineType(TypeLine newLineType); 
     int type() const
         { return Type; }
     QRectF boundingRect() const;
@@ -175,6 +181,8 @@ private:
     QGraphicsTextItem *myEndItem;
     QColor myColor;
     QPolygonF arrowHead;
+	TypeLine lineType;
+	
 };
 //! [0]
 

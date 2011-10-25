@@ -1,23 +1,22 @@
 #include <QtGui>
 
 #include "arrow.h"
-//#include <math.h>
+
 
 const qreal Pi = 3.14;
 
-//! [0]
 Arrow::Arrow(QGraphicsTextItem *startItem, QGraphicsTextItem *endItem,
-         QGraphicsItem *parent, QGraphicsScene *scene)
+         QGraphicsItem *parent, QGraphicsScene *scene, TypeLine linetype)
     : QGraphicsLineItem(parent, scene)
 {
     myStartItem = startItem;
     myEndItem = endItem;
+	lineType = linetype;
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     myColor = Qt::black;
     setPen(QPen(myColor, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
 //! [0]
-
 //! [1]
 QRectF Arrow::boundingRect() const
 {
@@ -96,27 +95,46 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     painter->setBrush(myColor);
 //! [4] //! [5]
 	int calcType = 1;
-
-	//-----------исправить после апдейта
-
-	//if(myStartItem->diagramType() == DiagramType::Step && myEndItem->diagramType() == DiagramType::Step)
+	int lineType = 3;
+	
+	//->type() == DiagramEllipseItem::type()
+	//->type() == DiagramActorItem::type()
+	//->type() == DiagramTextItem::type()
+	//->type() == DiagramImageItem::type()
+	if(myStartItem->type() == DiagramEllipseItem::Type && myEndItem->type() == DiagramEllipseItem::Type)
 			calcType = 1;
-	//if(myStartItem->diagramType() == DiagramType::Step && myEndItem->diagramType() == DiagramType::Conditional)
-	//		calcType = 2;
-	//if(myStartItem->diagramType() == DiagramType::Conditional && myEndItem->diagramType() == DiagramType::Step)
-	//		calcType = 3;
-	//if(myStartItem->diagramType() == DiagramType::Conditional && myEndItem->diagramType() == DiagramType::Conditional)
-	//		calcType = 4;
+	if(myStartItem->type() == DiagramEllipseItem::Type && 
+		(myEndItem->type() == DiagramTextItem::Type || 
+		myEndItem->type() == DiagramActorItem::Type || 
+		myEndItem->type() == DiagramImageItem::Type))
+			calcType = 2;
+	if((myEndItem->type() == DiagramTextItem::Type || 
+		myEndItem->type() == DiagramActorItem::Type || 
+		myEndItem->type() == DiagramImageItem::Type) && myEndItem->type() == DiagramEllipseItem::Type)
+			calcType = 3;
+	if(
+		(myEndItem->type() == DiagramTextItem::Type || 
+		myEndItem->type() == DiagramActorItem::Type || 
+		myEndItem->type() == DiagramImageItem::Type)
+		&&
+		(myEndItem->type() == DiagramTextItem::Type || 
+		myEndItem->type() == DiagramActorItem::Type || 
+		myEndItem->type() == DiagramImageItem::Type)
+		)
+			calcType = 4;
 
 
 
 
 	//-----------
-
-	QPair<QPointF, QPointF> points = getPoints(calcType, mapFromItem(myStartItem, ellipseItem(myStartItem)->polygon().boundingRect().center()), 
-								   mapFromItem(myEndItem, ellipseItem(myStartItem)->polygon().boundingRect().center()),
-								   ellipseItem(myStartItem)->polygon().boundingRect().width(), ellipseItem(myEndItem)->polygon().boundingRect().width(), 
-								   ellipseItem(myStartItem)->polygon().boundingRect().height(), ellipseItem(myEndItem)->polygon().boundingRect().height());
+	int par1 = calcType;
+	QPointF par2 = mapFromItem(myStartItem, myStartItem->boundingRect().center());
+	QPointF par3 = mapFromItem(myEndItem, myStartItem->boundingRect().center());
+	float par4 = myStartItem->boundingRect().width();
+	float par5 = myEndItem->boundingRect().width();
+	float par6 = myStartItem->boundingRect().height();
+	float par7 = myEndItem->boundingRect().height();
+	QPair<QPointF, QPointF> points = getPoints(par1,par2,par3,par4,par5,par6,par7);
     //QLineF centerLine(myStartItem->pos(), myEndItem->pos());
 	QLineF centerLine(points.first, points.second);
 	
@@ -144,29 +162,47 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 //! [5] //! [6]
 
     double angle = ::acos(line().dx() / line().length());
-    if (line().dy() >= 0)
-        angle = (Pi * 2) - angle;
-
-        QPointF arrowP1 = line().p1() + QPointF(sin(angle + Pi / 3) * arrowSize,
-                                        cos(angle + Pi / 3) * arrowSize);
-        QPointF arrowP2 = line().p1() + QPointF(sin(angle + Pi - Pi / 3) * arrowSize,
-                                        cos(angle + Pi - Pi / 3) * arrowSize);
-
-        arrowHead.clear();
-        arrowHead << arrowP1 << line().p1() <<  arrowP2;
+    QPointF arrowP1;
+	QPointF arrowP2;
+	
+    
 //! [6] //! [7]
-        painter->drawLine(line());
-		painter->drawLine(QLineF(line().p1(), arrowP1));
-		painter->drawLine(QLineF(line().p1(), arrowP2));
-		//painter->drawPolygon(arrowHead);
-        if (isSelected()) {
-            painter->setPen(QPen(myColor, 1, Qt::DashLine));
-        QLineF myLine = line();
-        myLine.translate(0, 4.0);
-        painter->drawLine(myLine);
-        myLine.translate(0,-8.0);
-        painter->drawLine(myLine);
-    }
+	switch(lineType){
+		case 1:
+			arrowP1 = line().p1() + QPointF(sin(angle + Pi / 3) * arrowSize,
+                                        cos(angle + Pi / 3) * arrowSize);
+			arrowP2 = line().p1() + QPointF(sin(angle + Pi - Pi / 3) * arrowSize,
+                                        cos(angle + Pi - Pi / 3) * arrowSize);
+			painter->drawLine(line());
+			painter->drawLine(QLineF(line().p1(), arrowP1));
+			painter->drawLine(QLineF(line().p1(), arrowP2));
+		break;
+		case 2:
+			painter->setPen(QPen(myColor, 1, Qt::DashLine));
+			painter->drawLine(line());
+		break;
+		case 3:
+			arrowSize = 9;
+			arrowP1 = line().p1() + QPointF(sin(angle + Pi / 3) * arrowSize,
+                                        cos(angle + Pi / 3) * arrowSize);
+			arrowP2 = line().p1() + QPointF(sin(angle + Pi - Pi / 3) * arrowSize,
+                                        cos(angle + Pi - Pi / 3) * arrowSize);
+			arrowHead.clear();
+			arrowHead << arrowP1 << line().p1() <<  arrowP2;
+			painter->setBrush(Qt::white);
+			painter->drawLine(line());
+			painter->drawPolygon(arrowHead);
+		break;	
+	}
+	//painter->drawPolygon(arrowHead);
+    if (isSelected()) {
+        painter->setPen(QPen(myColor, 1, Qt::DashLine));
+		QLineF myLine = line();
+		myLine.translate(0, 4.0);
+		painter->drawLine(myLine);
+		myLine.translate(0,-8.0);
+		painter->drawLine(myLine);
+	}
 	this->scene()->update();
 }
 //! [7]
