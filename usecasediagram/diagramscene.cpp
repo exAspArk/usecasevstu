@@ -209,6 +209,7 @@ void DiagramScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     } else if (myMode == MoveItem) {
         QGraphicsScene::mouseMoveEvent(mouseEvent);
     }
+    update();
 }
 //! [10]
 
@@ -249,6 +250,7 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 //! [12] //! [13]
     line = 0;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
+    update();
 }
 //! [13]
 
