@@ -95,7 +95,7 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     painter->setBrush(myColor);
 //! [4] //! [5]
 	int calcType = 1;
-	int lineType = 3;
+	//int lineType = 3;
 	
 	//->type() == DiagramEllipseItem::type()
 	//->type() == DiagramActorItem::type()
@@ -168,7 +168,7 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     
 //! [6] //! [7]
 	switch(lineType){
-		case 1:
+		case AssociationLine:
 			arrowP1 = line().p1() + QPointF(sin(angle + Pi / 3) * arrowSize,
                                         cos(angle + Pi / 3) * arrowSize);
 			arrowP2 = line().p1() + QPointF(sin(angle + Pi - Pi / 3) * arrowSize,
@@ -177,11 +177,11 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 			painter->drawLine(QLineF(line().p1(), arrowP1));
 			painter->drawLine(QLineF(line().p1(), arrowP2));
 		break;
-		case 2:
+		case DottedLine:
 			painter->setPen(QPen(myColor, 1, Qt::DashLine));
 			painter->drawLine(line());
 		break;
-		case 3:
+		case GeneralizationLine:
 			arrowSize = 9;
 			arrowP1 = line().p1() + QPointF(sin(angle + Pi / 3) * arrowSize,
                                         cos(angle + Pi / 3) * arrowSize);
