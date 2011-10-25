@@ -770,28 +770,142 @@ void MainWindow::on_saveToPicAction()
 
 }
 
-void MainWindow::on_saveAction()
+void MainWindow::on_saveAction() {
+    QString filename = QFileDialog::getSaveFileName(this, QString("Сохранить файл"), QDir::currentPath(), QString("Use case diagram(*.vox)"));
+ 
+    //check file
+    QFile file(filename);
+    if(!file.open(QIODevice::WriteOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText("Не возможно сохранить файл");
+        msgBox.exec();
+        return;
+    }
+    
+    QDataStream output(&file);
 
-{
+    QMessageBox msgBox;
+    msgBox.setText(QString::number(scene->getEllipseItemList().size()));
+    msgBox.exec();
 
-	
+    //save ellipses
+    output << scene->getEllipseItemList().size();
+    for(int i = 0; i < scene->getEllipseItemList().size(); i++) {
+        output << scene->getEllipseItemList()[i];
+    }
 
+    // output << scene->getLineItemList().size();    
+    // for(int i = 0; i < scene->getLineItemList().size(); i++) {
+    //     output << scene->getLineItemList()[i];
+    // }
+        
+    // output << scene->getLineItem2List().size();
+    // for(int i = 0; i < scene->getLineItem2List().size(); i++) {
+    //     output << scene->getLineItem2List()[i];
+    // }
+  
+    //save comments
+    output << scene->getTextItemList().size();
+    for(int i = 0; i < scene->getTextItemList().size(); i++) {
+        output << scene->getTextItemList()[i];
+    }
+     
+    //save actors
+    output << scene->getActorItemList().size();
+    for(int i = 0; i < scene->getActorItemList().size(); i++) {
+         output << scene->getActorItemList()[i];
+    }
+    
+    //save image
+    output << 1;
+    output << scene->getImageItem()->getImage();
+    
+    file.close();
 }
 
-void MainWindow::on_saveAsAction()
-
-{
-
-	
-
+void MainWindow::on_saveAsAction() {
+    on_saveAction();
 }
 
-void MainWindow::on_openAction()
-
-{
-
-	
-
+void MainWindow::on_openAction() {
+    QString filename = QFileDialog::getOpenFileName(this, QString("Открыть файл"), QDir::currentPath(), QString("Use case diagram(*.vox)"));
+    
+    //check file
+    if(!QFile::exists(filename)) {
+        QMessageBox msgBox;
+        msgBox.setText(filename);
+        msgBox.exec();
+        return;
+    }
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(filename);
+        msgBox.exec();
+        return;
+    }
+    
+    QDataStream input(&file);
+    int size;
+    
+    //read ellipses
+    input >> size;    
+    for(int i = 0; i < size; i++) {
+        DiagramEllipseItem * ellipseItem = new DiagramEllipseItem();
+        input >> ellipseItem;
+        scene->addEllipseItemList(ellipseItem);
+        
+		ellipseItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+        scene->addItem(ellipseItem);
+    }
+    
+    //input >> size;    
+        
+    // for(int i = 0; i < size; i++) {
+    //     QGraphicsLineItem *line = new QGraphicsLineItem();
+    //     QLineF lineF;
+    //     input >> lineF;
+    //     line->setLine(lineF);
+    //     scene->addLineItemList(line);
+    //     
+    //     line->setPen(QPen(Qt::black, 2));
+    //     scene->addItem(line);
+    // }
+    
+    //read comments
+    input >> size;  
+    for(int i = 0; i < size; i++) {
+        DiagramTextItem * textItem = new DiagramTextItem();
+        input >> textItem;
+        scene->addTextItemList(textItem);
+        
+		textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+        scene->addItem(textItem);
+    }
+    
+    //read actors
+    input >> size;  
+    for(int i = 0; i < size; i++) {
+        DiagramActorItem * actorItem = new DiagramActorItem();
+        input >> actorItem;
+        scene->addActorItemList(actorItem);
+        
+        actorItem->setTextWidth(50);
+        scene->addItem(actorItem);
+    }    
+    
+    //read image
+    input >> size;
+    if(size == 1) {
+        QImage image;
+        input >> image;
+        DiagramImageItem * imageItem = new DiagramImageItem(image);
+        scene->setImageItem(imageItem);
+        
+        scene->addItem(imageItem);
+    }
+    
+    file.close();
 }
 
 void MainWindow::on_createAction()

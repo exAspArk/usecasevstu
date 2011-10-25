@@ -18,6 +18,44 @@ DiagramScene::DiagramScene(QMenu *itemMenu, QObject *parent)
 }
 //! [0]
 
+QList<DiagramEllipseItem*> DiagramScene::getEllipseItemList() {
+    return ellipseItemList;
+}
+QList<QGraphicsLineItem*> DiagramScene::getLineItemList() {
+    return lineItemList;
+}
+QList<QGraphicsLineItem*> DiagramScene::getLineItem2List() {
+    return lineItem2List;
+}
+QList<DiagramTextItem*> DiagramScene::getTextItemList() {
+    return textItemList;
+}
+QList<DiagramActorItem*> DiagramScene::getActorItemList() {
+    return actorItemList;
+}
+DiagramImageItem* DiagramScene::getImageItem() {
+    return imageItem;
+}
+
+void DiagramScene::addEllipseItemList(DiagramEllipseItem* item) {
+    ellipseItemList.append(item);
+}
+void DiagramScene::addLineItemList(QGraphicsLineItem* item) {
+    lineItemList.append(item);
+}
+void DiagramScene::addLineItem2List(QGraphicsLineItem* item) {
+    lineItem2List.append(item);
+}
+void DiagramScene::addTextItemList(DiagramTextItem* item) {
+    textItemList.append(item);
+}
+void DiagramScene::addActorItemList(DiagramActorItem* item) {
+    actorItemList.append(item);
+}
+void DiagramScene::setImageItem(DiagramImageItem* item) {
+    imageItem = item;
+}
+
 //! [1]
 void DiagramScene::setLineColor(const QColor &color)
 {
@@ -131,6 +169,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			ellipseItem->setDefaultTextColor(myTextColor);
 			ellipseItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            ellipseItemList.append(ellipseItem);
 			/*emit textInserted(ellipseItem);*/
 			break;
 //! [6] //! [7]
@@ -169,6 +208,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             textItem->setDefaultTextColor(myTextColor);
             textItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            textItemList.append(textItem);
             break;
             
         case InsertActor:
@@ -188,6 +228,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             //actorItem->setDefaultTextColor(myTextColor);
             actorItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            actorItemList.append(actorItem);
             break;
 
         

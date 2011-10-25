@@ -42,6 +42,20 @@ public:
     void setFont(const QFont &font);
     void setImage(QString filename);
     void imageOnScene();
+    
+    QList<DiagramEllipseItem*> getEllipseItemList();
+    QList<QGraphicsLineItem*> getLineItemList();
+    QList<QGraphicsLineItem*> getLineItem2List();
+    QList<DiagramTextItem*> getTextItemList();
+    QList<DiagramActorItem*> getActorItemList();
+    DiagramImageItem* getImageItem();
+    
+    void addEllipseItemList(DiagramEllipseItem*);
+    void addLineItemList(QGraphicsLineItem*);
+    void addLineItem2List(QGraphicsLineItem*);
+    void addTextItemList(DiagramTextItem*);
+    void addActorItemList(DiagramActorItem*);
+    void setImageItem(DiagramImageItem*);
 
 public slots:
     void setMode(Mode mode);
@@ -75,9 +89,15 @@ private:
     QColor myItemColor;
     QColor myLineColor;
 
-    DiagramImageItem *imageItem;
     DiagramActorItem *actorItem;
     QImage image;
+    
+    QList<DiagramEllipseItem*> ellipseItemList;
+    QList<QGraphicsLineItem*> lineItemList;
+    QList<QGraphicsLineItem*> lineItem2List;
+    QList<DiagramTextItem*> textItemList;
+    QList<DiagramActorItem*> actorItemList;
+    DiagramImageItem *imageItem;
     
 };
 //! [0]
