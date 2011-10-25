@@ -866,11 +866,17 @@ void MainWindow::createToolbars()
 
     linePointerButton->setIcon(QIcon(":/images/linepointer.png"));
 
-    QToolButton *linePointer2Button = new QToolButton;
+    QToolButton *linePointerGeneralButton = new QToolButton;
 
-    linePointer2Button->setCheckable(true);
+    linePointerGeneralButton->setCheckable(true);
 
-    linePointer2Button->setIcon(QIcon(":/images/line2pointer.png"));
+    linePointerGeneralButton->setIcon(QIcon(":/images/line2pointer.png"));
+    
+    QToolButton *linePointerDottedButton = new QToolButton;
+
+    linePointerDottedButton->setCheckable(true);
+
+    linePointerDottedButton->setIcon(QIcon(":/images/linedottedpointer.png"));
 
 
 
@@ -881,9 +887,12 @@ void MainWindow::createToolbars()
     pointerTypeGroup->addButton(linePointerButton,
 
                                 int(DiagramScene::InsertLine));
-    pointerTypeGroup->addButton(linePointer2Button,
+    pointerTypeGroup->addButton(linePointerGeneralButton,
 
-                                int(DiagramScene::InsertLine2));
+                                int(DiagramScene::InsertLineGeneral));
+    pointerTypeGroup->addButton(linePointerDottedButton,
+
+                                int(DiagramScene::InsertLineDotted));
 
     connect(pointerTypeGroup, SIGNAL(buttonClicked(int)),
 
@@ -916,7 +925,8 @@ void MainWindow::createToolbars()
     editToolBar->addWidget(pointerButton);
 
     editToolBar->addWidget(linePointerButton);
-    editToolBar->addWidget(linePointer2Button);
+    editToolBar->addWidget(linePointerGeneralButton);
+    editToolBar->addWidget(linePointerDottedButton);
 
     editToolBar->addAction(deleteAction);
 

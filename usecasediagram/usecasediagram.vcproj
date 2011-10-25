@@ -422,6 +422,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\images\linedottedpointer.png"
+				>
+			</File>
+			<File
 				RelativePath=".\images\linepointer.png"
 				>
 				<FileConfiguration

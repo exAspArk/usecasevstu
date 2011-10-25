@@ -24,8 +24,8 @@ class DiagramScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    enum Mode { InsertItem, InsertLine, InsertLine2, InsertText, MoveItem, InsertActor, InsertImage };
-    enum TypeLine {AssociationLine, GeneralizationLine};
+    enum Mode { InsertItem, InsertLine, InsertLineGeneral, InsertLineDotted, InsertText, MoveItem, InsertActor, InsertImage };
+    enum TypeLine {AssociationLine, GeneralizationLine, DottedLine};
 
     DiagramScene(QMenu *itemMenu, QObject *parent = 0);
     QFont font() const
