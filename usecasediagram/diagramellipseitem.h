@@ -29,7 +29,7 @@ signals:
 
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-	QRecrtF boudinRect() const
+	QRectF boudinRect() const
 	{
 		qreal penW = 1;
 		QRectF oldR = QGraphicsTextItem::boundingRect();
