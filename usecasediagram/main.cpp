@@ -12,6 +12,11 @@ int main(int argv, char *args[])
     MainWindow mainWindow;
     mainWindow.setGeometry(100, 100, 800, 500);
     mainWindow.show();
+    app.exec();
+    while(!mainWindow.isEnded()) {
+        mainWindow.show();
+        app.exec();
+    }
 
-    return app.exec();
+    return 0;
 }

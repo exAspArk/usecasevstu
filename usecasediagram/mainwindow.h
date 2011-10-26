@@ -5,16 +5,9 @@
 
 
 #include <QMainWindow>
-
 #include <QFileDialog>
-
 #include "diagramitem.h"
-
-
-
-class DiagramScene;
-
-
+#include "diagramscene.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -57,11 +50,15 @@ class MainWindow : public QMainWindow
 
 
 public:
-
    MainWindow();
-
-
-
+   bool isEnded(){
+       return isEnd;
+   }
+   void clearScene() {
+       scene->clear();
+       scene->clearData();
+   }
+   
 private slots:
 
     void buttonGroupClicked(int id);
@@ -119,7 +116,9 @@ private slots:
 
 
 private:
-
+    bool isEnd;
+    QString filename;
+    void closeEvent(QCloseEvent * event);
     void createToolBox();
 
     void createActions();

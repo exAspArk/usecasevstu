@@ -15,6 +15,8 @@ DiagramScene::DiagramScene(QMenu *itemMenu, QObject *parent)
     myItemColor = Qt::white;
     myTextColor = Qt::black;
     myLineColor = Qt::black;  
+    changed = false;
+    imageItem = NULL;
 }
 //! [0]
 
@@ -171,7 +173,8 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             emit textInserted(textItem);
             ellipseItemList.append(ellipseItem);
 			/*emit textInserted(ellipseItem);*/
-			break;
+            changed = true;
+            break;
 //! [6] //! [7]
         case InsertLine:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -179,6 +182,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= AssociationLine;
             addItem(line);
+            changed = true;
             break;
         case InsertLineGeneral:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -186,6 +190,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= GeneralizationLine;
             addItem(line);
+            changed = true;
             break;
         case InsertLineDotted:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -193,6 +198,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= DottedLine;
             addItem(line);
+            changed = true;
             break;
 //! [7] //! [8]
         case InsertText:
@@ -209,6 +215,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             textItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
             textItemList.append(textItem);
+            changed = true;
             break;
             
         case InsertActor:
@@ -229,6 +236,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             actorItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
             actorItemList.append(actorItem);
+            changed = true;
             break;
 
         

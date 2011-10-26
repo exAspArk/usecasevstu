@@ -56,6 +56,21 @@ public:
     void addTextItemList(DiagramTextItem*);
     void addActorItemList(DiagramActorItem*);
     void setImageItem(DiagramImageItem*);
+    void clearData() {
+        ellipseItemList.clear();
+        lineItemList.clear();
+        lineItem2List.clear();
+        textItemList.clear();
+        actorItemList.clear();
+        delete imageItem;
+        imageItem = NULL;
+    }
+    void setNoChanged() {
+        changed = false;
+    }
+    bool isChanged() {
+        return changed;
+    }
 
 public slots:
     void setMode(Mode mode);
@@ -74,6 +89,7 @@ protected:
 
 private:
     bool isItemChange(int type);
+    bool changed;
 
     DiagramItem::DiagramType myItemType;
     QMenu *myItemMenu;
@@ -84,7 +100,7 @@ private:
     TypeLine myLine;
     QFont myFont;
     DiagramTextItem *textItem;
-	DiagramEllipseItem *ellipseItem;
+    DiagramEllipseItem *ellipseItem;
     QColor myTextColor;
     QColor myItemColor;
     QColor myLineColor;
