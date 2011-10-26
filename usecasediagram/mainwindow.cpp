@@ -784,10 +784,6 @@ void MainWindow::on_saveAction() {
     
     QDataStream output(&file);
 
-    QMessageBox msgBox;
-    msgBox.setText(QString::number(scene->getEllipseItemList().size()));
-    msgBox.exec();
-
     //save ellipses
     output << scene->getEllipseItemList().size();
     for(int i = 0; i < scene->getEllipseItemList().size(); i++) {

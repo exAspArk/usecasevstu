@@ -181,7 +181,7 @@ private:
     QGraphicsTextItem *myEndItem;
     QColor myColor;
     QPolygonF arrowHead;
-	TypeLine lineType;
+    TypeLine lineType;
 	
 };
 //! [0]
