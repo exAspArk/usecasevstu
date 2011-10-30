@@ -7,9 +7,143 @@
 
 import math
 
+
 from PySide import QtCore, QtGui
 
 import diagramscene_rc
+
+def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
+
+    result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
+
+    calc11 = LineCircleCalculation(startPoint, endPoint, width1, height1)
+    calc12 = LineCircleCalculation(endPoint, startPoint, width2, height2)
+    calc21 = LineCircleCalculation(startPoint, endPoint, width1, height1)
+    calc22 = LineRectCalculation(endPoint, startPoint, width2, height2)
+    calc31 = LineRectCalculation(startPoint, endPoint, width1, height1)
+    calc32 = LineCircleCalculation(endPoint, startPoint, width2, height2)
+    calc41 = LineRectCalculation(startPoint, endPoint, width1, height1)
+    calc42 = LineRectCalculation(endPoint, startPoint, width2, height2)
+
+    if calcType == 1:
+
+        #circle-circle
+        result[0] = calc11.getResult()
+        result[1] = calc12.getResult()
+        
+    if calcType == 2:
+        #circle-rect
+        result[0] = calc21.getResult()
+        result[1] = calc22.getResult()
+
+    if calcType == 3:
+        #rect-circle
+        result[0] = calc31.getResult()
+        result[1] = calc32.getResult()
+
+    if calcType == 4:
+        #rect-rect
+        result[0] = calc41.getResult()
+        result[1] = calc42.getResult()
+        
+    return result
+
+class LineCircleCalculation:
+
+    def __init__(self, circleCenter, outerPoint, circleWidth, circleHeight):
+
+        self.x1 = circleCenter.x()
+        self.y1 = circleCenter.y()
+        self.x3 = outerPoint.x()
+        self.y3 = outerPoint.y()
+        self.w = circleWidth
+        self.h = circleHeight
+        self.isVerticalLine = False
+        if self.x3-self.x1 != 0:
+            self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
+            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
+        else:
+            self.isVerticalLine = True
+
+    
+    def checkPoint(self, x, y):
+
+        result = math.sqrt((self.x3-x)*(self.x3-x) + (self.y3-y)*(self.y3-y)) < math.sqrt((self.x3-self.x1)*(self.x3-self.x1) + (self.y3-self.y1)*(self.y3-self.y1))
+
+        return result
+
+    def getResult(self):
+
+        res_x = 0
+        res_y = 0
+
+        if self.isVerticalLine:
+            x2_1 = self.x1
+            x2_2 = self.x1
+            y2_1 = self.y1 + self.h/2
+            y2_2 = self.y1 - self.h/2
+        else:
+            angle = math.atan(self.line_k)
+            x2_1 = self.x1 + self.w*math.cos(angle)/2
+            y2_1 = self.y1 + self.h*math.sin(angle)/2
+            x2_2 = self.x1 - self.w*math.cos(angle)/2
+            y2_2 = self.y1 - self.h*math.sin(angle)/2
+
+        if self.checkPoint(x2_1, y2_1):
+            res_x = x2_1
+            res_y = y2_1
+
+        elif self.checkPoint(x2_2, y2_2):
+            res_x = x2_2
+            res_y = y2_2
+
+        res = QtCore.QPointF(res_x, res_y)
+
+        return res
+
+class LineRectCalculation:
+
+    def __init__ (self, rectCenter, outerPoint, rectWidth, rectHeight):
+
+        self.x1 = rectCenter.x()
+        self.y1 = rectCenter.y()
+        self.x3 = outerPoint.x()
+        self.y3 = outerPoint.y()
+        self.w = rectWidth
+        self.h = rectHeight
+        self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
+        self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
+
+    def checkPoint(self, x, y):
+
+        result = math.sqrt((self.x3-x)*(self.x3-x) + (self.y3-y)*(self.y3-y))
+        return result
+
+    def getResult(self):
+
+        res_x = 0
+        res_y = 0
+        angle = math.atan(self.line_k)
+        x1 = self.x1
+        w = self.w
+        h = self.h
+        y1 = self.y1
+        xs = (x1 + w/2, x1 + w/2, x1 - w/2, x1 - w/2, x1 + w*math.cos(angle)/2, x1 + w*math.cos(angle)/2, x1 - w*math.cos(angle)/2, x1 - w*math.cos(angle)/2)
+        ys = (y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h/2, y1 - h/2, y1 + h/2, y1 - h/2)
+        best_res = self.checkPoint(xs[0], ys[0])
+        res_x = xs[0]
+        res_y = ys[0]
+        for i in range(0,8,1):
+            
+             if self.checkPoint(xs[i], ys[i]) <= best_res:
+
+                res_x = xs[i]
+                res_y = ys[i]
+                best_res = self.checkPoint(xs[i], ys[i])
+
+        res = QtCore.QPointF(res_x, res_y)
+
+        return res
 
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
@@ -64,9 +198,10 @@ class CommentLine(TotalLineDiagram):
         pass
 
     def paint(self, painter, option, widget=None):
-        if (self.myStartItem.collidesWithItem(self.myEndItem)):
+        if self.myStartItem.collidesWithItem(self.myEndItem):
             return
 
+        
         myStartItem = self.myStartItem
         myEndItem = self.myEndItem
         myColor = self.myColor
@@ -74,38 +209,23 @@ class CommentLine(TotalLineDiagram):
         # отрисовка пунктиром
         myPen.setStyle(QtCore.Qt.DotLine)
         myPen.setColor(self.myColor)
-        arrowSize = 20.0
+        # arrowSize = 20.0
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-        endPolygon = myEndItem.polygon()
-        p1 = endPolygon.at(0) + myEndItem.pos()
+        points = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
+        param1 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+        param2 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+        param4 = myStartItem.boundingRect().height()
+        param3 = myStartItem.boundingRect().width()
+        calc = LineRectCalculation(param1, param2, param3, param4)
+        points[0] = calc.getResult()
+        points[1] = param2
+        centerLine = QtCore.QLineF(points[1], points[0])
+        #centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
 
-        intersectPoint = QtCore.QPointF()
-        for i in endPolygon:
-            p2 = i + myEndItem.pos()
-            polyLine = QtCore.QLineF(p1, p2)
-            intersectType, intersectPoint = polyLine.intersect(centerLine)
-            if intersectType == QtCore.QLineF.BoundedIntersection:
-                break
-            p1 = p2
-
-        self.setLine(QtCore.QLineF(intersectPoint, myStartItem.pos()))
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
-
-        angle = math.acos(line.dx() / line.length())
-        if line.dy() >= 0:
-            angle = (math.pi * 2.0) - angle
-
-        arrowP1 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi / 3.0) * arrowSize,
-                                        math.cos(angle + math.pi / 3) * arrowSize)
-        arrowP2 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3.0) * arrowSize,
-                                        math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
-
-        self.arrowHead.clear()
-        for point in [line.p1(), arrowP1, arrowP2]:
-            self.arrowHead.append(point)
 
         painter.drawLine(line)
         # убрали отрисовку бошки у стрелки
@@ -117,6 +237,7 @@ class CommentLine(TotalLineDiagram):
             painter.drawLine(myLine)
             myLine.translate(0,-8.0)
             painter.drawLine(myLine)
+        
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
 
@@ -137,24 +258,36 @@ class ArrowAssociation(TotalLineDiagram):
         myColor = self.myColor
         myPen = self.pen()
         myPen.setColor(self.myColor)
-        arrowSize = 20.0
+        arrowSize = 7.0
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-        endPolygon = myEndItem.polygon()
-        p1 = endPolygon.at(0) + myEndItem.pos()
+        calcType = 1
 
-        intersectPoint = QtCore.QPointF()
-        for i in endPolygon:
-            p2 = i + myEndItem.pos()
-            polyLine = QtCore.QLineF(p1, p2)
-            intersectType, intersectPoint = polyLine.intersect(centerLine)
-            if intersectType == QtCore.QLineF.BoundedIntersection:
-                break
-            p1 = p2
+        if myStartItem.type == UseCase.type and myEndItem.type == UseCase.type:
+                calcType = 1
+        if myStartItem.type == UseCase.type and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+                calcType = 2
+        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and myEndItem.type == UseCase.type:
+                calcType = 3
+        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+                calcType = 4
 
-        self.setLine(QtCore.QLineF(intersectPoint, myStartItem.pos()))
+
+
+        par1 = calcType
+        par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+        par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+        par4 = myStartItem.boundingRect().width()
+        par5 = myEndItem.boundingRect().width()
+        par6 = myStartItem.boundingRect().height()
+        par7 = myEndItem.boundingRect().height()
+        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+
+        centerLine = QtCore.QLineF(points[1], points[0])
+
+
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
 
         angle = math.acos(line.dx() / line.length())
@@ -288,9 +421,9 @@ class Comment(ElementDiagramm):
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
         pointStart =  QtCore.QPointF((bodyRect.topRight().x()- bodyRect.topLeft().x())*4.0/5.0,
-			bodyRect.topLeft().y());
+            bodyRect.topLeft().y());
         pointEnd = QtCore.QPointF(bodyRect.topRight().x(),
-			(bodyRect.bottomRight().y() - bodyRect.topRight().y())*1.0/5.0);
+            (bodyRect.bottomRight().y() - bodyRect.topRight().y())*1.0/5.0);
         painter.drawRect(bodyRect)
         painter.drawLine(pointStart,pointEnd)
         super(Comment, self).paint(painter, option, widget)
@@ -530,7 +663,7 @@ class MainWindow(QtGui.QMainWindow):
     def deleteItem(self):
         for item in self.scene.selectedItems():
             if isinstance(item, ElementDiagramm):
-				pass
+                pass
                 #item.removeArrows()
             self.scene.removeItem(item)
 
