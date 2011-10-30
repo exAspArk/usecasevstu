@@ -30,7 +30,7 @@ def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
         #circle-circle
         result[0] = calc11.getResult()
         result[1] = calc12.getResult()
-        
+
     if calcType == 2:
         #circle-rect
         result[0] = calc21.getResult()
@@ -45,7 +45,7 @@ def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
         #rect-rect
         result[0] = calc41.getResult()
         result[1] = calc42.getResult()
-        
+
     return result
 
 class LineCircleCalculation:
@@ -65,7 +65,7 @@ class LineCircleCalculation:
         else:
             self.isVerticalLine = True
 
-    
+
     def checkPoint(self, x, y):
 
         result = math.sqrt((self.x3-x)*(self.x3-x) + (self.y3-y)*(self.y3-y)) < math.sqrt((self.x3-self.x1)*(self.x3-self.x1) + (self.y3-self.y1)*(self.y3-self.y1))
@@ -111,8 +111,12 @@ class LineRectCalculation:
         self.y3 = outerPoint.y()
         self.w = rectWidth
         self.h = rectHeight
-        self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
-        self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
+        self.isVerticalLine = False
+        if self.x3-self.x1 != 0:
+            self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
+            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
+        else:
+            self.isVerticalLine = True
 
     def checkPoint(self, x, y):
 
@@ -123,18 +127,24 @@ class LineRectCalculation:
 
         res_x = 0
         res_y = 0
-        angle = math.atan(self.line_k)
-        x1 = self.x1
-        w = self.w
-        h = self.h
-        y1 = self.y1
-        xs = (x1 + w/2, x1 + w/2, x1 - w/2, x1 - w/2, x1 + w*math.cos(angle)/2, x1 + w*math.cos(angle)/2, x1 - w*math.cos(angle)/2, x1 - w*math.cos(angle)/2)
-        ys = (y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h/2, y1 - h/2, y1 + h/2, y1 - h/2)
+        if self.isVerticalLine:
+            xs = (self.x1, self.x1)
+            ys = (self.y1 - self.h/2, self.y1 + self.h/2)
+
+        else:
+            angle = math.atan(self.line_k)
+            x1 = self.x1
+            w = self.w
+            h = self.h
+            y1 = self.y1
+            xs = (x1 + w/2, x1 + w/2, x1 - w/2, x1 - w/2, x1 + w*math.cos(angle)/2, x1 + w*math.cos(angle)/2, x1 - w*math.cos(angle)/2, x1 - w*math.cos(angle)/2)
+            ys = (y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h/2, y1 - h/2, y1 + h/2, y1 - h/2)
+
         best_res = self.checkPoint(xs[0], ys[0])
         res_x = xs[0]
         res_y = ys[0]
-        for i in range(0,8,1):
-            
+        for i in range(0,xs.__len__(),1):
+
              if self.checkPoint(xs[i], ys[i]) <= best_res:
 
                 res_x = xs[i]
@@ -147,48 +157,50 @@ class LineRectCalculation:
 
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
-     def __init__(self, startItem, endItem, parent=None, scene=None):
-         super(TotalLineDiagram, self).__init__(parent, scene)
-         self.myStartItem = startItem
-         self.myEndItem = endItem
+    def __init__(self, startItem, endItem, parent=None, scene=None):
+        super(TotalLineDiagram, self).__init__(parent, scene)
+        self.myStartItem = startItem
+        self.myEndItem = endItem
+        self.arrowHead = QtGui.QPolygonF()
 
-         self.arrowHead = QtGui.QPolygonF()
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+        self.myColor = QtCore.Qt.black
+        self.setPen(QtGui.QPen(self.myColor, 2, QtCore.Qt.SolidLine,
+               QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
 
-         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
-         self.myColor = QtCore.Qt.black
-         self.setPen(QtGui.QPen(self.myColor, 2, QtCore.Qt.SolidLine,
-                QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-
-     def boundingRect(self):
+    def boundingRect(self):
         extra = (self.pen().width() + 20) / 2.0
         p1 = self.line().p1()
         p2 = self.line().p2()
         return QtCore.QRectF(p1, QtCore.QSizeF(p2.x() - p1.x(), p2.y() - p1.y())).normalized().adjusted(-extra, -extra, extra, extra)
-     
-     def setColor(self, color):
+
+    def setColor(self, color):
         self.myColor = color
 
-     def startItem(self):
+    def startItem(self):
         return self.myStartItem
 
-     def endItem(self):
+    def endItem(self):
         return self.myEndItem
 
-     def shape(self):
+    def shape(self):
         path = super(TotalLineDiagram, self).shape()
         path.addPolygon(self.arrowHead)
         return path
 
-     def updatePosition(self):
+    def updatePosition(self):
         line = QtCore.QLineF(self.mapFromItem(self.myStartItem, 0, 0), self.mapFromItem(self.myEndItem, 0, 0))
         self.setLine(line)
-     # функция которую надо описать для дочеррних классов
-     # определяет для начала и конца стрелки нужно ли её рисовать
-     # return true - если нужно, false - если не нужно отрисовывать
-     def isValid(self):
-         pass
-     def polygon(self):
-         return QtGui.QPolygonF(self.boundingRect())
+    # функция которую надо описать для дочеррних классов
+    # определяет для начала и конца стрелки нужно ли её рисовать
+    # return true - если нужно, false - если не нужно отрисовывать
+    def isValid(self):
+        pass
+    def polygon(self):
+        return QtGui.QPolygonF(self.boundingRect())
+
+
+
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
@@ -201,7 +213,7 @@ class CommentLine(TotalLineDiagram):
         if self.myStartItem.collidesWithItem(self.myEndItem):
             return
 
-        
+
         myStartItem = self.myStartItem
         myEndItem = self.myEndItem
         myColor = self.myColor
@@ -237,7 +249,7 @@ class CommentLine(TotalLineDiagram):
             painter.drawLine(myLine)
             myLine.translate(0,-8.0)
             painter.drawLine(myLine)
-        
+
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
 
@@ -333,24 +345,34 @@ class ArrowGeneralization(TotalLineDiagram):
         myColor = self.myColor
         myPen = self.pen()
         myPen.setColor(self.myColor)
-        arrowSize = 20.0
+        arrowSize = 7.0
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-        endPolygon = myEndItem.polygon()
-        p1 = endPolygon.at(0) + myEndItem.pos()
+        calcType = 1
 
-        intersectPoint = QtCore.QPointF()
-        for i in endPolygon:
-            p2 = i + myEndItem.pos()
-            polyLine = QtCore.QLineF(p1, p2)
-            intersectType, intersectPoint = polyLine.intersect(centerLine)
-            if intersectType == QtCore.QLineF.BoundedIntersection:
-                break
-            p1 = p2
+        if myStartItem.type == UseCase.type and myEndItem.type == UseCase.type:
+             calcType = 1
+        if myStartItem.type == UseCase.type and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+             calcType = 2
+        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and myEndItem.type == UseCase.type:
+             calcType = 3
+        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+             calcType = 4
 
-        self.setLine(QtCore.QLineF(intersectPoint, myStartItem.pos()))
+        par1 = calcType
+        par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+        par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+        par4 = myStartItem.boundingRect().width()
+        par5 = myEndItem.boundingRect().width()
+        par6 = myStartItem.boundingRect().height()
+        par7 = myEndItem.boundingRect().height()
+        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+
+        centerLine = QtCore.QLineF(points[1], points[0])
+
+
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
 
         angle = math.acos(line.dx() / line.length())
@@ -363,11 +385,12 @@ class ArrowGeneralization(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
-        for point in [line.p1(),arrowP1,arrowP2]:
-             self.arrowHead.append(point)
-
+        for point in [line.p1(), arrowP1, arrowP2]:
+            self.arrowHead.append(point)
+        painter.setBrush(QtCore.Qt.white)
         painter.drawLine(line)
         painter.drawPolygon(self.arrowHead)
+
         if self.isSelected():
             painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
             myLine = QtCore.QLineF(line)
@@ -377,10 +400,10 @@ class ArrowGeneralization(TotalLineDiagram):
             painter.drawLine(myLine)
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
-            
+
 class ElementDiagramm(QtGui.QGraphicsTextItem):
     CommentType,UseCaseType,ActorType,NoneType = range(4)
-    
+
     lostFocus = QtCore.Signal(QtGui.QGraphicsTextItem)
 
     selectedChange = QtCore.Signal(QtGui.QGraphicsItem)
@@ -726,19 +749,19 @@ class MainWindow(QtGui.QMainWindow):
                 "The <b>Diagram Scene</b> example shows use of the graphics framework.")
 
     def createActions(self):
-        
+
         self.arrowTotal = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointer.png'), "Arrow &Total",
                 self,shortcut = "Ctrl+A",statusTip = "Arrow total",
                 triggered = self.toArrowTotal
         )
-        
+
         self.arrowComment = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointer.png'), "Arrow &Comment",
                 self,shortcut = "Ctrl+A",statusTip = "Comment",
                 triggered = self.toArrowComment
         )
-        
+
         self.arrow = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointer.png'), "Arrowt",
                 self,shortcut = "Ctrl+A",statusTip = "Arrow",
@@ -761,12 +784,12 @@ class MainWindow(QtGui.QMainWindow):
                 self,shortcut = "Ctrl+A",statusTip = "Actor",
                 triggered = self.toComment
         )
-        
+
         self.toFrontAction = QtGui.QAction(
                 QtGui.QIcon(':/images/bringtofront.png'), "Bring to &Front",
                 self, shortcut="Ctrl+F", statusTip="Bring item to front",
                 triggered = self.bringToFront)
-        
+
         self.sendBackAction = QtGui.QAction(
                 QtGui.QIcon(':/images/sendtoback.png'), "Send to &Back", self,
                 shortcut="Ctrl+B", statusTip="Send item to back",
@@ -790,16 +813,16 @@ class MainWindow(QtGui.QMainWindow):
 
     def toArrow(self):
         self.scene.setMode(self.scene.InsertArrowGeneralization)
-    
+
     def toUseCase(self):
         self.scene.setMode(self.scene.InsertUseCase)
-    
+
     def toActor(self):
         self.scene.setMode(self.scene.InsertActor)
-    
+
     def toComment(self):
         self.scene.setMode(self.scene.InsertText)
-    
+
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&File")
         self.fileMenu.addAction(self.exitAction)
