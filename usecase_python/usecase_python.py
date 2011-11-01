@@ -11,7 +11,7 @@ import math
 from PySide import QtCore, QtGui
 
 import diagramscene_rc
-Id = 0
+
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
@@ -449,8 +449,10 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.myTypeElement = ElementDiagramm.NoneType
         self.arrows = []
+        
     def countArrows(self):
         print self.arrows
+        
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
             self.selectedChange.emit(self)
@@ -476,15 +478,18 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         self.arrows.append(item)
 
     def removeArrow(self,arrow):
-         self.arrows.remove(arrow)
-         self.scene().removeItem(arrow)
+        try:
+            self.arrows.remove(arrow)
+        except ValueError:
+            pass
+         
     def removeArrows(self):
         print len(self.arrows)
-        for i in range(len(self.arrows)):
-            print "Remover arrows"
-            self.arrows[i].startItem().removeArrow(self.arrows[i])
-            self.arrows[i].endItem().removeArrow(self.arrows[i])
-            self.scene().removeItem(self.arrows[i])
+        for arrow in self.arrows[:]:
+            arrow.startItem().removeArrow(arrow)
+            arrow.endItem().removeArrow(arrow)
+            self.scene().removeItem(arrow)
+            
 class Comment(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Comment, self).__init__(parent, scene)
@@ -558,13 +563,14 @@ class DiagramScene(QtGui.QGraphicsScene):
     itemSelected = QtCore.Signal(QtGui.QGraphicsItem)
 
     elements = []
-
+    
+    Id = 0
+    
     def __init__(self, itemMenu, parent=None):
         super(DiagramScene, self).__init__(parent)
 
         self.myItemMenu = itemMenu
         self.myMode = self.MoveItem
-        #self.myItemType = DiagramItem.Step
         self.line = None
         self.textItem = None
         self.myItemColor = QtCore.Qt.white
@@ -670,17 +676,13 @@ class DiagramScene(QtGui.QGraphicsScene):
                 elif self.myMode == self.InsertArrowGeneralization:
                      arrow = ArrowGeneralization(startItem,endItem)
                 if arrow.isValid():
-                     id=Id+1
-                     arrow.setId(id)
+                     self.Id = self.Id + 1
+                     arrow.setId(self.Id)
                      arrow.setColor(self.myLineColor)
                      arrow.setZValue(-1000.0)
                      self.addItem(arrow)
-                     print "add to start"
                      startItem.addArrow(arrow)
-                     #print "add to end"
                      endItem.addArrow(arrow)
-                     startItem.countArrows()
-                     endItem.countArrows()
                      arrow.updatePosition()
         self.line = None
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
