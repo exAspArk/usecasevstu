@@ -10,7 +10,7 @@ import math
 from PySide import QtCore, QtGui
 
 import diagramscene_rc
-
+Id = 0
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
      def __init__(self, startItem, endItem, parent=None, scene=None):
@@ -26,12 +26,16 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
                 QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
          self.arrowsComment = []
 
+         self.id = -1
+
      def boundingRect(self):
         extra = (self.pen().width() + 20) / 2.0
         p1 = self.line().p1()
         p2 = self.line().p2()
         return QtCore.QRectF(p1, QtCore.QSizeF(p2.x() - p1.x(), p2.y() - p1.y())).normalized().adjusted(-extra, -extra, extra, extra)
-     
+     def setId(self,i):
+         self.id = i
+         
      def setColor(self, color):
         self.myColor = color
 
@@ -282,9 +286,9 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.myTypeElement = ElementDiagramm.NoneType
-
         self.arrows = []
-
+    def countArrows(self):
+        print self.arrows
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
             self.selectedChange.emit(self)
@@ -309,6 +313,16 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     def addArrow(self,item):
         self.arrows.append(item)
 
+    def removeArrow(self,arrow):
+         self.arrows.remove(arrow)
+         self.scene().removeItem(arrow)
+    def removeArrows(self):
+        print len(self.arrows)
+        for i in range(len(self.arrows)):
+            print "Remover arrows"
+            self.arrows[i].startItem().removeArrow(self.arrows[i])
+            self.arrows[i].endItem().removeArrow(self.arrows[i])
+            self.scene().removeItem(self.arrows[i])
 class Comment(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Comment, self).__init__(parent, scene)
@@ -345,12 +359,10 @@ class UseCase(ElementDiagramm):
 
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
-        #painter.drawEllipse(bodyRect)
+        # painter.drawEllipse(bodyRect)
         listCoord = bodyRect.getCoords()
         x1 = listCoord[0]
         y1 = listCoord[1]
-        x2 = listCoord[2]
-        y2 = listCoord[3]
         grad = QtGui.QRadialGradient(QtCore.QPointF(x1,y1),bodyRect.width())
         grad.setColorAt(1,QtGui.QColor(255,160,25))
         grad.setColorAt(0.5,QtCore.Qt.yellow)
@@ -382,6 +394,8 @@ class DiagramScene(QtGui.QGraphicsScene):
     textInserted = QtCore.Signal(QtGui.QGraphicsTextItem)
 
     itemSelected = QtCore.Signal(QtGui.QGraphicsItem)
+
+    elements = []
 
     def __init__(self, itemMenu, parent=None):
         super(DiagramScene, self).__init__(parent)
@@ -461,6 +475,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
             self.textInserted.emit(textItem)
+            self.elements.append(textItem)
         super(DiagramScene, self).mousePressEvent(mouseEvent)
 
     def mouseMoveEvent(self, mouseEvent):
@@ -493,11 +508,17 @@ class DiagramScene(QtGui.QGraphicsScene):
                 elif self.myMode == self.InsertArrowGeneralization:
                     arrow = ArrowGeneralization(startItem,endItem)
                 if arrow.isValid():
+                    id=Id+1
+                    arrow.setId(id)
                     arrow.setColor(self.myLineColor)
                     arrow.setZValue(-1000.0)
                     self.addItem(arrow)
+                    print "add to start"
                     startItem.addArrow(arrow)
+                    #print "add to end"
                     endItem.addArrow(arrow)
+                    startItem.countArrows()
+                    endItem.countArrows()
                     arrow.updatePosition()
         self.line = None
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
@@ -540,10 +561,13 @@ class MainWindow(QtGui.QMainWindow):
     def deleteItem(self):
         for item in self.scene.selectedItems():
             if isinstance(item, ElementDiagramm):
-				pass
-                #item.removeArrows()
-            self.scene.removeItem(item)
-
+                item.removeArrows()
+                self.scene.removeItem(item)
+        for arrow in self.scene.selectedItems():
+            if isinstance(arrow, TotalLineDiagram):
+                arrow.startItem().removerArrow(arrow)
+                arrow.endItem().removeArrow(arrow)
+    
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
 
