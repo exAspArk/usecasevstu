@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# coding: windows-1251
+# coding: UTF-8
 # This is only needed for Python v2 but is harmless for Python v3.
 #import sip
 #sip.setapi('QString', 2)
 
-
+# РїСЂРѕРІРµСЂРєР° РєРѕРјРјРµРЅС‚Р°СЂРёСЏ
 import math
 
 
@@ -155,7 +155,7 @@ class LineRectCalculation:
 
         return res
 
-# базовый класс для линии
+# Р±Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ Р»РёРЅРёРё
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
     def __init__(self, startItem, endItem, parent=None, scene=None):
          super(TotalLineDiagram, self).__init__(parent, scene)
@@ -196,9 +196,9 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
     def updatePosition(self):
         line = QtCore.QLineF(self.mapFromItem(self.myStartItem, 0, 0), self.mapFromItem(self.myEndItem, 0, 0))
         self.setLine(line)
-    # функция которую надо описать для дочеррних классов
-    # определяет для начала и конца стрелки нужно ли её рисовать
-    # return true - если нужно, false - если не нужно отрисовывать
+    # С„СѓРЅРєС†РёСЏ РєРѕС‚РѕСЂСѓСЋ РЅР°РґРѕ РѕРїРёСЃР°С‚СЊ РґР»СЏ РґРѕС‡РµСЂСЂРЅРёС… РєР»Р°СЃСЃРѕРІ
+    # РѕРїСЂРµРґРµР»СЏРµС‚ РґР»СЏ РЅР°С‡Р°Р»Р° Рё РєРѕРЅС†Р° СЃС‚СЂРµР»РєРё РЅСѓР¶РЅРѕ Р»Рё РµС‘ СЂРёСЃРѕРІР°С‚СЊ
+    # return true - РµСЃР»Рё РЅСѓР¶РЅРѕ, false - РµСЃР»Рё РЅРµ РЅСѓР¶РЅРѕ РѕС‚СЂРёСЃРѕРІС‹РІР°С‚СЊ
     def isValid(self):
         pass
     
@@ -220,7 +220,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
          
-# клас для отрисовки линии комментария
+# РєР»Р°СЃ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё Р»РёРЅРёРё РєРѕРјРјРµРЅС‚Р°СЂРёСЏ
 class CommentLine(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
         super(CommentLine,self).__init__(startItem,endItem,parent,scene)
@@ -242,7 +242,7 @@ class CommentLine(TotalLineDiagram):
         myEndItem = self.myEndItem
         myColor = self.myColor
         myPen = self.pen()
-        # отрисовка пунктиром
+        # РѕС‚СЂРёСЃРѕРІРєР° РїСѓРЅРєС‚РёСЂРѕРј
         myPen.setStyle(QtCore.Qt.DotLine)
         myPen.setColor(self.myColor)
         # arrowSize = 20.0
@@ -259,12 +259,12 @@ class CommentLine(TotalLineDiagram):
         points[1] = param2
         centerLine = QtCore.QLineF(points[1], points[0])
         #centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-
+        
         self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
 
         painter.drawLine(line)
-        # убрали отрисовку бошки у стрелки
+        # СѓР±СЂР°Р»Рё РѕС‚СЂРёСЃРѕРІРєСѓ Р±РѕС€РєРё Сѓ СЃС‚СЂРµР»РєРё
         # painter.drawPolygon(self.arrowHead)
         if self.isSelected():
             painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
@@ -277,7 +277,7 @@ class CommentLine(TotalLineDiagram):
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
 
-# класс для отрисовки стрелки ассоциации
+# РєР»Р°СЃСЃ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё СЃС‚СЂРµР»РєРё Р°СЃСЃРѕС†РёР°С†РёРё
 class ArrowAssociation(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
         super(ArrowAssociation,self).__init__(startItem,endItem,parent,scene)
@@ -366,7 +366,7 @@ class ArrowAssociation(TotalLineDiagram):
          return QtGui.QPolygonF(self.boundingRect())
 
 
-# класс для отрисовки стрелки обобщения
+# РєР»Р°СЃСЃ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё СЃС‚СЂРµР»РєРё РѕР±РѕР±С‰РµРЅРёСЏ
 class ArrowGeneralization(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
         super(ArrowGeneralization,self).__init__(startItem,endItem,parent,scene)
@@ -675,7 +675,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 
             self.removeItem(self.line)
             self.line = None
-            # проверка на соотвествие правил отрисовк
+            # РїСЂРѕРІРµСЂРєР° РЅР° СЃРѕРѕС‚РІРµСЃС‚РІРёРµ РїСЂР°РІРёР» РѕС‚СЂРёСЃРѕРІРє
             if len(startItems) and len(endItems) and \
                     startItems[0] != endItems[0]:
                 startItem = startItems[0]
