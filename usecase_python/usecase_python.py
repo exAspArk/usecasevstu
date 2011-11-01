@@ -56,7 +56,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          pass
      def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
-     def addArrowComment(self,item):
+     def addArrow(self,item):
          self.arrowsComment.append(item)
          
 # клас для отрисовки линии комментария
@@ -299,8 +299,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         if self.textInteractionFlags() == QtCore.Qt.NoTextInteraction:
             self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
         super(ElementDiagramm, self).mouseDoubleClickEvent(event)
-
-
+        
     def typeElement(self):
         return self.myTypeElement
 
@@ -346,7 +345,19 @@ class UseCase(ElementDiagramm):
 
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
-        painter.drawEllipse(bodyRect)
+        #painter.drawEllipse(bodyRect)
+        listCoord = bodyRect.getCoords()
+        x1 = listCoord[0]
+        y1 = listCoord[1]
+        x2 = listCoord[2]
+        y2 = listCoord[3]
+        grad = QtGui.QRadialGradient(QtCore.QPointF(x1,y1),bodyRect.width())
+        grad.setColorAt(1,QtGui.QColor(255,160,25))
+        grad.setColorAt(0.5,QtCore.Qt.yellow)
+        grad.setColorAt(0,QtCore.Qt.white)
+        _path = QtGui.QPainterPath()
+        _path.addEllipse(bodyRect)
+        painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
