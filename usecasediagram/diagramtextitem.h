@@ -30,6 +30,23 @@ public:
         { return Type; }
 	int typeElement() {return this->typeElementData;}
 
+	friend QDataStream &operator << (QDataStream &stream, DiagramTextItem *textItem) {
+        stream << textItem->toHtml();
+        stream << textItem->pos();
+        return stream;
+    }
+    friend QDataStream &operator >> (QDataStream &stream, DiagramTextItem *textItem) {
+        QString text;
+        QPointF pos;
+        
+        stream >> text;
+        stream >> pos;
+
+        textItem->setHtml(text);
+        textItem->setPos(pos);
+        return stream;
+    }
+
 signals:
     void lostFocus(DiagramTextItem *item);
     void selectedChange(QGraphicsItem *item);

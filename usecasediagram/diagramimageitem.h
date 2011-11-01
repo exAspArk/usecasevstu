@@ -17,6 +17,10 @@ class DiagramImageItem: public QGraphicsRectItem
 	{ return Type; }
 	int typeElement() {return this->typeElementData;}
      //int rtti () const { return imageRTTI; }
+     QImage getImage() {
+         return image;
+     }
+     
  protected:
      void paint( QPainter *, const QStyleOptionGraphicsItem *option, QWidget *widget );
  private:

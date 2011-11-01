@@ -42,6 +42,35 @@ public:
     void setFont(const QFont &font);
     void setImage(QString filename);
     void imageOnScene();
+    
+    QList<DiagramEllipseItem*> getEllipseItemList();
+    QList<QGraphicsLineItem*> getLineItemList();
+    QList<QGraphicsLineItem*> getLineItem2List();
+    QList<DiagramTextItem*> getTextItemList();
+    QList<DiagramActorItem*> getActorItemList();
+    DiagramImageItem* getImageItem();
+    
+    void addEllipseItemList(DiagramEllipseItem*);
+    void addLineItemList(QGraphicsLineItem*);
+    void addLineItem2List(QGraphicsLineItem*);
+    void addTextItemList(DiagramTextItem*);
+    void addActorItemList(DiagramActorItem*);
+    void setImageItem(DiagramImageItem*);
+    void clearData() {
+        ellipseItemList.clear();
+        lineItemList.clear();
+        lineItem2List.clear();
+        textItemList.clear();
+        actorItemList.clear();
+        delete imageItem;
+        imageItem = NULL;
+    }
+    void setNoChanged() {
+        changed = false;
+    }
+    bool isChanged() {
+        return changed;
+    }
 
 public slots:
     void setMode(Mode mode);
@@ -60,6 +89,7 @@ protected:
 
 private:
     bool isItemChange(int type);
+    bool changed;
 
     DiagramItem::DiagramType myItemType;
     QMenu *myItemMenu;
@@ -70,14 +100,20 @@ private:
     TypeLine myLine;
     QFont myFont;
     DiagramTextItem *textItem;
-	DiagramEllipseItem *ellipseItem;
+    DiagramEllipseItem *ellipseItem;
     QColor myTextColor;
     QColor myItemColor;
     QColor myLineColor;
 
-    DiagramImageItem *imageItem;
     DiagramActorItem *actorItem;
     QImage image;
+    
+    QList<DiagramEllipseItem*> ellipseItemList;
+    QList<QGraphicsLineItem*> lineItemList;
+    QList<QGraphicsLineItem*> lineItem2List;
+    QList<DiagramTextItem*> textItemList;
+    QList<DiagramActorItem*> actorItemList;
+    DiagramImageItem *imageItem;
     
 };
 //! [0]

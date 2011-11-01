@@ -31,10 +31,10 @@ MainWindow::MainWindow()
      QTextCodec::setCodecForTr(codec);
 
     // создаём экшены
-
+     
     createActions();
-
-
+    isEnd = false;
+    filename = "";
 
     // createToolBox();
 
@@ -102,7 +102,32 @@ MainWindow::MainWindow()
 
 //! [0]
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if(scene->isChanged()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Сохранить"));
+        msgBox.setInformativeText(tr("Вы хотите сохранить текущую диаграмму?"));
+        QPushButton save(tr("Сохранить"));
+        QPushButton dont(tr("Не сохранять"));
+        QPushButton cancel(tr("Отменить"));
 
+        msgBox.setDefaultButton(&save);
+
+        msgBox.addButton(&save,QMessageBox::RejectRole);
+        msgBox.addButton(&dont,QMessageBox::AcceptRole);
+        msgBox.addButton(&cancel,QMessageBox::NoRole);
+        int res = msgBox.exec();
+
+        if(res == 0) {          // Save
+            on_saveAction();
+        }
+        else if(res == 6) {     // Cancel
+            isEnd = false;
+            return;
+        }
+    }
+    isEnd = true;
+}
 
 //! [2]
 
@@ -140,44 +165,24 @@ void MainWindow::buttonGroupClicked(int id)
 
 //! [3]
 
-void MainWindow::deleteItem()
-
-{
-
+void MainWindow::deleteItem() {
     foreach (QGraphicsItem *item, scene->selectedItems()) {
-
         if (item->type() == Arrow::Type) {
-
             scene->removeItem(item);
-
            /* Arrow *arrow = qgraphicsitem_cast<Arrow *>(item);
-
             arrow->startItem()->removeArrow(arrow);
-
             arrow->endItem()->removeArrow(arrow);*/
-
             delete item;
-
         }
-
     }
 
-
-
     foreach (QGraphicsItem *item, scene->selectedItems()) {
-
          if (item->type() == DiagramItem::Type) {
-
              qgraphicsitem_cast<DiagramItem *>(item)->removeArrows();
-
          }
-
          scene->removeItem(item);
-
          delete item;
-
      }
-
 }
 
 //! [3]
@@ -770,28 +775,171 @@ void MainWindow::on_saveToPicAction()
 
 }
 
-void MainWindow::on_saveAction()
+void MainWindow::on_saveAction() {
+    if(filename == "") {
+        filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл"), QDir::currentPath(), tr("Use case diagram(*.vox)"));
+    }
+    //check file
+    QFile file(filename);
+    if(!file.open(QIODevice::WriteOnly)) {
+        filename = "";
+        QMessageBox msgBox;
+        msgBox.setText(tr("Невозможно сохранить файл") + filename);
+        msgBox.exec();
+        return;
+    }
+    
+    QDataStream output(&file);
 
-{
+    //save ellipses
+    output << scene->getEllipseItemList().size();
+    for(int i = 0; i < scene->getEllipseItemList().size(); i++) {
+        output << scene->getEllipseItemList()[i];
+    }
 
-	
-
+    // output << scene->getLineItemList().size();    
+    // for(int i = 0; i < scene->getLineItemList().size(); i++) {
+    //     output << scene->getLineItemList()[i];
+    // }
+        
+    // output << scene->getLineItem2List().size();
+    // for(int i = 0; i < scene->getLineItem2List().size(); i++) {
+    //     output << scene->getLineItem2List()[i];
+    // }
+  
+    //save comments
+    output << scene->getTextItemList().size();
+    for(int i = 0; i < scene->getTextItemList().size(); i++) {
+        output << scene->getTextItemList()[i];
+    }
+     
+    //save actors
+    output << scene->getActorItemList().size();
+    for(int i = 0; i < scene->getActorItemList().size(); i++) {
+         output << scene->getActorItemList()[i];
+    }
+    
+    //save image
+    if(scene->getImageItem() != NULL) {
+        output << 1;
+        output << scene->getImageItem()->getImage();
+    }
+    else {
+        output << 0;
+    }
+    file.close();
+    scene->setNoChanged();
 }
 
-void MainWindow::on_saveAsAction()
-
-{
-
-	
-
+void MainWindow::on_saveAsAction() {
+    filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл как..."), QDir::currentPath(), tr("Use case diagram(*.vox)"));
+    on_saveAction();
 }
 
-void MainWindow::on_openAction()
+void MainWindow::on_openAction() {
+    
+    if(scene->isChanged()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Сохранить"));
+        msgBox.setInformativeText(tr("Вы хотите сохранить текущую диаграмму?"));
+        QPushButton save(tr("Сохранить"));
+        QPushButton dont(tr("Не сохранять"));
+        QPushButton cancel(tr("Отменить"));
 
-{
+        msgBox.setDefaultButton(&save);
 
-	
+        msgBox.addButton(&save,QMessageBox::RejectRole);
+        msgBox.addButton(&dont,QMessageBox::AcceptRole);
+        msgBox.addButton(&cancel,QMessageBox::NoRole);
+        int res = msgBox.exec();
 
+        if(res == 0) {          // Save
+            on_saveAction();
+        }
+        else if(res == 6) {     // Cancel
+            return;
+        }
+    }
+    
+    filename = QFileDialog::getOpenFileName(this, tr("Открыть файл"), QDir::currentPath(), tr("Use case diagram(*.vox)"));
+    
+    //check file
+    if(!QFile::exists(filename)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Не существует файла ") + filename);
+        msgBox.exec();
+        return;
+    }
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Невозможно открыть файл ") + filename);
+        msgBox.exec();
+        return;
+    }
+    
+    QDataStream input(&file);
+    int size;
+    clearScene();
+    
+    //read ellipses
+    input >> size;    
+    for(int i = 0; i < size; i++) {
+        DiagramEllipseItem * ellipseItem = new DiagramEllipseItem();
+        input >> ellipseItem;
+        scene->addEllipseItemList(ellipseItem);
+        
+		ellipseItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+        scene->addItem(ellipseItem);
+    }
+    
+    //input >> size;    
+        
+    // for(int i = 0; i < size; i++) {
+    //     QGraphicsLineItem *line = new QGraphicsLineItem();
+    //     QLineF lineF;
+    //     input >> lineF;
+    //     line->setLine(lineF);
+    //     scene->addLineItemList(line);
+    //     
+    //     line->setPen(QPen(Qt::black, 2));
+    //     scene->addItem(line);
+    // }
+    
+    //read comments
+    input >> size;  
+    for(int i = 0; i < size; i++) {
+        DiagramTextItem * textItem = new DiagramTextItem();
+        input >> textItem;
+        scene->addTextItemList(textItem);
+        
+		textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+        scene->addItem(textItem);
+    }
+    
+    //read actors
+    input >> size;  
+    for(int i = 0; i < size; i++) {
+        DiagramActorItem * actorItem = new DiagramActorItem();
+        input >> actorItem;
+        scene->addActorItemList(actorItem);
+        
+        actorItem->setTextWidth(50);
+        scene->addItem(actorItem);
+    }    
+    
+    //read image
+    input >> size;
+    if(size == 1) {
+        QImage image;
+        input >> image;
+        DiagramImageItem * imageItem = new DiagramImageItem(image);
+        scene->setImageItem(imageItem);
+        
+        scene->addItem(imageItem);
+    }
+    
+    file.close();
 }
 
 void MainWindow::on_createAction()

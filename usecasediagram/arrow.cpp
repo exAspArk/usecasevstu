@@ -3,7 +3,7 @@
 #include "arrow.h"
 
 
-const qreal Pi = 3.14;
+//const qreal Pi = 3.14;
 
 Arrow::Arrow(QGraphicsTextItem *startItem, QGraphicsTextItem *endItem,
          QGraphicsItem *parent, QGraphicsScene *scene, TypeLine linetype)
@@ -46,17 +46,17 @@ void Arrow::updatePosition()
 }
 //! [3]
 
-QPair<QPointF, QPointF> getPoints(int calcType, QPointF center2, QPointF center1, float width2, float width1, float height2, float height1) 
+QPair<QPointF, QPointF> getPoints(int calcType, QPointF startPoint, QPointF endPoint, float width1, float width2, float height1, float height2) 
 {
 	QPair<QPointF, QPointF> result;
-	Arrow::LineCircleCalculation calc11 = Arrow::LineCircleCalculation(center1, center2, width1, height1);
-	Arrow::LineCircleCalculation calc12 = Arrow::LineCircleCalculation(center2, center1, width2, height2);
-	Arrow::LineCircleCalculation calc21 = Arrow::LineCircleCalculation(center1, center2, width1, height1);
-	Arrow::LineRectCalculation calc22 = Arrow::LineRectCalculation(center2, center1, width2, height2);
-	Arrow::LineRectCalculation calc31 = Arrow::LineRectCalculation(center1, center2, width1, height1);
-	Arrow::LineCircleCalculation calc32 = Arrow::LineCircleCalculation(center2, center1, width2, height2);
-	Arrow::LineRectCalculation calc41 = Arrow::LineRectCalculation(center1, center2, width1, height1);
-	Arrow::LineRectCalculation calc42 = Arrow::LineRectCalculation(center2, center1, width2, height2)	;
+	Arrow::LineCircleCalculation calc11 = Arrow::LineCircleCalculation(startPoint, endPoint, width1, height1);
+	Arrow::LineCircleCalculation calc12 = Arrow::LineCircleCalculation(endPoint, startPoint, width2, height2);
+	Arrow::LineCircleCalculation calc21 = Arrow::LineCircleCalculation(startPoint, endPoint, width1, height1);
+	Arrow::LineRectCalculation calc22 = Arrow::LineRectCalculation(endPoint, startPoint, width2, height2);
+	Arrow::LineRectCalculation calc31 = Arrow::LineRectCalculation(startPoint, endPoint, width1, height1);
+	Arrow::LineCircleCalculation calc32 = Arrow::LineCircleCalculation(endPoint, startPoint, width2, height2);
+	Arrow::LineRectCalculation calc41 = Arrow::LineRectCalculation(startPoint, endPoint, width1, height1);
+	Arrow::LineRectCalculation calc42 = Arrow::LineRectCalculation(endPoint, startPoint, width2, height2)	;
 	
 	switch(calcType)
 	{
@@ -95,12 +95,7 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
     painter->setBrush(myColor);
 //! [4] //! [5]
 	int calcType = 1;
-	//int lineType = 3;
-	
-	//->type() == DiagramEllipseItem::type()
-	//->type() == DiagramActorItem::type()
-	//->type() == DiagramTextItem::type()
-	//->type() == DiagramImageItem::type()
+		
 	if(myStartItem->type() == DiagramEllipseItem::Type && myEndItem->type() == DiagramEllipseItem::Type)
 			calcType = 1;
 	if(myStartItem->type() == DiagramEllipseItem::Type && 
@@ -108,14 +103,14 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 		myEndItem->type() == DiagramActorItem::Type || 
 		myEndItem->type() == DiagramImageItem::Type))
 			calcType = 2;
-	if((myEndItem->type() == DiagramTextItem::Type || 
-		myEndItem->type() == DiagramActorItem::Type || 
-		myEndItem->type() == DiagramImageItem::Type) && myEndItem->type() == DiagramEllipseItem::Type)
+	if((myStartItem->type() == DiagramTextItem::Type || 
+		myStartItem->type() == DiagramActorItem::Type || 
+		myStartItem->type() == DiagramImageItem::Type) && myEndItem->type() == DiagramEllipseItem::Type)
 			calcType = 3;
 	if(
-		(myEndItem->type() == DiagramTextItem::Type || 
-		myEndItem->type() == DiagramActorItem::Type || 
-		myEndItem->type() == DiagramImageItem::Type)
+		(myStartItem->type() == DiagramTextItem::Type || 
+		myStartItem->type() == DiagramActorItem::Type || 
+		myStartItem->type() == DiagramImageItem::Type)
 		&&
 		(myEndItem->type() == DiagramTextItem::Type || 
 		myEndItem->type() == DiagramActorItem::Type || 
@@ -129,14 +124,14 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 	//-----------
 	int par1 = calcType;
 	QPointF par2 = mapFromItem(myStartItem, myStartItem->boundingRect().center());
-	QPointF par3 = mapFromItem(myEndItem, myStartItem->boundingRect().center());
+	QPointF par3 = mapFromItem(myEndItem, myEndItem->boundingRect().center());
 	float par4 = myStartItem->boundingRect().width();
 	float par5 = myEndItem->boundingRect().width();
 	float par6 = myStartItem->boundingRect().height();
 	float par7 = myEndItem->boundingRect().height();
 	QPair<QPointF, QPointF> points = getPoints(par1,par2,par3,par4,par5,par6,par7);
     //QLineF centerLine(myStartItem->pos(), myEndItem->pos());
-	QLineF centerLine(points.first, points.second);
+	QLineF centerLine(points.second, points.first);
 	
 	
 

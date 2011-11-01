@@ -1,37 +1,37 @@
-HEADERS	    =   mainwindow.h \
-		diagramitem.h \
-		diagramscene.h \
-		arrow.h \
-		diagramtextitem.h \
-    diagramellipseitem.h \
-    declarationdatatypes.h \
-    diagramimageitem.h \
-    diagramactorimageitem.h \
-    diagramactorimageitem.h
-SOURCES	    =   mainwindow.cpp \
-		diagramitem.cpp \
-		main.cpp \
-		arrow.cpp \
-		diagramtextitem.cpp \
-		diagramscene.cpp \
-    diagramellipseitem.cpp \
+#-------------------------------------------------
+#
+# Project created by QtCreator 2011-10-25T09:11:25
+#
+#-------------------------------------------------
+
+QT       += core gui
+
+TARGET = diagramscene
+TEMPLATE = app
+
+
+SOURCES += main.cpp\
+        mainwindow.cpp \
+    diagramtextitem.cpp \
+    diagramscene.cpp \
+    diagramitem.cpp \
     diagramimageitem.cpp \
-    diagramactorimageitem.cpp
-RESOURCES   =	diagramscene.qrc
+    diagramellipseitem.cpp \
+    diagramactoritem.cpp \
+    arrow.cpp
 
+HEADERS  += mainwindow.h \
+    diagramtextitem.h \
+    diagramscene.h \
+    diagramitem.h \
+    diagramimageitem.h \
+    diagramellipseitem.h \
+    diagramactoritem.h \
+    declarationdatatypes.h \
+    arrow.h
 
-# install
-target.path = $$[QT_INSTALL_EXAMPLES]/graphicsview/diagramscene
-sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS diagramscene.pro images
-sources.path = $$[QT_INSTALL_EXAMPLES]/graphicsview/diagramscene
-INSTALLS += target sources
-
-symbian: include($$QT_SOURCE_TREE/examples/symbianpkgrules.pri)
-
-
-
-
-
+RESOURCES += \
+    diagramscene.qrc
 
 
 

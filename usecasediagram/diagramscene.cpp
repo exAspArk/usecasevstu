@@ -15,8 +15,48 @@ DiagramScene::DiagramScene(QMenu *itemMenu, QObject *parent)
     myItemColor = Qt::white;
     myTextColor = Qt::black;
     myLineColor = Qt::black;  
+    changed = false;
+    imageItem = NULL;
 }
 //! [0]
+
+QList<DiagramEllipseItem*> DiagramScene::getEllipseItemList() {
+    return ellipseItemList;
+}
+QList<QGraphicsLineItem*> DiagramScene::getLineItemList() {
+    return lineItemList;
+}
+QList<QGraphicsLineItem*> DiagramScene::getLineItem2List() {
+    return lineItem2List;
+}
+QList<DiagramTextItem*> DiagramScene::getTextItemList() {
+    return textItemList;
+}
+QList<DiagramActorItem*> DiagramScene::getActorItemList() {
+    return actorItemList;
+}
+DiagramImageItem* DiagramScene::getImageItem() {
+    return imageItem;
+}
+
+void DiagramScene::addEllipseItemList(DiagramEllipseItem* item) {
+    ellipseItemList.append(item);
+}
+void DiagramScene::addLineItemList(QGraphicsLineItem* item) {
+    lineItemList.append(item);
+}
+void DiagramScene::addLineItem2List(QGraphicsLineItem* item) {
+    lineItem2List.append(item);
+}
+void DiagramScene::addTextItemList(DiagramTextItem* item) {
+    textItemList.append(item);
+}
+void DiagramScene::addActorItemList(DiagramActorItem* item) {
+    actorItemList.append(item);
+}
+void DiagramScene::setImageItem(DiagramImageItem* item) {
+    imageItem = item;
+}
 
 //! [1]
 void DiagramScene::setLineColor(const QColor &color)
@@ -131,8 +171,10 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			ellipseItem->setDefaultTextColor(myTextColor);
 			ellipseItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            ellipseItemList.append(ellipseItem);
 			/*emit textInserted(ellipseItem);*/
-			break;
+            changed = true;
+            break;
 //! [6] //! [7]
         case InsertLine:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -140,6 +182,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= AssociationLine;
             addItem(line);
+            changed = true;
             break;
         case InsertLineGeneral:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -147,6 +190,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= GeneralizationLine;
             addItem(line);
+            changed = true;
             break;
         case InsertLineDotted:
             line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(),
@@ -154,6 +198,7 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             line->setPen(QPen(myLineColor, 2));
             myLine= DottedLine;
             addItem(line);
+            changed = true;
             break;
 //! [7] //! [8]
         case InsertText:
@@ -169,6 +214,8 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             textItem->setDefaultTextColor(myTextColor);
             textItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            textItemList.append(textItem);
+            changed = true;
             break;
             
         case InsertActor:
@@ -188,6 +235,8 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             //actorItem->setDefaultTextColor(myTextColor);
             actorItem->setPos(mouseEvent->scenePos());
             emit textInserted(textItem);
+            actorItemList.append(actorItem);
+            changed = true;
             break;
 
         

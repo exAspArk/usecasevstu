@@ -20,7 +20,7 @@ class QRectF;
 class QGraphicsSceneMouseEvent;
 class QPainterPath;
 QT_END_NAMESPACE
-
+const qreal Pi = 3.14;
 //! [0]
 class Arrow : public QGraphicsLineItem
 {
@@ -102,51 +102,30 @@ public:
 			line_k = (y3-y1)/(x3-x1);
 			line_b = y1 - x1*(y3-y1)/(x3-x1);
 		}
-		bool checkPoint(float x, float y)
+		float checkPoint(float x, float y)
 		{
-			bool result = false;
-			result = sqrt((x3-x)*(x3-x) + (y3-y)*(y3-y)) < sqrt((x3-x1)*(x3-x1) + (y3-y1)*(y3-y1));
+			float result = 0;
+			result = sqrt((x3-x)*(x3-x) + (y3-y)*(y3-y));
 			return result;
 		}
 		QPointF getResult() 
 		{
 			float res_x = 0;
 			float res_y = 0;
-			
-			
 			float angle = atanf(line_k);
+			float xs[8] = {x1 + w/2, x1 + w/2, x1 - w/2, x1 - w/2, x1 + w*cosf(angle)/2, x1 + w*cosf(angle)/2, x1 - w*cosf(angle)/2, x1 - w*cosf(angle)/2};
+			float ys[8] = {y1 + h*sinf(angle)/2, y1 - h*sinf(angle)/2, y1 + h*sinf(angle)/2, y1 - h*sinf(angle)/2, y1 + h/2, y1 - h/2, y1 + h/2, y1 - h/2,};
+			float best_res = checkPoint(xs[0], ys[0]);
+			res_x = xs[0]; res_y = ys[0];
 			
-			if(angle < atanf(h/w))
+			for(int i = 0 ;i < 8; i++)
 			{
-				x2_1 = x1 + w/2;
-				y2_1 = y1 + h*sinf(angle)/2;
-
-				x2_2 = x1 - w/2;
-				y2_2 = y1 - h*sinf(angle)/2;
-			}
-			else
-			{
-				y2_1 = y1 + h/2;
-				x2_1 = x1 + w*cosf(angle)/2;
-
-				y2_2 = y1 - h/2;
-				x2_2 = x1 - w*cosf(angle)/2;
-			}
-			
-			if(checkPoint(x2_1, y2_1))
-			{
-				res_x = x2_1;
-				res_y = y2_1;
-			}
-			else 
-			{
-				if(checkPoint(x2_2, y2_2))
+				if(checkPoint(xs[i], ys[i]) <= best_res)
 				{
-					res_x = x2_2;
-					res_y = y2_2;
+					res_x = xs[i]; res_y = ys[i];
+					best_res = checkPoint(xs[i], ys[i]);
 				}
 			}
-			
 			QPointF res(res_x, res_y);
 			return res;
 		}

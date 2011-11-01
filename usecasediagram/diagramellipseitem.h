@@ -23,6 +23,23 @@ public:
 		_path.addEllipse(this->rectF);
 		return _path.toFillPolygon();
 	}
+	
+	friend QDataStream &operator << (QDataStream &stream, DiagramEllipseItem *ellipse) {
+        stream << ellipse->toHtml();
+        stream << ellipse->pos();
+        return stream;
+    }
+    friend QDataStream &operator >> (QDataStream &stream, DiagramEllipseItem *ellipse) {
+        QString text;
+        QPointF pos;
+        
+        stream >> text;
+        stream >> pos;
+        ellipse->setHtml(text);
+        ellipse->setPos(pos);
+        return stream;
+    }
+    
 signals:
 	void lostFocus(DiagramEllipseItem *item);
 	void selectedChange(QGraphicsItem *item);
