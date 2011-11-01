@@ -207,6 +207,18 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
 
     def addArrow(self,item):
         self.arrowsComment.append(item)
+
+    def removeArrow(self,arrow):
+        try:
+            self.arrowsComment.remove(arrow)
+        except ValueError:
+            pass
+         
+    def removeArrows(self):
+        for arrow in self.arrowsComment[:]:
+            arrow.startItem().removeArrow(arrow)
+            arrow.endItem().removeArrow(arrow)
+            self.scene().removeItem(arrow)
          
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
@@ -484,7 +496,6 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             pass
          
     def removeArrows(self):
-        print len(self.arrows)
         for arrow in self.arrows[:]:
             arrow.startItem().removeArrow(arrow)
             arrow.endItem().removeArrow(arrow)
