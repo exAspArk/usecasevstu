@@ -157,19 +157,18 @@ class LineRectCalculation:
 
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
-     def __init__(self, startItem, endItem, parent=None, scene=None):
+    def __init__(self, startItem, endItem, parent=None, scene=None):
          super(TotalLineDiagram, self).__init__(parent, scene)
          self.myStartItem = startItem
          self.myEndItem = endItem
 
          self.arrowHead = QtGui.QPolygonF()
 
-        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
-        self.myColor = QtCore.Qt.black
-        self.setPen(QtGui.QPen(self.myColor, 2, QtCore.Qt.SolidLine,
+         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+         self.myColor = QtCore.Qt.black
+         self.setPen(QtGui.QPen(self.myColor, 2, QtCore.Qt.SolidLine,
                QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
          self.arrowsComment = []
-
          self.id = -1
 
     def boundingRect(self):
@@ -177,9 +176,10 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         p1 = self.line().p1()
         p2 = self.line().p2()
         return QtCore.QRectF(p1, QtCore.QSizeF(p2.x() - p1.x(), p2.y() - p1.y())).normalized().adjusted(-extra, -extra, extra, extra)
-     def setId(self,i):
-         self.id = i
-         
+
+    def setId(self,idN):
+        self.id = idN
+
     def setColor(self, color):
         self.myColor = color
 
@@ -193,7 +193,6 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         path = super(TotalLineDiagram, self).shape()
         path.addPolygon(self.arrowHead)
         return path
-
     def updatePosition(self):
         line = QtCore.QLineF(self.mapFromItem(self.myStartItem, 0, 0), self.mapFromItem(self.myEndItem, 0, 0))
         self.setLine(line)
@@ -202,11 +201,12 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
     # return true - если нужно, false - если не нужно отрисовывать
     def isValid(self):
         pass
+    
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
 
-     def addArrow(self,item):
-         self.arrowsComment.append(item)
+    def addArrow(self,item):
+        self.arrowsComment.append(item)
          
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
@@ -664,24 +664,24 @@ class DiagramScene(QtGui.QGraphicsScene):
                 startItem = startItems[0]
                 endItem = endItems[0]
                 if self.myMode == self.InsertCommentLine:
-                    arrow = CommentLine(startItem, endItem)
+                     arrow = CommentLine(startItem, endItem)
                 elif self.myMode == self.InsertArrowAssociation:
-                    arrow = ArrowAssociation(startItem,endItem)
+                     arrow = ArrowAssociation(startItem,endItem)
                 elif self.myMode == self.InsertArrowGeneralization:
-                    arrow = ArrowGeneralization(startItem,endItem)
+                     arrow = ArrowGeneralization(startItem,endItem)
                 if arrow.isValid():
-                    id=Id+1
-                    arrow.setId(id)
-                    arrow.setColor(self.myLineColor)
-                    arrow.setZValue(-1000.0)
-                    self.addItem(arrow)
-                    print "add to start"
-                    startItem.addArrow(arrow)
-                    #print "add to end"
-                    endItem.addArrow(arrow)
-                    startItem.countArrows()
-                    endItem.countArrows()
-                    arrow.updatePosition()
+                     id=Id+1
+                     arrow.setId(id)
+                     arrow.setColor(self.myLineColor)
+                     arrow.setZValue(-1000.0)
+                     self.addItem(arrow)
+                     print "add to start"
+                     startItem.addArrow(arrow)
+                     #print "add to end"
+                     endItem.addArrow(arrow)
+                     startItem.countArrows()
+                     endItem.countArrows()
+                     arrow.updatePosition()
         self.line = None
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
 
@@ -690,7 +690,6 @@ class DiagramScene(QtGui.QGraphicsScene):
             if isinstance(item, type):
                 return True
         return False
-
 
 class MainWindow(QtGui.QMainWindow):
     InsertTextButton = 10
