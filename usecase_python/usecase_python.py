@@ -782,10 +782,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.removeItem(item)
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
-                super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrows(arrow.startItem())
+                arrow.removeArrows()
                 super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
                 super(ElementDiagramm,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
-                #self.scene.removeItem(arrow)
+                self.scene.removeItem(arrow)
     
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
