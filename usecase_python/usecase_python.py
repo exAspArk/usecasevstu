@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#
 # coding: UTF-8
 # This is only needed for Python v2 but is harmless for Python v3.
 #import sip
@@ -11,7 +11,28 @@ import math
 from PySide import QtCore, QtGui
 
 import diagramscene_rc
-
+# класс для элемента для хранение в файле
+class ElementData:
+    def __init__(self,typeElement,item):
+        self.point = item.scenePos()
+        self.type = typeElement
+        if(isinstance(item,TotalLineDiagram)):
+            self.idStart = item.startItem().getId()
+            self.idEnd = item.endItem().getId()
+        elif(isinstance(item,ElementDiagramm)):
+            self.text = item.toPlainText()
+    def getItem(self):
+        item = QtGui.QRaphicsTextItem()
+        if(isinstance(item,ElementDiagramm)):
+            if(self.type == ElementDiagramm.ActorType):
+                item = Actor()
+            elif(self.type == ElementDiagramm.CommentType):
+                item = Comment()
+            elif(self.type == ElementDiagramm.UseCaseType):
+                item == UseCase()
+        
+        return item
+                
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
@@ -161,7 +182,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          super(TotalLineDiagram, self).__init__(parent, scene)
          self.myStartItem = startItem
          self.myEndItem = endItem
-
+         
          self.arrowHead = QtGui.QPolygonF()
 
          self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
@@ -179,7 +200,10 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
 
     def setId(self,idN):
         self.id = idN
-
+        
+    def getId(self):
+        return self.id
+    
     def setColor(self, color):
         self.myColor = color
 
@@ -188,7 +212,13 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
 
     def endItem(self):
         return self.myEndItem
-
+    
+    def setStartItem(self,item):
+        self.myStartItem = item
+        
+    def setEndItem(self,item):
+        self.myEndItem = item
+        
     def shape(self):
         path = super(TotalLineDiagram, self).shape()
         path.addPolygon(self.arrowHead)
@@ -456,12 +486,12 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
 
     def __init__(self, parent=None, scene=None):
         super(ElementDiagramm, self).__init__(parent, scene)
-
+        
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.myTypeElement = ElementDiagramm.NoneType
         self.arrows = []
-        
+        self.id = -1
     def countArrows(self):
         print self.arrows
         
@@ -469,7 +499,13 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
             self.selectedChange.emit(self)
         return value
-
+    
+    def setId(self,id):
+        self.id = id
+        
+    def getId(self):
+        return self.id
+    
     def focusOutEvent(self, event):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
@@ -497,6 +533,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
          
     def removeArrows(self):
         for arrow in self.arrows[:]:
+            arrow.removeArrows()
             arrow.startItem().removeArrow(arrow)
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
@@ -675,6 +712,9 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
             self.textInserted.emit(textItem)
+            # увеличиваем идентификатор
+            self.Id = self.Id + 1
+            textItem.setId(self.Id)
             self.elements.append(textItem)
         super(DiagramScene, self).mousePressEvent(mouseEvent)
 
@@ -696,17 +736,20 @@ class DiagramScene(QtGui.QGraphicsScene):
 
             self.removeItem(self.line)
             self.line = None
+            
             # проверка на соотвествие правил отрисовк
             if len(startItems) and len(endItems) and \
                     startItems[0] != endItems[0]:
                 startItem = startItems[0]
                 endItem = endItems[0]
+                
                 if self.myMode == self.InsertCommentLine:
                      arrow = CommentLine(startItem, endItem)
                 elif self.myMode == self.InsertArrowAssociation:
                      arrow = ArrowAssociation(startItem,endItem)
                 elif self.myMode == self.InsertArrowGeneralization:
                      arrow = ArrowGeneralization(startItem,endItem)
+            
                 if arrow.isValid():
                      self.Id = self.Id + 1
                      arrow.setId(self.Id)
@@ -760,8 +803,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.removeItem(item)
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
-                arrow.startItem().removerArrow(arrow)
-                arrow.endItem().removeArrow(arrow)
+                arrow.removeArrows()
+                super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
+                super(ElementDiagramm,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
+                self.scene.removeItem(arrow)
     
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
