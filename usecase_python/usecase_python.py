@@ -180,7 +180,10 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
 
     def setId(self,idN):
         self.id = idN
-
+        
+    def getId(self):
+        return self.id
+    
     def setColor(self, color):
         self.myColor = color
 
@@ -462,7 +465,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.myTypeElement = ElementDiagramm.NoneType
         self.arrows = []
-        
+        self.id = -1
     def countArrows(self):
         print self.arrows
         
@@ -470,7 +473,13 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
             self.selectedChange.emit(self)
         return value
-
+    
+    def setId(self,id):
+        self.id = id
+        
+    def getId(self):
+        return self.id
+    
     def focusOutEvent(self, event):
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
@@ -656,6 +665,9 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
             self.textInserted.emit(textItem)
+            # увеличиваем идентификатор
+            self.Id = self.Id + 1
+            textItem.setId(self.Id)
             self.elements.append(textItem)
         super(DiagramScene, self).mousePressEvent(mouseEvent)
 
