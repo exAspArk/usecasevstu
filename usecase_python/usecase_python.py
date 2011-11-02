@@ -30,6 +30,7 @@ class ElementData:
                 item = Comment()
             elif(self.type == ElementDiagramm.UseCaseType):
                 item == UseCase()
+        
         return item
                 
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
@@ -714,17 +715,20 @@ class DiagramScene(QtGui.QGraphicsScene):
 
             self.removeItem(self.line)
             self.line = None
+            
             # проверка на соотвествие правил отрисовк
             if len(startItems) and len(endItems) and \
                     startItems[0] != endItems[0]:
                 startItem = startItems[0]
                 endItem = endItems[0]
+                
                 if self.myMode == self.InsertCommentLine:
                      arrow = CommentLine(startItem, endItem)
                 elif self.myMode == self.InsertArrowAssociation:
                      arrow = ArrowAssociation(startItem,endItem)
                 elif self.myMode == self.InsertArrowGeneralization:
                      arrow = ArrowGeneralization(startItem,endItem)
+            
                 if arrow.isValid():
                      self.Id = self.Id + 1
                      arrow.setId(self.Id)
@@ -778,8 +782,9 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.removeItem(item)
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
-                arrow.startItem().removerArrow(arrow)
-                arrow.endItem().removeArrow(arrow)
+                super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
+                super(ElementDiagramm,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
+                self.scene.removeItem(arrow)
     
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
