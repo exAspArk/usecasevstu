@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#
 # coding: UTF-8
 # This is only needed for Python v2 but is harmless for Python v3.
 #import sip
@@ -11,8 +11,27 @@ import math
 from PySide import QtCore, QtGui
 
 import diagramscene_rc
-
-
+# класс для элемента для хранение в файле
+class ElementData:
+    def __init__(self,typeElement,item):
+        self.point = item.scenePos()
+        self.type = typeElement
+        if(isinstance(item,TotalLineDiagram)):
+            self.idStart = item.startItem().getId()
+            self.idEnd = item.endItem().getId()
+        elif(isinstance(item,ElementDiagramm)):
+            self.text = item.toPlainText()
+    def getItem(self):
+        item = QtGui.QRaphicsTextItem()
+        if(isinstance(item,ElementDiagramm)):
+            if(self.type == ElementDiagramm.ActorType):
+                item = Actor()
+            elif(self.type == ElementDiagramm.CommentType):
+                item = Comment()
+            elif(self.type == ElementDiagramm.UseCaseType):
+                item == UseCase()
+        return item
+                
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
@@ -162,7 +181,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          super(TotalLineDiagram, self).__init__(parent, scene)
          self.myStartItem = startItem
          self.myEndItem = endItem
-
+         
          self.arrowHead = QtGui.QPolygonF()
 
          self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
@@ -192,7 +211,13 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
 
     def endItem(self):
         return self.myEndItem
-
+    
+    def setStartItem(self,item):
+        self.myStartItem = item
+        
+    def setEndItem(self,item):
+        self.myEndItem = item
+        
     def shape(self):
         path = super(TotalLineDiagram, self).shape()
         path.addPolygon(self.arrowHead)
@@ -460,7 +485,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
 
     def __init__(self, parent=None, scene=None):
         super(ElementDiagramm, self).__init__(parent, scene)
-
+        
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.myTypeElement = ElementDiagramm.NoneType
