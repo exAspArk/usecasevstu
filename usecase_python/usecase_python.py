@@ -12,6 +12,7 @@ from PySide import QtCore, QtGui
 
 import diagramscene_rc
 
+
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
@@ -497,6 +498,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
          
     def removeArrows(self):
         for arrow in self.arrows[:]:
+            arrow.removeArrows()
             arrow.startItem().removeArrow(arrow)
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
