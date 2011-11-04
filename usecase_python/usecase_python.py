@@ -507,6 +507,21 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         return self.id
     
     def focusOutEvent(self, event):
+        if self.myTypeElement==ElementDiagramm.UseCaseType or self.myTypeElement==ElementDiagramm.CommentType:
+            string=self.toPlainText()
+            string=string.encode("UTF-8")
+            i=0
+            while len(string)>i and string[i]==' ':
+                i+=1
+            if i!=0:    
+                string=string[i-1:]
+            i=len(string)-1
+            while i>0 and string[i]==' ':
+                i-=1
+            if i!=len(string)-1:    
+                string=string[:i]
+            string=string.center(20)
+        self.setPlainText(string)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
         super(ElementDiagramm, self).focusOutEvent(event)
@@ -542,6 +557,9 @@ class Comment(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Comment, self).__init__(parent, scene)
         self.myTypeElement = ElementDiagramm.CommentType
+        string=""
+        string=string.center(20)
+        self.setPlainText(string)
 
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
@@ -571,7 +589,10 @@ class UseCase(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(UseCase, self).__init__(parent, scene)
         self.myTypeElement = ElementDiagramm.UseCaseType
-
+        string=""
+        string=string.center(20)
+        self.setPlainText(string)
+        
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
         # painter.drawEllipse(bodyRect)
@@ -685,6 +706,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         if not item.toPlainText():
             self.removeItem(item)
             item.deleteLater()
+        self.update()
 
     def mousePressEvent(self, mouseEvent):
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
@@ -707,7 +729,8 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setZValue(1000.0)
             textItem.lostFocus.connect(self.editorLostFocus)
             textItem.selectedChange.connect(self.itemSelected)
-            textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+            if self.myMode == self.InsertActor:
+                textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
@@ -717,6 +740,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setId(self.Id)
             self.elements.append(textItem)
         super(DiagramScene, self).mousePressEvent(mouseEvent)
+        self.update()
 
     def mouseMoveEvent(self, mouseEvent):
         if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
@@ -724,6 +748,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.line.setLine(newLine)
         elif self.myMode == self.MoveItem:
             super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+        self.update()
 
     def mouseReleaseEvent(self, mouseEvent):
         if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
@@ -761,6 +786,7 @@ class DiagramScene(QtGui.QGraphicsScene):
                      arrow.updatePosition()
         self.line = None
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
+        self.update()
 
     def isItemChange(self, type):
         for item in self.selectedItems():
