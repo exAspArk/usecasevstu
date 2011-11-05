@@ -547,19 +547,23 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     
     def focusOutEvent(self, event):
         if self.myTypeElement==DiagramScene.UseCaseType or self.myTypeElement==DiagramScene.CommentType:
+            #
             string=self.toPlainText()
             string=string.encode("UTF-8")
             i=0
+            #ищем и удаляем пробелы в строке справа
             while len(string)>i and string[i]==' ':
                 i+=1
             if i!=0:    
                 string=string[i-1:]
             i=len(string)-1
+            #ищем и удаляем пробелы в строке слева
             while i>0 and string[i]==' ':
                 i-=1
             if i!=len(string)-1:    
-                string=string[:i]
-            string=string.center(20)
+                string=string[:i+1]
+            #выравниваем по центру, если длина меньше 15, то бобавляем пробелы слева и справа
+            string=string.center(15)
             self.setPlainText(string)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
@@ -666,14 +670,19 @@ class Actor(ElementDiagramm):
         imgFlag=False
         pos=0
         i=0
+        #пока не конец строки и картинка не найдена
         while i<len(string) and imgFlag!=True:
+            #код проверяемого символа, больше допустимого
             if ord(string[i])>127:
                 imgFlag=True
                 pos=i
             i += 1
+        #если картинка не найдена вставляем ее в начало
         if imgFlag==False:
             self.setHtml("<img src=\":/images/actor.png\" />"+"<p>"+string+"</p>")
+        #если картинка найдена
         if imgFlag==True and (pos-1)!=0:
+            #если картинка без текста
             if len(string)-pos-4<=0:
                 self.setHtml("<img src=\":/images/actor.png\" /><p>Actor</p>");
             else:
