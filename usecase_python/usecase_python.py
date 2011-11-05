@@ -10,6 +10,7 @@ import math
 
 from PySide import QtCore, QtGui
 
+
 import diagramscene_rc
 # класс для элемента для хранение в файле
 class ElementData:
@@ -521,7 +522,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             if i!=len(string)-1:    
                 string=string[:i]
             string=string.center(20)
-        self.setPlainText(string)
+            self.setPlainText(string)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
         super(ElementDiagramm, self).focusOutEvent(event)
@@ -785,6 +786,8 @@ class DiagramScene(QtGui.QGraphicsScene):
                      endItem.addArrow(arrow)
                      arrow.updatePosition()
         self.line = None
+        #после добавления элемента, переходит в состояние перетаскивания
+        self.myMode = self.MoveItem
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
         self.update()
 
@@ -799,7 +802,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-
+                
         self.createActions()
         self.createMenus()
         self.scene = DiagramScene(self.itemMenu)
@@ -820,7 +823,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setCentralWidget(self.widget)
         self.setWindowTitle("Use case diagramm")
-        self.scene.setMode(self.scene.InsertText)
+        #self.scene.setMode(self.pointerTypeGroup.checkedId())
 
     def deleteItem(self):
         for item in self.scene.selectedItems():
@@ -895,63 +898,75 @@ class MainWindow(QtGui.QMainWindow):
     def createActions(self):
 
         self.arrowTotal = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointer.png'), "Arrow &Total",
-                self,shortcut = "Ctrl+A",statusTip = "Arrow total",
-                triggered = self.toArrowTotal
+                QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация"),
+                self,triggered = self.toArrowTotal
         )
-
         self.arrowComment = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointer.png'), "Arrow &Comment",
-                self,shortcut = "Ctrl+A",statusTip = "Comment",
-                triggered = self.toArrowComment
+                QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия"),
+                self,triggered = self.toArrowComment
         )
-
         self.arrow = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointer.png'), "Arrowt",
-                self,shortcut = "Ctrl+A",statusTip = "Arrow",
-                triggered = self.toArrow
+                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение"),
+                self,triggered = self.toArrow
         )
-
         self.useCaseAction = QtGui.QAction(
-                QtGui.QIcon(':/images/usecase.png'), "Use case",
-                self,shortcut = "Ctrl+A",statusTip = "Use case",
-                triggered = self.toUseCase
+                QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования"),
+                self,triggered = self.toUseCase
         )
-
         self.actorAction = QtGui.QAction(
-                QtGui.QIcon(':/images/actor.png'), "Actor",
-                self,shortcut = "Ctrl+A",statusTip = "Actor",
-                triggered = self.toActor
+                QtGui.QIcon(':/images/actor.png'), unicode("Участник"),
+                self,triggered = self.toActor
         )
         self.commentAction = QtGui.QAction(
-                QtGui.QIcon(':/images/comment.png'), "Actor",
-                self,shortcut = "Ctrl+A",statusTip = "Actor",
-                triggered = self.toComment
+                QtGui.QIcon(':/images/comment.png'), unicode("Комментарий"),
+                self,triggered = self.toComment
         )
+        self.createAction = QtGui.QAction( unicode("Создать"),
+                self,triggered = self.toCreateAction
+        )
+        self.openAction = QtGui.QAction( unicode("Открыть..."),
+                self,triggered = self.toOpenAction
+        )
+        self.saveAction = QtGui.QAction( unicode("Сохранить"),
+                self,triggered = self.toSaveAction
+        )
+        self.saveAsAction = QtGui.QAction( unicode("Сохранить как..."),
+                self,triggered = self.toSaveAsAction
+        )
+        self.saveToPicAction = QtGui.QAction( unicode("Сохранить в картинку..."),
+                self,triggered = self.toSaveToPicAction
+        )
+        #self.toFrontAction = QtGui.QAction(
+        #        QtGui.QIcon(':/images/bringtofront.png'), "Bring to &Front",
+        #        self, shortcut="Ctrl+F", statusTip="Bring item to front",
+        #        triggered = self.bringToFront)
 
-        self.toFrontAction = QtGui.QAction(
-                QtGui.QIcon(':/images/bringtofront.png'), "Bring to &Front",
-                self, shortcut="Ctrl+F", statusTip="Bring item to front",
-                triggered = self.bringToFront)
-
-        self.sendBackAction = QtGui.QAction(
-                QtGui.QIcon(':/images/sendtoback.png'), "Send to &Back", self,
-                shortcut="Ctrl+B", statusTip="Send item to back",
-                triggered=self.sendToBack)
+        #self.sendBackAction = QtGui.QAction(
+        #        QtGui.QIcon(':/images/sendtoback.png'), "Send to &Back", self,
+        #        shortcut="Ctrl+B", statusTip="Send item to back",
+        #        triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                "&Delete", self, shortcut="Delete",
-                statusTip="Delete item from diagram",
-                triggered=self.deleteItem)
-
-        self.exitAction = QtGui.QAction("E&xit", self, shortcut="Ctrl+X",
+                unicode("Удаление"), self, shortcut="Delete",triggered=self.deleteItem)
+        self.exitAction = QtGui.QAction(unicode("Выход"), self, shortcut="Ctrl+X",
                 statusTip="Quit Scenediagram example", triggered=self.close)
-        self.aboutAction = QtGui.QAction("A&bout", self, shortcut="Ctrl+B",
+        self.aboutAction = QtGui.QAction(unicode("О программе"), self, shortcut="Ctrl+B",
                 triggered=self.about)
-
+    
+    def toCreateAction(self):
+        print("!!")
+    def toOpenAction(self):
+        print("!!")
+    def toSaveAction(self):
+        print("!!")
+    def toSaveAsAction(self):
+        print("!!")
+    def toSaveToPicAction(self):
+        print("!!")
+    
     def toArrowTotal(self):
         self.scene.setMode(self.scene.InsertArrowAssociation)
-
+    
     def toArrowComment(self):
         self.scene.setMode(self.scene.InsertCommentLine)
 
@@ -966,55 +981,67 @@ class MainWindow(QtGui.QMainWindow):
 
     def toComment(self):
         self.scene.setMode(self.scene.InsertText)
-
+       
     def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu("&File")
+        self.fileMenu = self.menuBar().addMenu(unicode("Файл"))
+        self.fileMenu.addAction(self.openAction)
+        self.fileMenu.addAction(self.createAction)
+        self.fileMenu.addAction(self.saveAction)
+        self.fileMenu.addAction(self.saveAsAction)
+        self.fileMenu.addAction(self.saveToPicAction)
         self.fileMenu.addAction(self.exitAction)
 
-        self.itemMenu = self.menuBar().addMenu("&Item")
-        self.itemMenu.addAction(self.deleteAction)
+        self.itemMenu = self.menuBar().addMenu(unicode("Команды"))
+        self.itemMenu.addAction(self.useCaseAction)
+        self.itemMenu.addAction(self.actorAction)
+        self.itemMenu.addAction(self.commentAction)
+        self.itemMenu.addAction(self.arrowTotal)
+        self.itemMenu.addAction(self.arrow)
+        self.itemMenu.addAction(self.arrowComment)
         self.itemMenu.addSeparator()
-        self.itemMenu.addAction(self.toFrontAction)
-        self.itemMenu.addAction(self.sendBackAction)
+        self.itemMenu.addAction(self.deleteAction)
+        #self.itemMenu.addAction(self.toFrontAction)
+        #self.itemMenu.addAction(self.sendBackAction)
 
-        self.aboutMenu = self.menuBar().addMenu("&Help")
+        self.aboutMenu = self.menuBar().addMenu(unicode("Помощь"))
         self.aboutMenu.addAction(self.aboutAction)
 
     def createToolbars(self):
         self.editToolBar = self.addToolBar("Edit")
-        self.editToolBar.addAction(self.deleteAction)
-        self.editToolBar.addAction(self.toFrontAction)
-        self.editToolBar.addAction(self.sendBackAction)
-        self.editToolBar.addAction(self.arrow)
-        self.editToolBar.addAction(self.arrowComment)
-        self.editToolBar.addAction(self.arrowTotal)
+        #self.editToolBar.addAction(self.toFrontAction)
+        #self.editToolBar.addAction(self.sendBackAction)
         self.editToolBar.addAction(self.useCaseAction)
         self.editToolBar.addAction(self.actorAction)
         self.editToolBar.addAction(self.commentAction)
+        self.editToolBar.addAction(self.arrowTotal)
+        self.editToolBar.addAction(self.arrow)
+        self.editToolBar.addAction(self.arrowComment)
+        self.editToolBar.addAction(self.deleteAction)
+        
 
 
         pointerButton = QtGui.QToolButton()
         pointerButton.setCheckable(True)
-        pointerButton.setChecked(True)
+        #pointerButton.setChecked(True)
         pointerButton.setIcon(QtGui.QIcon(':/images/pointer.png'))
-        linePointerButton = QtGui.QToolButton()
-        linePointerButton.setCheckable(True)
-        linePointerButton.setIcon(QtGui.QIcon(':/images/linepointer.png'))
+        #linePointerButton = QtGui.QToolButton()
+        #linePointerButton.setCheckable(True)
+        #linePointerButton.setIcon(QtGui.QIcon(':/images/linepointer.png'))
 
-        self.pointerTypeGroup = QtGui.QButtonGroup()
-        self.pointerTypeGroup.addButton(pointerButton, DiagramScene.MoveItem)
-        self.pointerTypeGroup.addButton(linePointerButton,
-                DiagramScene.InsertLine)
-        self.pointerTypeGroup.buttonClicked[int].connect(self.pointerGroupClicked)
+        #self.pointerTypeGroup = QtGui.QButtonGroup()
+        #self.pointerTypeGroup.addButton(pointerButton, DiagramScene.MoveItem)
+        #self.pointerTypeGroup.addButton(linePointerButton,
+        #        DiagramScene.InsertLine)
+        #self.pointerTypeGroup.buttonClicked[int].connect(self.pointerGroupClicked)
 
         self.sceneScaleCombo = QtGui.QComboBox()
-        self.sceneScaleCombo.addItems(["50%", "75%", "100%", "125%", "150%"])
-        self.sceneScaleCombo.setCurrentIndex(2)
+        self.sceneScaleCombo.addItems(["50%", "100%", "150%", "200%"])
+        self.sceneScaleCombo.setCurrentIndex(1)
         self.sceneScaleCombo.currentIndexChanged[str].connect(self.sceneScaleChanged)
 
         self.pointerToolbar = self.addToolBar("Pointer type")
-        self.pointerToolbar.addWidget(pointerButton)
-        self.pointerToolbar.addWidget(linePointerButton)
+        #self.pointerToolbar.addWidget(pointerButton)
+        #self.pointerToolbar.addWidget(linePointerButton)
         self.pointerToolbar.addWidget(self.sceneScaleCombo)
 
 
