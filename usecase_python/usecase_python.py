@@ -35,7 +35,6 @@ class ElementData:
             stream.__lshift__ (self.idEnd)
         else:
             stream.__lshift__ (self.text)
-        stream.__lshift__ (self.text)
         QtGui.QApplication.restoreOverrideCursor()
     def read(self,stream):
         item = QtGui.QGraphicsTextItem
@@ -55,6 +54,9 @@ class ElementData:
             item = UseCase()
             item.setId(id)
             item.setPos(pos)
+            str = ""
+            stream.__rshift__(str)
+            item.setPlainText(str)
         if(type == DiagramScene.CommentLineType):
             tem = CommentLine()
         elif(type == DiagramScene.ArrowAssociationType):
@@ -1018,7 +1020,7 @@ class MainWindow(QtGui.QMainWindow):
             item = elem.read(_out)
             self.scene.addItem(item)
             self.scene.elements.append(item)
-        
+        file.close()
     def toSaveAction(self):
         fileName = "file.data"
         file = QtCore.QFile(fileName)
@@ -1031,6 +1033,7 @@ class MainWindow(QtGui.QMainWindow):
         for i in self.scene.getElements():
             elem = ElementData(i)
             elem.save(_out)
+        file.close()
     def toSaveAsAction(self):
         print("!!")
     def toSaveToPicAction(self):
