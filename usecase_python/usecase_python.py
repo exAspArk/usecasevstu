@@ -14,26 +14,55 @@ from PySide import QtCore, QtGui
 import diagramscene_rc
 # класс для элемента для хранение в файле
 class ElementData:
-    def __init__(self,typeElement,item):
-        self.point = item.scenePos()
-        self.type = typeElement
-        if(isinstance(item,TotalLineDiagram)):
-            self.idStart = item.startItem().getId()
-            self.idEnd = item.endItem().getId()
-        elif(isinstance(item,ElementDiagramm)):
-            self.text = item.toPlainText()
-    def getItem(self):
-        item = QtGui.QRaphicsTextItem()
-        if(isinstance(item,ElementDiagramm)):
-            if(self.type == ElementDiagramm.ActorType):
-                item = Actor()
-            elif(self.type == ElementDiagramm.CommentType):
-                item = Comment()
-            elif(self.type == ElementDiagramm.UseCaseType):
-                item == UseCase()
-        
+    def __init__(self,item=None):
+        if item!=None:
+            self.point = item.scenePos()
+            self.id = item.getId()
+            self.type = item.getType()
+            if(isinstance(item,TotalLineDiagram)):
+                self.idStart = item.startItem().getId()
+                self.idEnd = item.endItem().getId()
+            elif(isinstance(item,ElementDiagramm)):
+                self.text = item.toPlainText()
+    def save(self,stream):
+        QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        stream.writeUInt32(self.type)
+        stream.writeUInt32(self.id)
+        stream.__lshift__ (self.point)
+        if(self.type == DiagramScene.CommentLineType or self.type == DiagramScene.ArrowAssociationType or \
+           self.type == DiagramScene.ArrowGeneralizationType):
+            stream.__lshift__ (self.idStart)
+            stream.__lshift__ (self.idEnd)
+        else:
+            stream.__lshift__ (self.text)
+        stream.__lshift__ (self.text)
+        QtGui.QApplication.restoreOverrideCursor()
+    def read(self,stream):
+        item = QtGui.QGraphicsTextItem
+        type = stream.readInt32()
+        id = stream.readInt32()
+        pos = QtCore.QPointF(0,0)
+        stream.__rshift__(pos)
+        if(type == DiagramScene.ActorType):
+            item = Actor()
+            item.setId(id)
+            item.setPos(pos)
+        elif(type == DiagramScene.CommentType):
+            item = Comment()
+            item.setId(id)
+            item.setPos(pos)
+        elif(type == DiagramScene.UseCaseType):
+            item = UseCase()
+            item.setId(id)
+            item.setPos(pos)
+        if(type == DiagramScene.CommentLineType):
+            tem = CommentLine()
+        elif(type == DiagramScene.ArrowAssociationType):
+            item = ArrowAssociation()
+        elif(type == DiagramScene.ArrowGeneralizationType):
+            item = ArrowGeneralization()
         return item
-                
+            
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
@@ -179,7 +208,8 @@ class LineRectCalculation:
 
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
-    def __init__(self, startItem, endItem, parent=None, scene=None):
+    # типы линий
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
          super(TotalLineDiagram, self).__init__(parent, scene)
          self.myStartItem = startItem
          self.myEndItem = endItem
@@ -192,6 +222,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
                QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
          self.arrowsComment = []
          self.id = -1
+         self.type = DiagramScene.NonType
 
     def boundingRect(self):
         extra = (self.pen().width() + 20) / 2.0
@@ -204,6 +235,9 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         
     def getId(self):
         return self.id
+    
+    def getType(self):
+        return self.type
     
     def setColor(self, color):
         self.myColor = color
@@ -253,8 +287,9 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
-    def __init__(self, startItem, endItem, parent=None, scene=None):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
         super(CommentLine,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.CommentLineType
 
     def isValid(self):
         if((isinstance(self.startItem(),Comment) and \
@@ -312,6 +347,7 @@ class CommentLine(TotalLineDiagram):
 class ArrowAssociation(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
         super(ArrowAssociation,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.ArrowAssociationType
 
     def isValid(self):
         if((isinstance(self.startItem(),Actor) and \
@@ -401,6 +437,7 @@ class ArrowAssociation(TotalLineDiagram):
 class ArrowGeneralization(TotalLineDiagram):
     def __init__(self, startItem, endItem, parent=None, scene=None):
         super(ArrowGeneralization,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.ArrowGeneralizationType
 
     def isValid(self):
         if ((isinstance(self.startItem(),Actor) and \
@@ -479,7 +516,6 @@ class ArrowGeneralization(TotalLineDiagram):
          return QtGui.QPolygonF(self.boundingRect())
 
 class ElementDiagramm(QtGui.QGraphicsTextItem):
-    CommentType,UseCaseType,ActorType,NoneType = range(4)
 
     lostFocus = QtCore.Signal(QtGui.QGraphicsTextItem)
 
@@ -490,7 +526,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-        self.myTypeElement = ElementDiagramm.NoneType
+        self.myTypeElement = DiagramScene.NonType
         self.arrows = []
         self.id = -1
     def countArrows(self):
@@ -508,7 +544,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         return self.id
     
     def focusOutEvent(self, event):
-        if self.myTypeElement==ElementDiagramm.UseCaseType or self.myTypeElement==ElementDiagramm.CommentType:
+        if self.myTypeElement==DiagramScene.UseCaseType or self.myTypeElement==DiagramScene.CommentType:
             string=self.toPlainText()
             string=string.encode("UTF-8")
             i=0
@@ -532,7 +568,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
         super(ElementDiagramm, self).mouseDoubleClickEvent(event)
         
-    def typeElement(self):
+    def getType(self):
         return self.myTypeElement
 
     def polygon(self):
@@ -557,7 +593,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
 class Comment(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Comment, self).__init__(parent, scene)
-        self.myTypeElement = ElementDiagramm.CommentType
+        self.myTypeElement = DiagramScene.CommentType
         string=""
         string=string.center(20)
         self.setPlainText(string)
@@ -589,7 +625,7 @@ class Comment(ElementDiagramm):
 class UseCase(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(UseCase, self).__init__(parent, scene)
-        self.myTypeElement = ElementDiagramm.UseCaseType
+        self.myTypeElement = DiagramScene.UseCaseType
         string=""
         string=string.center(20)
         self.setPlainText(string)
@@ -614,7 +650,7 @@ class UseCase(ElementDiagramm):
 class Actor(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Actor, self).__init__(parent, scene)
-        self.myTypeElement = ElementDiagramm.ActorType
+        self.myTypeElement = DiagramScene.ActorType
         self.setTextWidth(50);
         self.setHtml("<img src=\":/images/actor.png\" /><p>Actor</p>");
 
@@ -644,7 +680,8 @@ class Actor(ElementDiagramm):
         self.lostFocus.emit(self)
 
 class DiagramScene(QtGui.QGraphicsScene):
-    InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor  = range(9)
+   
+    ArrowGeneralizationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor  = range(16)
 
     itemInserted = QtCore.Signal(ElementDiagramm)
 
@@ -747,10 +784,12 @@ class DiagramScene(QtGui.QGraphicsScene):
         if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
             newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
             self.line.setLine(newLine)
-        elif self.myMode == self.MoveItem:
+        elif self.myMode == self.MoveItem:           
             super(DiagramScene, self).mouseMoveEvent(mouseEvent)
         self.update()
 
+    def getElements(self):
+        return self.elements
     def mouseReleaseEvent(self, mouseEvent):
         if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
             startItems = self.items(self.line.line().p1())
@@ -901,18 +940,22 @@ class MainWindow(QtGui.QMainWindow):
                 QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация"),
                 self,triggered = self.toArrowTotal
         )
+
         self.arrowComment = QtGui.QAction(
                 QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия"),
                 self,triggered = self.toArrowComment
         )
+
         self.arrow = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение"),
                 self,triggered = self.toArrow
         )
+
         self.useCaseAction = QtGui.QAction(
                 QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования"),
                 self,triggered = self.toUseCase
         )
+
         self.actorAction = QtGui.QAction(
                 QtGui.QIcon(':/images/actor.png'), unicode("Участник"),
                 self,triggered = self.toActor
@@ -946,6 +989,11 @@ class MainWindow(QtGui.QMainWindow):
         #        shortcut="Ctrl+B", statusTip="Send item to back",
         #        triggered=self.sendToBack)
 
+        self.sendBackAction = QtGui.QAction(
+                QtGui.QIcon(':/images/sendtoback.png'), "Send to &Back", self,
+                shortcut="Ctrl+B", statusTip="Send item to back",
+                triggered=self.sendToBack)
+
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
                 unicode("Удаление"), self, shortcut="Delete",triggered=self.deleteItem)
         self.exitAction = QtGui.QAction(unicode("Выход"), self, shortcut="Ctrl+X",
@@ -956,9 +1004,33 @@ class MainWindow(QtGui.QMainWindow):
     def toCreateAction(self):
         print("!!")
     def toOpenAction(self):
-        print("!!")
+        self.scene.clear()
+        #self.scene.elements().__format__()
+        fileName = "file.data"
+        file = QtCore.QFile(fileName)
+        if file.open(QtCore.QIODevice.ReadWrite) == False:
+            QtGui.QMessageBox.warning(self, 'Application', QtCore.QString('Cannot write file %1:\n%2.').arg(fileName).arg(file.errorString()))
+            return False
+        _out = QtCore.QDataStream(file)
+        count = _out.readInt32()
+        for i in range(count):
+            elem = ElementData()
+            item = elem.read(_out)
+            self.scene.addItem(item)
+            self.scene.elements.append(item)
+        
     def toSaveAction(self):
-        print("!!")
+        fileName = "file.data"
+        file = QtCore.QFile(fileName)
+        if file.open(QtCore.QIODevice.WriteOnly) == False:
+            QtGui.QMessageBox.warning(self, 'Application', QtCore.QString('Cannot write file %1:\n%2.').arg(fileName).arg(file.errorString()))
+            return False
+        _out = QtCore.QDataStream(file)
+        count = len(self.scene.getElements())
+        _out.writeInt32(count)
+        for i in self.scene.getElements():
+            elem = ElementData(i)
+            elem.save(_out)
     def toSaveAsAction(self):
         print("!!")
     def toSaveToPicAction(self):
