@@ -38,35 +38,42 @@ class ElementData:
         QtGui.QApplication.restoreOverrideCursor()
         return stream
     def read(self,stream):
-        item = QtGui.QGraphicsTextItem
         type = stream.readInt32()
         id = stream.readInt32()
         pos = QtCore.QPointF(0,0)
         stream = stream.__rshift__(pos)
         if(type == DiagramScene.ActorType):
             item = Actor()
-            item.setId(id)
-            item.setPos(pos)
             str = stream.readString()
             item.setPlainText(str)
         elif(type == DiagramScene.CommentType):
             item = Comment()
-            item.setId(id)
-            item.setPos(pos)
             str= stream.readString()
             item.setPlainText(str)
         elif(type == DiagramScene.UseCaseType):
             item = UseCase()
-            item.setId(id)
-            item.setPos(pos)
             str = stream.readString()
             item.setPlainText(str)
         if(type == DiagramScene.CommentLineType):
-            tem = CommentLine()
+            item = CommentLine()
+            idStart = stream.readInt32()
+            idEnd = stream.readInt32()
+            item.setIdStart(idStart)
+            item.setIdEnd(idEnd)
         elif(type == DiagramScene.ArrowAssociationType):
             item = ArrowAssociation()
+            idStart = stream.readInt32()
+            idEnd = stream.readInt32()
+            item.setIdStart(idStart)
+            item.setIdEnd(idEnd)
         elif(type == DiagramScene.ArrowGeneralizationType):
             item = ArrowGeneralization()
+            idStart = stream.readInt32()
+            idEnd = stream.readInt32()
+            item.setIdStart(idStart)
+            item.setIdEnd(idEnd)
+        item.setId(id)
+        item.setPos(pos)
         return item
             
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
@@ -219,7 +226,8 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          super(TotalLineDiagram, self).__init__(parent, scene)
          self.myStartItem = startItem
          self.myEndItem = endItem
-         
+         self.idStart = -1
+         self.idEnd = -1
          self.arrowHead = QtGui.QPolygonF()
 
          self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
@@ -242,6 +250,18 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
     def getId(self):
         return self.id
     
+    def setIdStart(self,id):
+        self.idStart = id
+        
+    def setIdEnd(self,id):
+        self.idEnd = id
+        
+    def getIdStart(self):
+        return self.idStart
+        
+    def getIdEnd(self):
+        return self.idEnd   
+        
     def getType(self):
         return self.type
     
@@ -351,7 +371,7 @@ class CommentLine(TotalLineDiagram):
 
 # класс для отрисовки стрелки ассоциации
 class ArrowAssociation(TotalLineDiagram):
-    def __init__(self, startItem, endItem, parent=None, scene=None):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
         super(ArrowAssociation,self).__init__(startItem,endItem,parent,scene)
         self.type = DiagramScene.ArrowAssociationType
 
@@ -441,7 +461,7 @@ class ArrowAssociation(TotalLineDiagram):
 
 # класс для отрисовки стрелки обобщения
 class ArrowGeneralization(TotalLineDiagram):
-    def __init__(self, startItem, endItem, parent=None, scene=None):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
         super(ArrowGeneralization,self).__init__(startItem,endItem,parent,scene)
         self.type = DiagramScene.ArrowGeneralizationType
 
@@ -710,6 +730,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     textEndInserted = QtCore.Signal()
 
     elements = []
+    Arrows = []
     
     Id = 0
     
@@ -765,7 +786,12 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.removeItem(item)
             item.deleteLater()
         self.update()
-
+        
+    def getElementsById(self,id):
+        for item in self.elements:
+            if item.getId() == id:
+                return item
+        return None
     def mousePressEvent(self, mouseEvent):
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
             return
@@ -810,6 +836,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 
     def getElements(self):
         return self.elements
+    
     def mouseReleaseEvent(self, mouseEvent):
         if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
             startItems = self.items(self.line.line().p1())
@@ -843,6 +870,7 @@ class DiagramScene(QtGui.QGraphicsScene):
                      self.addItem(arrow)
                      startItem.addArrow(arrow)
                      endItem.addArrow(arrow)
+                     self.Arrows.append(arrow)
                      arrow.updatePosition()
         self.line = None
         #после добавления элемента, переходит в состояние перетаскивания
@@ -1065,8 +1093,22 @@ class MainWindow(QtGui.QMainWindow):
         for i in range(count):
             elem = ElementData()
             item = elem.read(_out)
+            item.setId(item.id)
             self.scene.addItem(item)
             self.scene.elements.append(item)
+        count = _out.readInt32()
+        for i in range(count):
+            elem = ElementData()
+            item = elem.read(_out)
+            e1 = self.scene.getElementsById(item.getIdStart())
+            item.setStartItem(e1)
+            e2 = self.scene.getElementsById(item.getIdEnd())
+            item.setEndItem(e2)
+            e1.addArrow(item)
+            e2.addArrow(item)
+            self.scene.addItem(item)
+            self.scene.Arrows.append(item)
+            item.updatePosition()
         file.close()
     def toSaveAction(self):
         fileName = "file.data"
@@ -1080,7 +1122,12 @@ class MainWindow(QtGui.QMainWindow):
         for i in self.scene.getElements():
             elem = ElementData(i)
             _out = elem.save(_out)
-            #_out. __lshift__(i.)
+        count = len(self.scene.Arrows)
+        _out.writeUInt32(count)
+        for i in self.scene.Arrows:
+            elem = ElementData(i)
+            _out = elem.save(_out)
+        _out.writeInt32(self.scene.Id)
         file.close()
     def toSaveAsAction(self):
         print("!!")
