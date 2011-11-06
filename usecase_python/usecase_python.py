@@ -28,40 +28,38 @@ class ElementData:
         QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         stream.writeUInt32(self.type)
         stream.writeUInt32(self.id)
-        stream.__lshift__ (self.point)
+        stream = stream.__lshift__ (self.point)
         if(self.type == DiagramScene.CommentLineType or self.type == DiagramScene.ArrowAssociationType or \
            self.type == DiagramScene.ArrowGeneralizationType):
-            stream.__lshift__ (self.idStart)
-            stream.__lshift__ (self.idEnd)
+            stream.writeUInt32 (self.idStart)
+            stream.writeUInt32 (self.idEnd)
         else:
-            stream.__lshift__ (self.text)
+            stream.writeQString (self.text)
         QtGui.QApplication.restoreOverrideCursor()
+        return stream
     def read(self,stream):
         item = QtGui.QGraphicsTextItem
         type = stream.readInt32()
         id = stream.readInt32()
         pos = QtCore.QPointF(0,0)
-        stream.__rshift__(pos)
+        stream = stream.__rshift__(pos)
         if(type == DiagramScene.ActorType):
             item = Actor()
             item.setId(id)
             item.setPos(pos)
-            str = ""
-            stream.__rshift__(str)
+            str = stream.readString()
             item.setPlainText(str)
         elif(type == DiagramScene.CommentType):
             item = Comment()
             item.setId(id)
             item.setPos(pos)
-            str = ''
-            stream.__rshift__(str)
+            str= stream.readString()
             item.setPlainText(str)
         elif(type == DiagramScene.UseCaseType):
             item = UseCase()
             item.setId(id)
             item.setPos(pos)
-            str = ""
-            stream.__rshift__(str)
+            str = stream.readString()
             item.setPlainText(str)
         if(type == DiagramScene.CommentLineType):
             tem = CommentLine()
@@ -1087,7 +1085,8 @@ class MainWindow(QtGui.QMainWindow):
         _out.writeInt32(count)
         for i in self.scene.getElements():
             elem = ElementData(i)
-            elem.save(_out)
+            _out = elem.save(_out)
+            #_out. __lshift__(i.)
         file.close()
     def toSaveAsAction(self):
         print("!!")
