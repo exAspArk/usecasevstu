@@ -663,7 +663,11 @@ class Actor(ElementDiagramm):
         self.myTypeElement = DiagramScene.ActorType
         self.setTextWidth(50);
         self.setHtml("<img src=\":/images/actor.png\" /><p>Actor</p>");
-
+        textcursor=self.textCursor()
+        textcursor.movePosition(QtGui.QTextCursor.Down,QtGui.QTextCursor.MoveAnchor,1)
+        textcursor.movePosition(QtGui.QTextCursor.EndOfLine,QtGui.QTextCursor.KeepAnchor,5)
+        self.setTextCursor(textcursor)
+         
     def paint(self, painter, option, widget=None):
         super(Actor, self).paint(painter, option, widget)
     def polygon(self):
@@ -691,7 +695,7 @@ class Actor(ElementDiagramm):
                 self.setHtml("<img src=\":/images/actor.png\" /><p>Actor</p>");
             else:
                 self.setHtml("<img src=\":/images/actor.png\" />"+"<p>"+string[pos+4:]+"</p>")
-        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)        
         self.lostFocus.emit(self)
 
 class DiagramScene(QtGui.QGraphicsScene):
@@ -783,8 +787,8 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.setZValue(1000.0)
             textItem.lostFocus.connect(self.editorLostFocus)
             textItem.selectedChange.connect(self.itemSelected)
-            if self.myMode == self.InsertActor:
-                textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+            #if self.myMode == self.InsertActor:
+             #   textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
