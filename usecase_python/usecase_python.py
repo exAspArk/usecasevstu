@@ -46,10 +46,16 @@ class ElementData:
             item = Actor()
             item.setId(id)
             item.setPos(pos)
+            str = ""
+            stream.__rshift__(str)
+            item.setPlainText(str)
         elif(type == DiagramScene.CommentType):
             item = Comment()
             item.setId(id)
             item.setPos(pos)
+            str = ''
+            stream.__rshift__(str)
+            item.setPlainText(str)
         elif(type == DiagramScene.UseCaseType):
             item = UseCase()
             item.setId(id)
