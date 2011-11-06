@@ -783,6 +783,9 @@ class DiagramScene(QtGui.QGraphicsScene):
         for item in self.elements:
             if item.getId() == id:
                 return item
+        for item in self.Arrows:
+            if item.getId() == id:
+                return item
         return None
     def mousePressEvent(self, mouseEvent):
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
@@ -1107,6 +1110,7 @@ class MainWindow(QtGui.QMainWindow):
             self.scene.addItem(item)
             self.scene.Arrows.append(item)
             item.updatePosition()
+        self.scene.Id = _out.readInt32()
         file.close()
     def toSaveAction(self):
         fileName = "file.data"
