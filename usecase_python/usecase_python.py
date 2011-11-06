@@ -908,6 +908,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.widget)
         self.setWindowTitle("UseCaseDiagram")
         self.pointer.setChecked(True)
+        QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName("UTF-8"));
         
         #self.scene.setMode(self.pointerTypeGroup.checkedId())
     def falseChecked(self):
