@@ -42,32 +42,24 @@ class ElementData:
         id = stream.readInt32()
         pos = QtCore.QPointF(0,0)
         stream = stream.__rshift__(pos)
-        if(type == DiagramScene.ActorType):
-            item = Actor()
+        if type == DiagramScene.ActorType or type == DiagramScene.CommentType \
+                or type == DiagramScene.UseCaseType:
+            if type == DiagramScene.ActorType:
+                item = Actor()
+            elif type == DiagramScene.CommentType:
+                item = Comment()
+            elif type == DiagramScene.UseCaseType:
+                item = UseCase()
             str = stream.readString()
             item.setPlainText(str)
-        elif(type == DiagramScene.CommentType):
-            item = Comment()
-            str= stream.readString()
-            item.setPlainText(str)
-        elif(type == DiagramScene.UseCaseType):
-            item = UseCase()
-            str = stream.readString()
-            item.setPlainText(str)
-        if(type == DiagramScene.CommentLineType):
-            item = CommentLine()
-            idStart = stream.readInt32()
-            idEnd = stream.readInt32()
-            item.setIdStart(idStart)
-            item.setIdEnd(idEnd)
-        elif(type == DiagramScene.ArrowAssociationType):
-            item = ArrowAssociation()
-            idStart = stream.readInt32()
-            idEnd = stream.readInt32()
-            item.setIdStart(idStart)
-            item.setIdEnd(idEnd)
-        elif(type == DiagramScene.ArrowGeneralizationType):
-            item = ArrowGeneralization()
+        if type == DiagramScene.CommentLineType or type == DiagramScene.ArrowAssociationType \
+                or type == DiagramScene.ArrowGeneralizationType:
+            if type == DiagramScene.CommentLineType:
+                item = CommentLine()
+            elif type == DiagramScene.ArrowAssociationType:
+                item = ArrowAssociation()
+            elif type == DiagramScene.ArrowGeneralizationType:
+                item = ArrowGeneralization()
             idStart = stream.readInt32()
             idEnd = stream.readInt32()
             item.setIdStart(idStart)
@@ -318,10 +310,10 @@ class CommentLine(TotalLineDiagram):
         self.type = DiagramScene.CommentLineType
 
     def isValid(self):
-        if((isinstance(self.startItem(),Comment) and \
-            isinstance(self.endItem(), TotalLineDiagram)) or \
-            (isinstance(self.startItem(), TotalLineDiagram) and \
-            isinstance(self.endItem(), Comment))):
+        if(((isinstance(self.startItem(),Comment) and \
+            isinstance(self.endItem(), TotalLineDiagram))) or \
+            ((isinstance(self.startItem(), TotalLineDiagram) and \
+            isinstance(self.endItem(), Comment)))):
             return True
         else: return False
 
