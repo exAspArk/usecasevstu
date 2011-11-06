@@ -1134,7 +1134,14 @@ class MainWindow(QtGui.QMainWindow):
     def toSaveAsAction(self):
         print("!!")
     def toSaveToPicAction(self):
-       print("!!")
+       filename=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в картинку"),unicode(""),unicode("Images (*.png)"))
+       img = QtGui.QImage(self.scene.width(),self.scene.height(), QtGui.QImage.Format_ARGB32_Premultiplied)
+       p = QtGui.QPainter()
+       p.begin(img)
+       self.scene.render(p)
+       p.end()
+  
+       img.save(unicode(filename[0]),"png")
     
     def toArrowTotal(self):
         self.scene.setMode(self.scene.InsertArrowAssociation)
