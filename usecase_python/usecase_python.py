@@ -699,6 +699,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     textInserted = QtCore.Signal(QtGui.QGraphicsTextItem)
 
     itemSelected = QtCore.Signal(QtGui.QGraphicsItem)
+    textEndInserted = QtCore.Signal()
 
     elements = []
     
@@ -783,7 +784,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(mouseEvent.scenePos())
-            self.textInserted.emit(textItem)
+            
             # увеличиваем идентификатор
             self.Id = self.Id + 1
             textItem.setId(self.Id)
@@ -838,6 +839,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.line = None
         #после добавления элемента, переходит в состояние перетаскивания
         self.myMode = self.MoveItem
+        self.textEndInserted.emit()
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
         self.update()
 
@@ -859,22 +861,32 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.setSceneRect(QtCore.QRectF(0, 0, 5000, 5000))
         self.scene.itemInserted.connect(self.itemInserted)
         self.scene.textInserted.connect(self.textInserted)
+        self.scene.textEndInserted.connect(self.textEndInserted)
         self.scene.itemSelected.connect(self.itemSelected)
-
         self.createToolbars()
 
         layout = QtGui.QHBoxLayout()
         self.view = QtGui.QGraphicsView(self.scene)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
+        
         layout.addWidget(self.view)
-
+        
         self.widget = QtGui.QWidget()
         self.widget.setLayout(layout)
 
         self.setCentralWidget(self.widget)
-        self.setWindowTitle("Use case diagramm")
+        self.setWindowTitle("UseCaseDiagram")
+        self.pointer.setChecked(True)
+        
         #self.scene.setMode(self.pointerTypeGroup.checkedId())
-
+    def falseChecked(self):
+        self.arrowTotal.setChecked(False)
+        self.arrowComment.setChecked(False)
+        self.arrow.setChecked(False)
+        self.useCaseAction.setChecked(False)
+        self.commentAction.setChecked(False)
+        self.actorAction.setChecked(False)
+        self.pointer.setChecked(False)
     def deleteItem(self):
         for item in self.scene.selectedItems():
             if isinstance(item, ElementDiagramm):
@@ -922,6 +934,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def textInserted(self, item):
         pass
+    def textEndInserted(self):
+        self.falseChecked()
+        self.pointer.setChecked(True)
 
     def sceneScaleChanged(self, scale):
         newScale = int(scale[:-1]) / 100.0
@@ -942,8 +957,16 @@ class MainWindow(QtGui.QMainWindow):
     def itemSelected(self, item):
         pass
     def about(self):
-        QtGui.QMessageBox.about(self, "About Diagram Scene",
-                "The <b>Diagram Scene</b> example shows use of the graphics framework.")
+        QtGui.QMessageBox.about(self, unicode("О программа UseCaseDiagram"),
+                unicode("<p align=\"center\">ВОЛГОГРАДСКИЙ ГОСУДАРСТВЕННЫЙ ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ</p> \
+                <p align=\"center\">ФАКУЛЬТЕТ ЭЛЕКТРОНИКИ И ВЫЧИСЛИТЕЛЬНОЙ ТЕХНИКИ</p>\
+                <p align=\"center\">КАФЕДРА ПРОГРАМНОГО ОБЕСПЕЧЕНИЯ АВТОМАТИЗИРОВАННЫХ СИСТЕМ</p>\
+                <p>UseCaseDiagram - программа построения диагамм \"вариантов использования\"</p>\
+                <p>Авторы:</p>\
+                <p>Дмитриенко Д.В., Ли Е.В., Рашевский Н.М., Синицын А.А.</p>\
+                <p><a href=\"http://code.google.com/p/usecasevstu/\" >http://code.google.com/p/usecasevstu/</a></p>\
+                <p align=\"center\">Волгоград 2011</p>\
+                "))
 
     def createActions(self):
 
@@ -951,30 +974,37 @@ class MainWindow(QtGui.QMainWindow):
                 QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация"),
                 self,triggered = self.toArrowTotal
         )
-
+        self.arrowTotal.setCheckable(True)
         self.arrowComment = QtGui.QAction(
                 QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия"),
                 self,triggered = self.toArrowComment
         )
-
+        self.arrowComment.setCheckable(True)
         self.arrow = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение"),
                 self,triggered = self.toArrow
         )
-
+        self.arrow.setCheckable(True)
         self.useCaseAction = QtGui.QAction(
                 QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования"),
                 self,triggered = self.toUseCase
         )
-
+        self.useCaseAction.setCheckable(True)
         self.actorAction = QtGui.QAction(
                 QtGui.QIcon(':/images/actor.png'), unicode("Участник"),
                 self,triggered = self.toActor
         )
+        self.actorAction.setCheckable(True)
         self.commentAction = QtGui.QAction(
                 QtGui.QIcon(':/images/comment.png'), unicode("Комментарий"),
                 self,triggered = self.toComment
         )
+        self.commentAction.setCheckable(True)
+        self.pointer = QtGui.QAction(
+                QtGui.QIcon(':/images/pointer.png'), unicode("Выбрать"),
+                self,triggered = self.toPointer
+        )
+        self.pointer.setCheckable(True)
         self.createAction = QtGui.QAction( unicode("Создать"),
                 self,triggered = self.toCreateAction
         )
@@ -1050,22 +1080,40 @@ class MainWindow(QtGui.QMainWindow):
     
     def toArrowTotal(self):
         self.scene.setMode(self.scene.InsertArrowAssociation)
+        self.falseChecked()
+        self.arrowTotal.setChecked(True)
+        
     
     def toArrowComment(self):
         self.scene.setMode(self.scene.InsertCommentLine)
+        self.falseChecked()
+        self.arrowComment.setChecked(True)
 
     def toArrow(self):
         self.scene.setMode(self.scene.InsertArrowGeneralization)
+        self.falseChecked()
+        self.arrow.setChecked(True)
 
     def toUseCase(self):
         self.scene.setMode(self.scene.InsertUseCase)
+        self.falseChecked()
+        self.useCaseAction.setChecked(True)
 
     def toActor(self):
         self.scene.setMode(self.scene.InsertActor)
+        self.falseChecked()
+        self.actorAction.setChecked(True)
 
     def toComment(self):
         self.scene.setMode(self.scene.InsertText)
+        self.falseChecked()
+        self.commentAction.setChecked(True)
        
+    def toPointer(self):
+        self.scene.setMode(self.scene.MoveItem)
+        self.falseChecked()
+        self.pointer.setChecked(True)
+        
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл"))
         self.fileMenu.addAction(self.openAction)
@@ -1075,7 +1123,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.saveToPicAction)
         self.fileMenu.addAction(self.exitAction)
 
-        self.itemMenu = self.menuBar().addMenu(unicode("Команды"))
+        self.itemMenu = self.menuBar().addMenu(unicode("Редактирование"))
         self.itemMenu.addAction(self.useCaseAction)
         self.itemMenu.addAction(self.actorAction)
         self.itemMenu.addAction(self.commentAction)
@@ -1091,9 +1139,10 @@ class MainWindow(QtGui.QMainWindow):
         self.aboutMenu.addAction(self.aboutAction)
 
     def createToolbars(self):
-        self.editToolBar = self.addToolBar("Edit")
+        self.editToolBar = self.addToolBar("Редактирование")
         #self.editToolBar.addAction(self.toFrontAction)
         #self.editToolBar.addAction(self.sendBackAction)
+        self.editToolBar.addAction(self.pointer)
         self.editToolBar.addAction(self.useCaseAction)
         self.editToolBar.addAction(self.actorAction)
         self.editToolBar.addAction(self.commentAction)
@@ -1106,8 +1155,9 @@ class MainWindow(QtGui.QMainWindow):
 
         pointerButton = QtGui.QToolButton()
         pointerButton.setCheckable(True)
-        #pointerButton.setChecked(True)
+        pointerButton.setChecked(True)
         pointerButton.setIcon(QtGui.QIcon(':/images/pointer.png'))
+        
         #linePointerButton = QtGui.QToolButton()
         #linePointerButton.setCheckable(True)
         #linePointerButton.setIcon(QtGui.QIcon(':/images/linepointer.png'))
@@ -1123,7 +1173,7 @@ class MainWindow(QtGui.QMainWindow):
         self.sceneScaleCombo.setCurrentIndex(1)
         self.sceneScaleCombo.currentIndexChanged[str].connect(self.sceneScaleChanged)
 
-        self.pointerToolbar = self.addToolBar("Pointer type")
+        self.pointerToolbar = self.addToolBar("Настройки")
         #self.pointerToolbar.addWidget(pointerButton)
         #self.pointerToolbar.addWidget(linePointerButton)
         self.pointerToolbar.addWidget(self.sceneScaleCombo)
