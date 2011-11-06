@@ -1,0 +1,14 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/pointer.png</file>
+    <file>images/linepointer.png</file>
+    <file>images/linepointerwhite.png</file>
+    <file>images/linedottedpointer.png</file>
+    <file>images/delete.png</file>
+    <file>images/actor.png</file>
+	<file>images/usecase.png</file>
+	<file>images/comment.png</file>
+	<file>images/pic.png</file>
+</qresource>
+</RCC>
+
