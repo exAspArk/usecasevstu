@@ -212,12 +212,19 @@ class LineRectCalculation:
         return res
 # базовый класс для класса с картинкой
 class PictureElement(QtGui.QGraphicsPixmapItem):
+    selectedChange = QtCore.Signal(QtGui.QGraphicsItem)
     def __init__(self,fName,parent = None,scene=None):
         super(PictureElement, self).__init__(parent, scene)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable,True)
         self.type = DiagramScene.PictureType
         self.id = -1
         self.setNewPicture(fName)
+    
+    def itemChange(self, change, value):
+        if change == QtGui.QGraphicsItem.ItemSelectedChange:
+            self.selectedChange.emit(self)
+        return value
         
     def setId(self,idN):
         self.id = idN
@@ -578,7 +585,8 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
-            self.selectedChange.emit(self)
+            pass
+            # self.selectedChange.emit(self)
         return value
     
     def setId(self,id):
@@ -847,7 +855,15 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.elements.append(textItem)
         super(DiagramScene, self).mousePressEvent(mouseEvent)
         self.update()
-
+        
+    def addPicture(self,fString):
+        pic = PictureElement(fString)
+        #pic.selectedChange.connect(self.itemSelected)
+        pic.setPos(QtCore.QPointF(0,0))
+        self.Id = self.Id+1
+        pic.setId(self.Id)
+        self.pictures.append(pic)
+        self.addItem(pic)
     def mouseMoveEvent(self, mouseEvent):
         if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
             newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
@@ -1229,17 +1245,11 @@ class MainWindow(QtGui.QMainWindow):
     def toPic(self):
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку"),unicode(""),unicode("picture (*.png)"))
         if fileName:
-            self.clearAll()
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
-            self.scene.picturePath = folders
-            pic = PictureElement(folders)
-            pic.setPos(QtCore.QPointF(0,0))
-            self.scene.Id = self.scene.Id+1
-            pic.setId(self.scene.Id)
-            self.scene.addItem(pic)
-        self.scene.setMode(self.scene.InsertPicture)
+            self.scene.addPicture(folders)
         self.falseChecked()
-        self.picAction.setChecked(True)
+        self.picAction.setChecked(False)
+        self.arrowTotal.setCheckable(True)
        
     def toPointer(self):
         self.scene.setMode(self.scene.MoveItem)
