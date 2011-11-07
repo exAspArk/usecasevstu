@@ -657,7 +657,7 @@ class UseCase(ElementDiagramm):
         
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
-        # painter.drawEllipse(bodyRect)
+        painter.drawEllipse(bodyRect)
         listCoord = bodyRect.getCoords()
         x1 = listCoord[0]
         y1 = listCoord[1]
