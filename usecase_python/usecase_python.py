@@ -989,6 +989,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setCentralWidget(self.widget)
         self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
+        self.setWindowIcon(QtGui.QIcon(':/images/program.png'))
         self.pointer.setChecked(True)
         QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName("UTF-8"));
         
@@ -1314,7 +1315,7 @@ class MainWindow(QtGui.QMainWindow):
        p.end()
   
        img.save(unicode(filename[0]),"png")
-    
+       
     def toArrowTotal(self):
         self.scene.setMode(self.scene.InsertArrowAssociation)
         self.falseChecked()
@@ -1353,7 +1354,7 @@ class MainWindow(QtGui.QMainWindow):
             self.scene.addPicture(folders)
         self.falseChecked()
         self.picAction.setCheckable(True)
-       
+        self.pointer.setChecked(True)
     def toPointer(self):
         self.scene.setMode(self.scene.MoveItem)
         self.falseChecked()
@@ -1361,8 +1362,8 @@ class MainWindow(QtGui.QMainWindow):
         
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
-        self.fileMenu.addAction(self.openAction)
         self.fileMenu.addAction(self.createAction)
+        self.fileMenu.addAction(self.openAction)
         self.fileMenu.addAction(self.saveAction)
         self.fileMenu.addAction(self.saveAsAction)
         self.fileMenu.addAction(self.saveToPicAction)
@@ -1385,7 +1386,7 @@ class MainWindow(QtGui.QMainWindow):
         self.aboutMenu.addAction(self.aboutAction)
         
     def createToolbars(self):
-        self.editToolBar = self.addToolBar("Редактирование")
+        self.editToolBar = self.addToolBar(unicode("Редактирование","UTF-8"))
         #self.editToolBar.addAction(self.toFrontAction)
         #self.editToolBar.addAction(self.sendBackAction)
         self.editToolBar.addAction(self.pointer)
@@ -1420,7 +1421,7 @@ class MainWindow(QtGui.QMainWindow):
         self.sceneScaleCombo.setCurrentIndex(1)
         self.sceneScaleCombo.currentIndexChanged[str].connect(self.sceneScaleChanged)
 
-        self.pointerToolbar = self.addToolBar("Настройки")
+        self.pointerToolbar = self.addToolBar(unicode("Настройки","UTF-8"))
         #self.pointerToolbar.addWidget(pointerButton)
         #self.pointerToolbar.addWidget(linePointerButton)
         self.pointerToolbar.addWidget(self.sceneScaleCombo)
