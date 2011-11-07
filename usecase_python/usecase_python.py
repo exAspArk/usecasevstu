@@ -1079,59 +1079,77 @@ class MainWindow(QtGui.QMainWindow):
                 statusTip="Quit Scenediagram example", triggered=self.close)
         self.aboutAction = QtGui.QAction(unicode("О программе"), self, shortcut="Ctrl+B",
                 triggered=self.about)
-    
+        
+    def clearAll(self):
+        for item in self.scene.elements:
+            item.removeArrows()
+            item.arrows[:]=[]
+            self.scene.elements.remove(item)
+        self.scene.elements[:]=[]
+        for item in self.scene.Arrows:
+            item.removeArrows()
+            item.arrowsComment[:]=[]
+            self.scene.Arrows.remove(item)
+        self.scene.Arrows[:]=[]
+        self.scene.clear()
+        
     def toCreateAction(self):
         print("!!")
+        
     def toOpenAction(self):
-        self.scene.clear()
-        #self.scene.elements().__format__()
-        fileName = "file.data"
-        file = QtCore.QFile(fileName)
-        if file.open(QtCore.QIODevice.ReadWrite) == False:
-            QtGui.QMessageBox.warning(self, 'Application', QtCore.QString('Cannot write file %1:\n%2.').arg(fileName).arg(file.errorString()))
-            return False
-        _out = QtCore.QDataStream(file)
-        count = _out.readInt32()
-        for i in range(count):
-            elem = ElementData()
-            item = elem.read(_out)
-            item.setId(item.id)
-            self.scene.addItem(item)
-            self.scene.elements.append(item)
-        count = _out.readInt32()
-        for i in range(count):
-            elem = ElementData()
-            item = elem.read(_out)
-            e1 = self.scene.getElementsById(item.getIdStart())
-            item.setStartItem(e1)
-            e2 = self.scene.getElementsById(item.getIdEnd())
-            item.setEndItem(e2)
-            e1.addArrow(item)
-            e2.addArrow(item)
-            self.scene.addItem(item)
-            self.scene.Arrows.append(item)
-            item.updatePosition()
-        self.scene.Id = _out.readInt32()
-        file.close()
+        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
+        if fileName:
+            self.clearAll()
+            folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            file = QtCore.QFile(folders)
+            if file.open(QtCore.QIODevice.ReadWrite) == False:
+                QtGui.QMessageBox.warning(self, 'Application', u('Cannot open file.'))
+                return False
+            _out = QtCore.QDataStream(file)
+            count = _out.readInt32()
+            for i in range(count):
+                elem = ElementData()
+                item = elem.read(_out)
+                item.setId(item.id)
+                self.scene.addItem(item)
+                self.scene.elements.append(item)
+            count = _out.readInt32()
+            for i in range(count):
+                elem = ElementData()
+                item = elem.read(_out)
+                e1 = self.scene.getElementsById(item.getIdStart())
+                item.setStartItem(e1)
+                e2 = self.scene.getElementsById(item.getIdEnd())
+                item.setEndItem(e2)
+                e1.addArrow(item)
+                e2.addArrow(item)
+                self.scene.addItem(item)
+                self.scene.Arrows.append(item)
+                item.updatePosition()
+            self.scene.Id = _out.readInt32()
+            file.close()
+            
     def toSaveAction(self):
-        fileName = "file.data"
-        file = QtCore.QFile(fileName)
-        if file.open(QtCore.QIODevice.WriteOnly) == False:
-            QtGui.QMessageBox.warning(self, 'Application', QtCore.QString('Cannot write file %1:\n%2.').arg(fileName).arg(file.errorString()))
-            return False
-        _out = QtCore.QDataStream(file)
-        count = len(self.scene.getElements())
-        _out.writeInt32(count)
-        for i in self.scene.getElements():
-            elem = ElementData(i)
-            _out = elem.save(_out)
-        count = len(self.scene.Arrows)
-        _out.writeUInt32(count)
-        for i in self.scene.Arrows:
-            elem = ElementData(i)
-            _out = elem.save(_out)
-        _out.writeInt32(self.scene.Id)
-        file.close()
+        fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
+        if fileName:
+            folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            file = QtCore.QFile(folders)
+            if file.open(QtCore.QIODevice.WriteOnly) == False:
+                QtGui.QMessageBox.warning(self, 'Application', u'Cannot write file ')
+                return False
+            _out = QtCore.QDataStream(file)
+            count = len(self.scene.getElements())
+            _out.writeInt32(count)
+            for i in self.scene.getElements():
+                elem = ElementData(i)
+                _out = elem.save(_out)
+            count = len(self.scene.Arrows)
+            _out.writeUInt32(count)
+            for i in self.scene.Arrows:
+                elem = ElementData(i)
+                _out = elem.save(_out)
+            _out.writeInt32(self.scene.Id)
+            file.close()
     def toSaveAsAction(self):
         print("!!")
     def toSaveToPicAction(self):
