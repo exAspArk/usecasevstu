@@ -931,8 +931,14 @@ class MainWindow(QtGui.QMainWindow):
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
                 arrow.removeArrows()
-                super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
-                super(ElementDiagramm,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
+                if isinstance(arrow.startItem(),ElementDiagramm):
+                    super(ElementDiagramm,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
+                else:
+                    super(TotalLineDiagram,arrow.startItem()).__thisclass__.removeArrow(arrow.startItem(),arrow)
+                if isinstance(arrow.endItem(),ElementDiagramm):
+                    super(ElementDiagramm,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
+                else:
+                    super(TotalLineDiagram,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
                 self.scene.removeItem(arrow)
     
     def pointerGroupClicked(self, i):
