@@ -16,9 +16,9 @@ VSVersionInfo(
           StringTable(
             '040904b0', 
             [StringStruct('CompanyName', u'CommandBrain'),
-            StringStruct('FileDescription', u'Pain'),
+            StringStruct('FileDescription', u'Programm for create Usecase diagram'),
             StringStruct('FileVersion', '1.0'),
-            StringStruct('LegalCopyright', u'CB'),
+            StringStruct('LegalCopyright', u'CommandBrain'),
             ])
           ]), 
         VarFileInfo([VarStruct('Translation', [1033, 1200])])
