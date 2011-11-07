@@ -1073,7 +1073,7 @@ class MainWindow(QtGui.QMainWindow):
     def itemSelected(self, item):
         pass
     def about(self):
-        QtGui.QMessageBox.about(self, unicode("О программа UseCaseDiagram"),
+        QtGui.QMessageBox.about(self, unicode("О программа UseCaseDiagram","UTF-8"),
                 unicode("<p align=\"center\">ВОЛГОГРАДСКИЙ ГОСУДАРСТВЕННЫЙ ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ</p> \
                 <p align=\"center\">ФАКУЛЬТЕТ ЭЛЕКТРОНИКИ И ВЫЧИСЛИТЕЛЬНОЙ ТЕХНИКИ</p>\
                 <p align=\"center\">КАФЕДРА ПРОГРАМНОГО ОБЕСПЕЧЕНИЯ АВТОМАТИЗИРОВАННЫХ СИСТЕМ</p>\
@@ -1082,63 +1082,63 @@ class MainWindow(QtGui.QMainWindow):
                 <p>Дмитриенко Д.В., Ли Е.В., Рашевский Н.М., Синицын А.А.</p>\
                 <p><a href=\"http://code.google.com/p/usecasevstu/\" >http://code.google.com/p/usecasevstu/</a></p>\
                 <p align=\"center\">Волгоград 2011</p>\
-                "))
+                ","UTF-8"))
 
     def createActions(self):
 
         self.arrowTotal = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация"),
+                QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация","UTF-8"),
                 self,triggered = self.toArrowTotal
         )
         self.arrowTotal.setCheckable(True)
         self.arrowComment = QtGui.QAction(
-                QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия"),
+                QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия","UTF-8"),
                 self,triggered = self.toArrowComment
         )
         self.arrowComment.setCheckable(True)
         self.arrow = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение"),
+                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение","UTF-8"),
                 self,triggered = self.toArrow
         )
         self.arrow.setCheckable(True)
         self.useCaseAction = QtGui.QAction(
-                QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования"),
+                QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования","UTF-8"),
                 self,triggered = self.toUseCase
         )
         self.useCaseAction.setCheckable(True)
         self.actorAction = QtGui.QAction(
-                QtGui.QIcon(':/images/actor.png'), unicode("Участник"),
+                QtGui.QIcon(':/images/actor.png'), unicode("Участник","UTF-8"),
                 self,triggered = self.toActor
         )
         self.actorAction.setCheckable(True)
         self.commentAction = QtGui.QAction(
-                QtGui.QIcon(':/images/comment.png'), unicode("Комментарий"),
+                QtGui.QIcon(':/images/comment.png'), unicode("Комментарий","UTF-8"),
                 self,triggered = self.toComment
         )
         self.commentAction.setCheckable(True)
         self.picAction = QtGui.QAction(
-                QtGui.QIcon(':/images/pic.png'), unicode("Изображение"),
+                QtGui.QIcon(':/images/pic.png'), unicode("Изображение","UTF-8"),
                 self,triggered = self.toPic
         )
         self.picAction.setCheckable(True)
         self.pointer = QtGui.QAction(
-                QtGui.QIcon(':/images/pointer.png'), unicode("Выбрать"),
+                QtGui.QIcon(':/images/pointer.png'), unicode("Выбрать","UTF-8"),
                 self,triggered = self.toPointer
         )
         self.pointer.setCheckable(True)
-        self.createAction = QtGui.QAction( unicode("Создать"),
+        self.createAction = QtGui.QAction( unicode("Создать","UTF-8"),
                 self,triggered = self.toCreateAction
         )
-        self.openAction = QtGui.QAction( unicode("Открыть..."),
+        self.openAction = QtGui.QAction( unicode("Открыть...","UTF-8"),
                 self,triggered = self.toOpenAction
         )
-        self.saveAction = QtGui.QAction( unicode("Сохранить"),
+        self.saveAction = QtGui.QAction( unicode("Сохранить","UTF-8"),
                 self,triggered = self.toSaveAction
         )
-        self.saveAsAction = QtGui.QAction( unicode("Сохранить как..."),
+        self.saveAsAction = QtGui.QAction( unicode("Сохранить как...","UTF-8"),
                 self,triggered = self.toSaveAsAction
         )
-        self.saveToPicAction = QtGui.QAction( unicode("Сохранить в картинку..."),
+        self.saveToPicAction = QtGui.QAction( unicode("Сохранить в картинку...","UTF-8"),
                 self,triggered = self.toSaveToPicAction
         )
         #self.toFrontAction = QtGui.QAction(
@@ -1157,10 +1157,10 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                unicode("Удаление"), self, shortcut="Delete",triggered=self.deleteItem)
-        self.exitAction = QtGui.QAction(unicode("Выход"), self, shortcut="Ctrl+X",
+                unicode("Удаление","UTF-8"), self, shortcut="Delete",triggered=self.deleteItem)
+        self.exitAction = QtGui.QAction(unicode("Выход","UTF-8"), self, shortcut="Ctrl+X",
                 statusTip="Quit Scenediagram example", triggered=self.close)
-        self.aboutAction = QtGui.QAction(unicode("О программе"), self, shortcut="Ctrl+B",
+        self.aboutAction = QtGui.QAction(unicode("О программе","UTF-8"), self, shortcut="Ctrl+B",
                 triggered=self.about)
         
     def clearAll(self):
@@ -1181,7 +1181,7 @@ class MainWindow(QtGui.QMainWindow):
         print("!!")
         
     def toOpenAction(self):
-        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
+        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             self.clearAll()
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
@@ -1221,7 +1221,7 @@ class MainWindow(QtGui.QMainWindow):
             file.close()
             
     def toSaveAction(self):
-        fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
+        fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
             file = QtCore.QFile(folders)
@@ -1249,7 +1249,7 @@ class MainWindow(QtGui.QMainWindow):
     def toSaveAsAction(self):
         print("!!")
     def toSaveToPicAction(self):
-       filename=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в картинку"),unicode(""),unicode("Images (*.png)"))
+       filename=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в картинку","UTF-8"),unicode(""),unicode("Images (*.png)"))
        img = QtGui.QImage(self.scene.width(),self.scene.height(), QtGui.QImage.Format_ARGB32_Premultiplied)
        p = QtGui.QPainter()
        p.begin(img)
@@ -1290,7 +1290,7 @@ class MainWindow(QtGui.QMainWindow):
         self.commentAction.setChecked(True)
         
     def toPic(self):
-        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку"),unicode(""),unicode("picture (*.png)"))
+        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку","UTF-8"),unicode(""),unicode("picture (*.png)"))
         if fileName:
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
             self.scene.addPicture(folders)
@@ -1304,7 +1304,7 @@ class MainWindow(QtGui.QMainWindow):
         self.pointer.setChecked(True)
         
     def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu(unicode("Файл"))
+        self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
         self.fileMenu.addAction(self.openAction)
         self.fileMenu.addAction(self.createAction)
         self.fileMenu.addAction(self.saveAction)
@@ -1312,7 +1312,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.saveToPicAction)
         self.fileMenu.addAction(self.exitAction)
 
-        self.itemMenu = self.menuBar().addMenu(unicode("Редактирование"))
+        self.itemMenu = self.menuBar().addMenu(unicode("Редактирование","UTF-8"))
         self.itemMenu.addAction(self.useCaseAction)
         self.itemMenu.addAction(self.actorAction)
         self.itemMenu.addAction(self.commentAction)
@@ -1325,7 +1325,7 @@ class MainWindow(QtGui.QMainWindow):
         #self.itemMenu.addAction(self.toFrontAction)
         #self.itemMenu.addAction(self.sendBackAction)
 
-        self.aboutMenu = self.menuBar().addMenu(unicode("Помощь"))
+        self.aboutMenu = self.menuBar().addMenu(unicode("Помощь","UTF-8"))
         self.aboutMenu.addAction(self.aboutAction)
 
     def createToolbars(self):
