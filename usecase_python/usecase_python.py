@@ -988,7 +988,7 @@ class MainWindow(QtGui.QMainWindow):
         self.widget.setLayout(layout)
 
         self.setCentralWidget(self.widget)
-        self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма1","UTF-8"))
+        self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
         self.pointer.setChecked(True)
         QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName("UTF-8"));
         
@@ -1208,8 +1208,15 @@ class MainWindow(QtGui.QMainWindow):
         super(MainWindow, self).closeEvent(event)
         
     def toCreateAction(self):
-        print("!!")
-        
+        if self.scene.getChangeFlag()==True and self.askSaveMessage()==True :
+            if self.currentFileName:
+                self.toSave(self.currentFileName)
+            else:
+                self.toSaveAsAction()
+        self.clearAll()
+        self.currentFileName=""
+        self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
+        self.scene.setChangeFlag(False)
     def toOpenAction(self):
         if self.scene.getChangeFlag()==True and self.askSaveMessage()==True:
             self.toSaveAsAction()
@@ -1261,7 +1268,12 @@ class MainWindow(QtGui.QMainWindow):
             self.scene.setChangeFlag(False)
             
     def toSaveAction(self):
-        pass
+        if self.scene.getChangeFlag()==True:
+            if self.currentFileName:
+                self.toSave(self.currentFileName)
+            else:
+                self.toSaveAsAction()
+        self.scene.setChangeFlag(False)
     def toSave(self,path):
         folders = unicode(path.replace("/","\\")).encode('UTF-8')
         file = QtCore.QFile(folders)
