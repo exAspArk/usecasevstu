@@ -989,6 +989,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.removeItem(arrow)
         for pic in self.scene.selectedItems():
             if isinstance(pic, PictureElement):
+                self.scene.pictures.remove(pic)
                 self.scene.removeItem(pic)
     
     def pointerGroupClicked(self, i):
