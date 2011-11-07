@@ -504,8 +504,8 @@ class ArrowAssociation(TotalLineDiagram):
         self.arrowHead.clear()
         
         painter.drawLine(line)
-		painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
-		painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
         if self.isSelected():
             painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
             myLine = QtCore.QLineF(line)
@@ -1221,6 +1221,8 @@ class MainWindow(QtGui.QMainWindow):
             file.close()
             
     def toSaveAction(self):
+        pass
+    def toSaveAsAction(self):
         fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
@@ -1246,8 +1248,6 @@ class MainWindow(QtGui.QMainWindow):
                 _out = elem.save(_out)
             _out.writeInt32(self.scene.Id)
             file.close()
-    def toSaveAsAction(self):
-        print("!!")
     def toSaveToPicAction(self):
        filename=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в картинку","UTF-8"),unicode(""),unicode("Images (*.png)"))
        img = QtGui.QImage(self.scene.width(),self.scene.height(), QtGui.QImage.Format_ARGB32_Premultiplied)
