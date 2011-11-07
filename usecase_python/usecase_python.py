@@ -223,7 +223,7 @@ class PictureElement(QtGui.QGraphicsPixmapItem):
     
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
-            self.selectedChange.emit(self)
+            pass
         return value
         
     def setId(self,idN):
@@ -980,6 +980,9 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     super(TotalLineDiagram,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
                 self.scene.removeItem(arrow)
+        for pic in self.scene.selectedItems():
+            if isinstance(pic, PictureElement):
+                self.scene.removeItem(pic)
     
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
@@ -1139,6 +1142,7 @@ class MainWindow(QtGui.QMainWindow):
             item.removeArrows()
             item.arrowsComment[:]=[]
             self.scene.Arrows.remove(item)
+        self.scene.pictures[:] = []
         self.scene.Arrows[:]=[]
         self.scene.clear()
         
