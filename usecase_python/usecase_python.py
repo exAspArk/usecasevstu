@@ -210,7 +210,30 @@ class LineRectCalculation:
         res = QtCore.QPointF(res_x, res_y)
 
         return res
-
+# базовый класс для класса с картинкой
+class PictureElement(QtGui.QGraphicsPixmapItem):
+    def __init__(self,fName,parent = None,scene=None):
+        super(PictureElement, self).__init__(parent, scene)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+        self.type = DiagramScene.PictureType
+        self.id = -1
+        self.setNewPicture(fName)
+        
+    def setId(self,idN):
+        self.id = idN
+        
+    def getId(self):
+        return self.id
+    
+    def getType(self):
+        return self.type
+    
+    def setNewPicture(self,string):
+        self.fileName = string
+        pixmap = QtGui.QPixmap(self.fileName,'PNG')
+        self.setPixmap(pixmap)
+        self.update()
+    
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
     # типы линий
@@ -715,7 +738,7 @@ class Actor(ElementDiagramm):
 
 class DiagramScene(QtGui.QGraphicsScene):
    
-    ArrowGeneralizationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor  = range(16)
+    PictureType,ArrowGeneralizationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor,InsertPicture  = range(18)
 
     itemInserted = QtCore.Signal(ElementDiagramm)
 
@@ -726,7 +749,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 
     elements = []
     Arrows = []
-    
+    pictures = []
     Id = 0
     
     def __init__(self, itemMenu, parent=None):
@@ -740,6 +763,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myTextColor = QtCore.Qt.black
         self.myLineColor = QtCore.Qt.black
         self.myFont = QtGui.QFont()
+        self.picturePath = ""
 
     def setLineColor(self, color):
         self.myLineColor = color
@@ -1201,8 +1225,19 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.setMode(self.scene.InsertText)
         self.falseChecked()
         self.commentAction.setChecked(True)
+        
     def toPic(self):
-        #self.scene.setMode(self.scene.InsertText)
+        fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку"),unicode(""),unicode("picture (*.png)"))
+        if fileName:
+            self.clearAll()
+            folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            self.scene.picturePath = folders
+            pic = PictureElement(folders)
+            pic.setPos(QtCore.QPointF(0,0))
+            self.scene.Id = self.scene.Id+1
+            pic.setId(self.scene.Id)
+            self.scene.addItem(pic)
+        self.scene.setMode(self.scene.InsertPicture)
         self.falseChecked()
         self.picAction.setChecked(True)
        
