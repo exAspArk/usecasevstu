@@ -24,6 +24,8 @@ class ElementData:
                 self.idEnd = item.endItem().getId()
             elif(isinstance(item,ElementDiagramm)):
                 self.text = item.toPlainText()
+            elif(isinstance(item,PictureElement)):
+                self.fName = item.fileName
     def save(self,stream):
         QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         stream.writeUInt32(self.type)
@@ -33,6 +35,8 @@ class ElementData:
            self.type == DiagramScene.ArrowGeneralizationType):
             stream.writeUInt32 (self.idStart)
             stream.writeUInt32 (self.idEnd)
+        elif(self.type == DiagramScene.PictureType):
+            stream.writeQString(self.fName)
         else:
             stream.writeQString (self.text)
         QtGui.QApplication.restoreOverrideCursor()
@@ -64,6 +68,9 @@ class ElementData:
             idEnd = stream.readInt32()
             item.setIdStart(idStart)
             item.setIdEnd(idEnd)
+        if type == DiagramScene.PictureType:
+            str = stream.readString()
+            item = PictureElement(str)
         item.setId(id)
         item.setPos(pos)
         return item
@@ -1170,6 +1177,13 @@ class MainWindow(QtGui.QMainWindow):
             for i in range(count):
                 elem = ElementData()
                 item = elem.read(_out)
+                item.setId(item.id)
+                self.scene.addItem(item)
+                self.scene.pictures.append(item)
+            count = _out.readInt32()
+            for i in range(count):
+                elem = ElementData()
+                item = elem.read(_out)
                 e1 = self.scene.getElementsById(item.getIdStart())
                 item.setStartItem(e1)
                 e2 = self.scene.getElementsById(item.getIdEnd())
@@ -1194,6 +1208,11 @@ class MainWindow(QtGui.QMainWindow):
             count = len(self.scene.getElements())
             _out.writeInt32(count)
             for i in self.scene.getElements():
+                elem = ElementData(i)
+                _out = elem.save(_out)
+            count = len(self.scene.pictures)
+            _out.writeInt32(count)
+            for i in self.scene.pictures:
                 elem = ElementData(i)
                 _out = elem.save(_out)
             count = len(self.scene.Arrows)
