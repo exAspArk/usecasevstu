@@ -122,43 +122,54 @@ class LineCircleCalculation:
         self.w = circleWidth
         self.h = circleHeight
         self.isVerticalLine = False
-        if self.x3-self.x1 != 0:
-            self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
-            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
-        else:
+        self.isHorizontalLine = False
+        self.dx = 0
+        self.dy = 0
+        self.r = math.sqrt((self.y3-self.y1)*(self.y3-self.y1) + (self.x3-self.x1)*(self.x3-self.x1))
+        if self.x3-self.x1 == 0:
             self.isVerticalLine = True
-
-
-    def checkPoint(self, x, y):
-
-        result = math.sqrt((self.x3-x)*(self.x3-x) + (self.y3-y)*(self.y3-y)) < math.sqrt((self.x3-self.x1)*(self.x3-self.x1) + (self.y3-self.y1)*(self.y3-self.y1))
-
-        return result
+        elif self.y3-self.y1 == 0:
+            self.isHorizontalLine = True
+        else:
+            self.line_k = abs(self.y3-self.y1)/abs(self.x3-self.x1)
+            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
 
     def getResult(self):
 
-        res_x = 0
-        res_y = 0
-
+        res_x = self.x1
+        res_y = self.y1
         if self.isVerticalLine:
-            x2_1 = self.x1
-            x2_2 = self.x1
-            y2_1 = self.y1 + self.h/2
-            y2_2 = self.y1 - self.h/2
+            self.dx = 0
+            self.dy = self.h/2
+            if self.y3 > self.y1:
+                res_y = self.y1 + self.h/2
+            else:
+                res_y = self.y1 - self.h/2
+        elif self.isHorizontalLine:
+            self.dx = self.w/2
+            self.dy = 0
+            if self.x3 > self.x1:
+                res_x = self.x1 + self.w/2
+            else:
+                res_x = self.x1 - self.w/2
         else:
             angle = math.atan(self.line_k)
-            x2_1 = self.x1 + self.w*math.cos(angle)/2
-            y2_1 = self.y1 + self.h*math.sin(angle)/2
-            x2_2 = self.x1 - self.w*math.cos(angle)/2
-            y2_2 = self.y1 - self.h*math.sin(angle)/2
+            self.dy = self.h/2*math.sin(angle)
+            self.dx = self.w/2*math.cos(angle)
 
-        if self.checkPoint(x2_1, y2_1):
-            res_x = x2_1
-            res_y = y2_1
+        if self.y3-self.y1>0 and self.x3-self.x1>0:
+            res_x = self.x1 + self.dx
+            res_y = self.y1 + self.dy
+        elif self.y3-self.y1>0 and self.x3-self.x1<0:
+            res_x = self.x1 - self.dx
+            res_y = self.y1 + self.dy
+        elif self.y3-self.y1<0 and self.x3-self.x1<0:
+            res_x = self.x1 - self.dx
+            res_y = self.y1 - self.dy
+        elif self.y3-self.y1<0 and self.x3-self.x1>0:
+            res_x = self.x1 + self.dx
+            res_y = self.y1 - self.dy
 
-        elif self.checkPoint(x2_2, y2_2):
-            res_x = x2_2
-            res_y = y2_2
 
         res = QtCore.QPointF(res_x, res_y)
 
@@ -166,53 +177,65 @@ class LineCircleCalculation:
 
 class LineRectCalculation:
 
-    def __init__ (self, rectCenter, outerPoint, rectWidth, rectHeight):
+    def __init__(self, circleCenter, outerPoint, circleWidth, circleHeight):
 
-        self.x1 = rectCenter.x()
-        self.y1 = rectCenter.y()
+        self.x1 = circleCenter.x()
+        self.y1 = circleCenter.y()
         self.x3 = outerPoint.x()
         self.y3 = outerPoint.y()
-        self.w = rectWidth
-        self.h = rectHeight
+        self.w = circleWidth
+        self.h = circleHeight
         self.isVerticalLine = False
-        if self.x3-self.x1 != 0:
-            self.line_k = (self.y3-self.y1)/(self.x3-self.x1)
-            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
-        else:
+        self.isHorizontalLine = False
+        self.dx = 0
+        self.dy = 0
+        self.r = math.sqrt((self.y3-self.y1)*(self.y3-self.y1) + (self.x3-self.x1)*(self.x3-self.x1))
+        if self.x3-self.x1 == 0:
             self.isVerticalLine = True
-
-    def checkPoint(self, x, y):
-
-        result = math.sqrt((self.x3-x)*(self.x3-x) + (self.y3-y)*(self.y3-y))
-        return result
+        elif self.y3-self.y1 == 0:
+            self.isHorizontalLine = True
+        else:
+            self.line_k = abs(self.y3-self.y1)/abs(self.x3-self.x1)
+            self.line_b = self.y1 - self.x1*(self.y3-self.y1)/(self.x3-self.x1)
 
     def getResult(self):
-
-        res_x = 0
-        res_y = 0
+        res_y = self.y1
+        res_x = self.x1
         if self.isVerticalLine:
-            xs = (self.x1, self.x1)
-            ys = (self.y1 - self.h/2, self.y1 + self.h/2)
-
+            self.dx = 0
+            self.dy = self.h/2
+            if self.y3 > self.y1:
+                res_y = self.y1 + self.h/2
+            else:
+                res_y = self.y1 - self.h/2
+        elif self.isHorizontalLine:
+            self.dx = self.w/2
+            self.dy = 0
+            if self.x3 > self.x1:
+                res_x = self.x1 + self.w/2
+            else:
+                res_x = self.x1 - self.w/2
         else:
             angle = math.atan(self.line_k)
-            x1 = self.x1
-            w = self.w
-            h = self.h
-            y1 = self.y1
-            xs = (x1 + w/2, x1 + w/2, x1 - w/2, x1 - w/2, x1 + w*math.cos(angle)/2, x1 + w*math.cos(angle)/2, x1 - w*math.cos(angle)/2, x1 - w*math.cos(angle)/2)
-            ys = (y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h*math.sin(angle)/2, y1 - h*math.sin(angle)/2, y1 + h/2, y1 - h/2, y1 + h/2, y1 - h/2)
+            if angle < math.atan(self.h/self.w):
+                self.dy = abs(self.y3-self.y1)*self.w/(2*self.r*math.cos(angle))#self.h/2*math.sin(angle)#
+                self.dx = self.w/2
+            if angle >= math.atan(self.h/self.w):
+                self.dy = self.h/2
+                self.dx = self.r*math.cos(angle)*self.h/(2*abs(self.y3-self.y1))#self.w/2*math.cos(angle)#
+        if self.y3-self.y1>0 and self.x3-self.x1>0:
+            res_x = self.x1 + self.dx
+            res_y = self.y1 + self.dy
+        elif self.y3-self.y1>0 and self.x3-self.x1<0:
+            res_x = self.x1 - self.dx
+            res_y = self.y1 + self.dy
+        elif self.y3-self.y1<0 and self.x3-self.x1<0:
+            res_x = self.x1 - self.dx
+            res_y = self.y1 - self.dy
+        elif self.y3-self.y1<0 and self.x3-self.x1>0:
+            res_x = self.x1 + self.dx
+            res_y = self.y1 - self.dy
 
-        best_res = self.checkPoint(xs[0], ys[0])
-        res_x = xs[0]
-        res_y = ys[0]
-        for i in range(0,xs.__len__(),1):
-
-             if self.checkPoint(xs[i], ys[i]) <= best_res:
-
-                res_x = xs[i]
-                res_y = ys[i]
-                best_res = self.checkPoint(xs[i], ys[i])
 
         res = QtCore.QPointF(res_x, res_y)
 
@@ -374,15 +397,22 @@ class CommentLine(TotalLineDiagram):
         painter.setBrush(self.myColor)
 
         points = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
-        param1 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-        param2 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-        param4 = myStartItem.boundingRect().height()
-        param3 = myStartItem.boundingRect().width()
+        if type(myStartItem) == Comment:
+            param1 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            param2 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            param4 = myStartItem.boundingRect().height()
+            param3 = myStartItem.boundingRect().width()
+            points[1] = param2
+        if type(myEndItem) == Comment :
+            param1 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            param2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            param4 = myEndItem.boundingRect().height()
+            param3 = myEndItem.boundingRect().width()
+            points[1] = param2
+
         calc = LineRectCalculation(param1, param2, param3, param4)
         points[0] = calc.getResult()
-        points[1] = param2
-        centerLine = QtCore.QLineF(points[1], points[0])
-        #centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
+        centerLine = QtCore.QLineF(points[1], points[0])#centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
         
         self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
@@ -434,18 +464,15 @@ class ArrowAssociation(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 1
-        centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-        endPolygon = myEndItem.polygon()
-        p1 = endPolygon.at(180) + myEndItem.pos()
+        calcType = 4
 
-        if myStartItem.type == UseCase.type and myEndItem.type == UseCase.type:
+        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
                 calcType = 1
-        if myStartItem.type == UseCase.type and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
                 calcType = 2
-        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and myEndItem.type == UseCase.type:
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
                 calcType = 3
-        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
                 calcType = 4
 
 
@@ -475,11 +502,10 @@ class ArrowAssociation(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
-        for point in [line.p1(), arrowP1, arrowP2]:
-            self.arrowHead.append(point)
-
+        
         painter.drawLine(line)
-        painter.drawPolygon(self.arrowHead)
+		painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+		painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
         if self.isSelected():
             painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
             myLine = QtCore.QLineF(line)
@@ -518,19 +544,16 @@ class ArrowGeneralization(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 1
-        centerLine = QtCore.QLineF(myStartItem.pos(), myEndItem.pos())
-        endPolygon = myEndItem.polygon()
-        p1 = endPolygon.at(0) + myEndItem.pos()
+        calcType = 4
 
-        if myStartItem.type == UseCase.type and myEndItem.type == UseCase.type:
-             calcType = 1
-        if myStartItem.type == UseCase.type and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
-             calcType = 2
-        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and myEndItem.type == UseCase.type:
-             calcType = 3
-        if (myEndItem.type == Comment.type or myEndItem.type == Actor.type) and (myEndItem.type == Comment.type or myEndItem.type == Actor.type):
-             calcType = 4
+        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
+                calcType = 1
+        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+                calcType = 2
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
+                calcType = 3
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+                calcType = 4
 
         par1 = calcType
         par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
