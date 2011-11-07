@@ -321,9 +321,12 @@ class CommentLine(TotalLineDiagram):
         if self.myStartItem.collidesWithItem(self.myEndItem):
             return
 
-
-        myStartItem = self.myStartItem
-        myEndItem = self.myEndItem
+        if isinstance(self.startItem(),TotalLineDiagram) and isinstance(self.endItem(), Comment):
+           myStartItem = self.myEndItem
+           myEndItem = self.myStartItem
+        else: 
+            myStartItem = self.myStartItem
+            myEndItem = self.myEndItem
         myColor = self.myColor
         myPen = self.pen()
         # отрисовка пунктиром
