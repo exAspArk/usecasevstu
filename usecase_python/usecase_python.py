@@ -963,7 +963,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 
 class MainWindow(QtGui.QMainWindow):
     InsertTextButton = 10
-    
+    currentFileName = ""
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -988,7 +988,7 @@ class MainWindow(QtGui.QMainWindow):
         self.widget.setLayout(layout)
 
         self.setCentralWidget(self.widget)
-        self.setWindowTitle("UseCaseDiagram")
+        self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма1","UTF-8"))
         self.pointer.setChecked(True)
         QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName("UTF-8"));
         
@@ -1201,7 +1201,10 @@ class MainWindow(QtGui.QMainWindow):
             return False
     def closeEvent(self,event):
         if self.scene.getChangeFlag()==True and self.askSaveMessage()==True:
-            self.toSaveAsAction()
+            if self.currentFileName:
+                self.toSave(self.currentFileName)
+            else:
+                self.toSaveAsAction()
         super(MainWindow, self).closeEvent(event)
         
     def toCreateAction(self):
@@ -1252,37 +1255,44 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.Arrows.append(item)
                 item.updatePosition()
             self.scene.Id = _out.readInt32()
+            self.currentFileName=folders
+            self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
             file.close()
             self.scene.setChangeFlag(False)
             
     def toSaveAction(self):
         pass
+    def toSave(self,path):
+        folders = unicode(path.replace("/","\\")).encode('UTF-8')
+        file = QtCore.QFile(folders)
+        if file.open(QtCore.QIODevice.WriteOnly) == False:
+            QtGui.QMessageBox.warning(self, 'Application', u'Cannot write file ')
+            return False
+        _out = QtCore.QDataStream(file)
+        count = len(self.scene.getElements())
+        _out.writeInt32(count)
+        for i in self.scene.getElements():
+            elem = ElementData(i)
+            _out = elem.save(_out)
+        count = len(self.scene.pictures)
+        _out.writeInt32(count)
+        for i in self.scene.pictures:
+            elem = ElementData(i)
+            _out = elem.save(_out)
+        count = len(self.scene.Arrows)
+        _out.writeUInt32(count)
+        for i in self.scene.Arrows:
+            elem = ElementData(i)
+            _out = elem.save(_out)
+        _out.writeInt32(self.scene.Id)
+        self.currentFileName=folders
+        self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
+        file.close()
     def toSaveAsAction(self):
         fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
-            folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
-            file = QtCore.QFile(folders)
-            if file.open(QtCore.QIODevice.WriteOnly) == False:
-                QtGui.QMessageBox.warning(self, 'Application', u'Cannot write file ')
-                return False
-            _out = QtCore.QDataStream(file)
-            count = len(self.scene.getElements())
-            _out.writeInt32(count)
-            for i in self.scene.getElements():
-                 elem = ElementData(i)
-                 _out = elem.save(_out)
-            count = len(self.scene.pictures)
-            _out.writeInt32(count)
-            for i in self.scene.pictures:
-                elem = ElementData(i)
-                _out = elem.save(_out)
-            count = len(self.scene.Arrows)
-            _out.writeUInt32(count)
-            for i in self.scene.Arrows:
-                elem = ElementData(i)
-                _out = elem.save(_out)
-            _out.writeInt32(self.scene.Id)
-            file.close()
+            self.toSave(fileName)
+        self.scene.setChangeFlag(False)
     def toSaveToPicAction(self):
        filename=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в картинку","UTF-8"),unicode(""),unicode("Images (*.png)"))
        img = QtGui.QImage(self.scene.width(),self.scene.height(), QtGui.QImage.Format_ARGB32_Premultiplied)
