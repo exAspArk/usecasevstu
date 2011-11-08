@@ -967,13 +967,13 @@ class DiagramScene(QtGui.QGraphicsScene):
                      endItem.addArrow(arrow)
                      self.Arrows.append(arrow)
                      arrow.updatePosition()
-        else:
-            curitems=self.items()
-            i=0
-            while i < len(curitems)-1:
-                curitems[i].setPos(self.checkPos(curitems[i].scenePos()))
-                i+=1
+        curitems=self.items()
+        i=0
+        while i < len(curitems)-1:
+            curitems[i].setPos(self.checkPos(curitems[i].scenePos()))
+            i+=1
         self.line = None
+        self.changeFlag=True
         #после добавления элемента, переходит в состояние перетаскивания
         self.myMode = self.MoveItem
         self.textEndInserted.emit()
