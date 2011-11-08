@@ -1253,8 +1253,6 @@ class MainWindow(QtGui.QMainWindow):
     def toOpenAction(self):
         if self.scene.getChangeFlag()==True and self.askSaveMessage()==True:
             self.toSaveAsAction()
-        self.clearAll()
-        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             self.clearAll()
