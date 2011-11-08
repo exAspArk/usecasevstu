@@ -602,6 +602,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
 
     selectedChange = QtCore.Signal(QtGui.QGraphicsItem)
 
+    
     def __init__(self, parent=None, scene=None):
         super(ElementDiagramm, self).__init__(parent, scene)
         
@@ -647,6 +648,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             self.setPlainText(string)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
+        
         super(ElementDiagramm, self).focusOutEvent(event)
 
     def mouseDoubleClickEvent(self, event):
@@ -804,6 +806,8 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myFont = QtGui.QFont()
         self.picturePath = ""
         changeFlag=False
+        
+        #self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(100,100,100,255)))
 
     def setLineColor(self, color):
         self.myLineColor = color
@@ -854,6 +858,26 @@ class DiagramScene(QtGui.QGraphicsScene):
             if item.getId() == id:
                 return item
         return None
+    def checkPos (self,pos):
+        currentPos=QtCore.QPointF()
+        currentPos=pos
+        flag=False
+        if currentPos.y()>1000.0:
+            flag=True
+            currentPos.setY(980.0)
+        if currentPos.y()<0.0:
+            flag=True
+            currentPos.setY(20.0)
+        if currentPos.x()>1000.0:
+            flag=True
+            currentPos.setX(980.0)
+        if currentPos.x()<0.0:
+            flag=True
+            currentPos.setX(20.0)
+        return currentPos
+        return flag
+        #currentPos.
+        
     def mousePressEvent(self, mouseEvent):
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
             return
@@ -879,7 +903,7 @@ class DiagramScene(QtGui.QGraphicsScene):
              #   textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
-            textItem.setPos(mouseEvent.scenePos())
+            textItem.setPos(self.checkPos(mouseEvent.scenePos()))
             self.changeFlag=True
             # увеличиваем идентификатор
             self.Id = self.Id + 1
@@ -937,12 +961,18 @@ class DiagramScene(QtGui.QGraphicsScene):
                      self.Id = self.Id + 1
                      arrow.setId(self.Id)
                      arrow.setColor(self.myLineColor)
-                     arrow.setZValue(-1000.0)
+                     arrow.setZValue(10.0)
                      self.addItem(arrow)
                      startItem.addArrow(arrow)
                      endItem.addArrow(arrow)
                      self.Arrows.append(arrow)
                      arrow.updatePosition()
+        else:
+            curitems=self.items()
+            i=0
+            while i < len(curitems)-1:
+                curitems[i].setPos(self.checkPos(curitems[i].scenePos()))
+                i+=1
         self.line = None
         #после добавления элемента, переходит в состояние перетаскивания
         self.myMode = self.MoveItem
@@ -972,6 +1002,7 @@ class MainWindow(QtGui.QMainWindow):
         self.createMenus()
         self.scene = DiagramScene(self.itemMenu)
         self.scene.setSceneRect(QtCore.QRectF(0, 0, 1000, 1000))
+        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
         self.scene.itemInserted.connect(self.itemInserted)
         self.scene.textInserted.connect(self.textInserted)
         self.scene.textEndInserted.connect(self.textEndInserted)
@@ -1215,6 +1246,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.toSaveAsAction()
         self.clearAll()
+        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
         self.currentFileName=""
         self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
         self.scene.setChangeFlag(False)
@@ -1222,9 +1254,11 @@ class MainWindow(QtGui.QMainWindow):
         if self.scene.getChangeFlag()==True and self.askSaveMessage()==True:
             self.toSaveAsAction()
         self.clearAll()
+        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             self.clearAll()
+            self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
             file = QtCore.QFile(folders)
             if file.open(QtCore.QIODevice.ReadWrite) == False:
