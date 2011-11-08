@@ -1060,6 +1060,7 @@ class MainWindow(QtGui.QMainWindow):
             if isinstance(item, ElementDiagramm):
                 item.removeArrows()
                 self.scene.removeItem(item)
+                self.scene.elements.remove(item)
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
                 arrow.removeArrows()
@@ -1072,6 +1073,7 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     super(TotalLineDiagram,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
                 self.scene.removeItem(arrow)
+                self.scene.Arrows.remove(arrow)
         for pic in self.scene.selectedItems():
             if isinstance(pic, PictureElement):
                 self.scene.pictures.remove(pic)
@@ -1286,35 +1288,37 @@ class MainWindow(QtGui.QMainWindow):
             _out = QtCore.QDataStream(file)
             count = _out.readInt32()
             for i in range(count):
-                elem = ElementData()
-                item = elem.read(_out)
-                item.setId(item.id)
-                if item.getType() == 7:
-                    string=item.toPlainText()
-                    string=string.encode("UTF-8")
-                    item.setHtml("<img src=\":/images/actor1.png\" />"+"<p>"+string+"</p>")
-                self.scene.addItem(item)
-                self.scene.elements.append(item)
+                    elem = ElementData()
+                    item = elem.read(_out)
+                    item.setId(item.id)
+                    if item.getType() == 7:
+                        string=item.toPlainText()
+                        string=string.encode("UTF-8")
+                        item.setHtml("<img src=\":/images/actor1.png\" />"+"<p>"+string+"</p>")
+                    self.scene.addItem(item)
+                    self.scene.elements.append(item)
             count = _out.readInt32()
             for i in range(count):
-                elem = ElementData()
-                item = elem.read(_out)
-                item.setId(item.id)
-                self.scene.addItem(item)
-                self.scene.pictures.append(item)
+                    elem = ElementData()
+                    item = elem.read(_out)
+                    item.setId(item.id)
+                    self.scene.addItem(item)
+                    self.scene.pictures.append(item)
             count = _out.readInt32()
             for i in range(count):
-                elem = ElementData()
-                item = elem.read(_out)
-                e1 = self.scene.getElementsById(item.getIdStart())
-                item.setStartItem(e1)
-                e2 = self.scene.getElementsById(item.getIdEnd())
-                item.setEndItem(e2)
-                e1.addArrow(item)
-                e2.addArrow(item)
-                self.scene.addItem(item)
-                self.scene.Arrows.append(item)
-                item.updatePosition()
+                    elem = ElementData()
+                    item = elem.read(_out)
+                    e1 = self.scene.getElementsById(item.getIdStart())
+                    if e1 != None:
+                        item.setStartItem(e1)
+                    e2 = self.scene.getElementsById(item.getIdEnd())
+                    if e2!=None and e1!=None:
+                        item.setEndItem(e2)
+                        e1.addArrow(item)
+                        e2.addArrow(item)
+                        self.scene.addItem(item)
+                        self.scene.Arrows.append(item)
+                        item.updatePosition()
             self.scene.Id = _out.readInt32()
             self.currentFileName=folders
             self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
