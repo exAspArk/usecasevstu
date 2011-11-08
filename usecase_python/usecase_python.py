@@ -928,6 +928,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.line.setLine(newLine)
         elif self.myMode == self.MoveItem:           
             super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+        self.changeFlag=True
         self.update()
 
     def getElements(self):
