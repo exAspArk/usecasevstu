@@ -332,7 +332,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
     def setEndItem(self,item):
         self.myEndItem = item
         
-     def selection(self):
+    def selection(self):
         angle = math.acos(self.line().dx() / self.line().length())
         size = 17
         if self.line().dy() >= 0:
