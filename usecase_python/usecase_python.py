@@ -1294,7 +1294,7 @@ class MainWindow(QtGui.QMainWindow):
                     if item.getType() == 7:
                         string=item.toPlainText()
                         string=string.encode("UTF-8")
-                        item.setHtml("<img src=\":/images/actor1.png\" />"+"<p>"+string+"</p>")
+                        item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
                     self.scene.addItem(item)
                     self.scene.elements.append(item)
             count = _out.readInt32()
