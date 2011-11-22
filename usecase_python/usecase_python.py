@@ -922,7 +922,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
             textItem.setPos(self.checkPos(mouseEvent.scenePos()))
-            self.changeFlag=True
+            #self.changeFlag=True
             # увеличиваем идентификатор
             self.Id = self.Id + 1
             textItem.setId(self.Id)
@@ -945,7 +945,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.line.setLine(newLine)
         elif self.myMode == self.MoveItem:           
             super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-        self.changeFlag=True
+        #self.changeFlag=True
         self.update()
 
     def getElements(self):
@@ -999,12 +999,13 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myMode = self.MoveItem
         self.textEndInserted.emit()
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
+        self.changeFlag=True
         self.update()
 
     def isItemChange(self, type):
         for item in self.selectedItems():
             if isinstance(item, type):
-                self.changeFlag=True
+                #self.changeFlag=True
                 return True
         return False
     def getChangeFlag(self):
