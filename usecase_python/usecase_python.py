@@ -809,7 +809,11 @@ class DiagramScene(QtGui.QGraphicsScene):
     Arrows = []
     pictures = []
     Id = 0
-    changeFlag=False
+    changeFlag = False
+    #высота рабочей области
+    heightWorkPlace = 1000.0
+    #ширина рабочей области
+    widthWorkPlace = 2000.0
     
     def __init__(self, itemMenu, parent=None):
         super(DiagramScene, self).__init__(parent)
@@ -876,22 +880,22 @@ class DiagramScene(QtGui.QGraphicsScene):
             if item.getId() == id:
                 return item
         return None
-    def checkPos (self,pos):
+    def checkPos (self,pos,height=0,width=0):
         currentPos=QtCore.QPointF()
         currentPos=pos
         flag=False
-        if currentPos.y()>1000.0:
+        if currentPos.y()>self.heightWorkPlace-height-1:
             flag=True
-            currentPos.setY(980.0)
-        if currentPos.y()<0.0:
+            currentPos.setY(self.heightWorkPlace-height)
+        if currentPos.y()<0:
             flag=True
-            currentPos.setY(20.0)
-        if currentPos.x()>1000.0:
+            currentPos.setY(0)
+        if currentPos.x()>self.widthWorkPlace-width-1:
             flag=True
-            currentPos.setX(980.0)
-        if currentPos.x()<0.0:
+            currentPos.setX(self.widthWorkPlace-width)
+        if currentPos.x()<0:
             flag=True
-            currentPos.setX(20.0)
+            currentPos.setX(0)
         return currentPos
         return flag
         #currentPos.
@@ -921,7 +925,10 @@ class DiagramScene(QtGui.QGraphicsScene):
              #   textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
             self.addItem(textItem)
             textItem.setDefaultTextColor(self.myTextColor)
-            textItem.setPos(self.checkPos(mouseEvent.scenePos()))
+            itemSize=QtCore.QRectF()
+            itemSize = textItem.boundingRect()
+            if isinstance(textItem,ElementDiagramm):
+                textItem.setPos(self.checkPos(mouseEvent.scenePos(),itemSize.height(),itemSize.width()))
             #self.changeFlag=True
             # увеличиваем идентификатор
             self.Id = self.Id + 1
@@ -988,8 +995,11 @@ class DiagramScene(QtGui.QGraphicsScene):
                      arrow.updatePosition()
         else:
             curitems=self.items()
+            itemSize=QtCore.QRectF()
             for item in curitems:
-                item.setPos(self.checkPos(item.scenePos()))
+                itemSize = item.boundingRect()
+                if isinstance(item,ElementDiagramm)or isinstance(item,PictureElement):
+                    item.setPos(self.checkPos(item.scenePos(),itemSize.height(),itemSize.width()))
                 item.update()
                 if isinstance(item,ElementDiagramm):
                     for arrow in item.arrows:
@@ -1023,8 +1033,8 @@ class MainWindow(QtGui.QMainWindow):
         self.createActions()
         self.createMenus()
         self.scene = DiagramScene(self.itemMenu)
-        self.scene.setSceneRect(QtCore.QRectF(0, 0, 1000, 1000))
-        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
+        self.scene.setSceneRect(QtCore.QRectF(0, 0, self.scene.widthWorkPlace, self.scene.heightWorkPlace))
+        self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
         self.scene.itemInserted.connect(self.itemInserted)
         self.scene.textInserted.connect(self.textInserted)
         self.scene.textEndInserted.connect(self.textEndInserted)
@@ -1270,7 +1280,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.toSaveAsAction()
         self.clearAll()
-        self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
+        self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
         self.currentFileName=""
         self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
         self.scene.setChangeFlag(False)
@@ -1280,7 +1290,7 @@ class MainWindow(QtGui.QMainWindow):
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
         if fileName:
             self.clearAll()
-            self.scene.addRect(0.0,0.0,1000.0,1000.0,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(240,240,240,255)))
+            self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
             file = QtCore.QFile(folders)
             if file.open(QtCore.QIODevice.ReadWrite) == False:
