@@ -736,6 +736,11 @@ class UseCase(ElementDiagramm):
         string=string.center(20)
         self.setPlainText(string)
         
+    # доделать для вида по умолчанию 
+    def boundingRect(self):
+        body = super(UseCase,self).boundingRect()
+        return body
+    
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
         painter.drawEllipse(bodyRect)
