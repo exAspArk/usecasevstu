@@ -1291,7 +1291,11 @@ class MainWindow(QtGui.QMainWindow):
         if fileName:
             self.clearAll()
             self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
+            #ifdef WIN32
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            #else
+            folders = unicode(fileName).encode('UTF-8')
+            #endif
             file = QtCore.QFile(folders)
             if file.open(QtCore.QIODevice.ReadWrite) == False:
                 QtGui.QMessageBox.warning(self, 'Application', u('Cannot open file.'))
@@ -1344,7 +1348,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.toSaveAsAction()
         self.scene.setChangeFlag(False)
     def toSave(self,path):
+        #ifdef WIN32
         folders = unicode(path.replace("/","\\")).encode('UTF-8')
+        #else
+        folders = unicode(path).encode('UTF-8')
+        #endif
         file = QtCore.QFile(folders)
         if file.open(QtCore.QIODevice.WriteOnly) == False:
             QtGui.QMessageBox.warning(self, 'Application', u'Cannot write file ')
