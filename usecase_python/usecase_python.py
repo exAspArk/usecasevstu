@@ -646,7 +646,8 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     lostFocus = QtCore.Signal(QtGui.QGraphicsTextItem)
 
     selectedChange = QtCore.Signal(QtGui.QGraphicsItem)
-
+    
+    diagramChanged = QtCore.Signal()
     
     def __init__(self, parent=None, scene=None):
         super(ElementDiagramm, self).__init__(parent, scene)
@@ -672,6 +673,9 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     def getId(self):
         return self.id
     
+    def focusInEvent(self, event):
+        self.prevStr = self.toPlainText()
+    
     def focusOutEvent(self, event):
         if self.myTypeElement==DiagramScene.UseCaseType or self.myTypeElement==DiagramScene.CommentType:
             #
@@ -692,11 +696,14 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             #выравниваем по центру, если длина меньше 15, то бобавляем пробелы слева и справа
             string=string.center(15)
             self.setPlainText(string)
+            
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
         
         super(ElementDiagramm, self).focusOutEvent(event)
-
+        
+        if(self.prevStr != self.toPlainText()):
+            self.diagramChanged.emit()
     def mouseDoubleClickEvent(self, event):
         if self.textInteractionFlags() == QtCore.Qt.NoTextInteraction:
             self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
@@ -786,7 +793,7 @@ class UseCase(ElementDiagramm):
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
 
-class Actor(ElementDiagramm):
+class Actor(ElementDiagramm):    
     def __init__(self, parent=None, scene=None):
         super(Actor, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.ActorType
@@ -802,6 +809,8 @@ class Actor(ElementDiagramm):
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
     def focusOutEvent(self, event):
+        if(self.prevStr != self.toPlainText()):
+            self.diagramChanged.emit()            
         string=self.toPlainText()
         string=string.encode("UTF-8")
         imgFlag=False
@@ -816,17 +825,17 @@ class Actor(ElementDiagramm):
             i += 1
         #если картинка не найдена вставляем ее в начало
         if imgFlag==False:
-            self.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+            self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">"+string+"</p>")
         #если картинка найдена
         if imgFlag==True and (pos-1)!=0:
             #если картинка без текста
             if len(string)-pos-4<=0:
                 self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">Actor</p>");
             else:
-                self.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string[pos+4:]+"</p>")
+                self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">"+string[pos+4:]+"</p>")
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)        
         self.lostFocus.emit(self)
-
+            
 class DiagramScene(QtGui.QGraphicsScene):
    
     PictureType,ArrowGeneralizationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor,InsertPicture  = range(18)
@@ -944,10 +953,13 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.addItem(self.line)
         elif self.myMode == self.InsertText:
             textItem = Comment()
+            textItem.diagramChanged.connect(self.textElementChanged)
         elif self.myMode == self.InsertUseCase:
             textItem = UseCase()
+            textItem.diagramChanged.connect(self.textElementChanged)
         elif self.myMode == self.InsertActor:
             textItem = Actor()
+            textItem.diagramChanged.connect(self.textElementChanged)
         if self.myMode == self.InsertText or self.myMode == self.InsertUseCase or \
            self.myMode == self.InsertActor:
             textItem.setFont(self.myFont)
@@ -966,11 +978,15 @@ class DiagramScene(QtGui.QGraphicsScene):
             # увеличиваем идентификатор
             self.Id = self.Id + 1
             textItem.setId(self.Id)
-            self.elements.append(textItem)
+            self.elements.append(textItem)            
             self.diagramChanged.emit()
         super(DiagramScene, self).mousePressEvent(mouseEvent)
         self.update()
+        self.pressPos = mouseEvent.scenePos();
         
+    def textElementChanged(self):
+            self.diagramChanged.emit()
+    
     def addPicture(self,fString):
         pic = PictureElement(fString)
         #pic.selectedChange.connect(self.itemSelected)
@@ -1026,13 +1042,17 @@ class DiagramScene(QtGui.QGraphicsScene):
                      endItem.addArrow(arrow)
                      self.Arrows.append(arrow)
                      arrow.updatePosition()
-            self.diagramChanged.emit()
+                     self.diagramChanged.emit()
         else:
             curitems=self.items()
             itemSize=QtCore.QRectF()
+            already = False
             for item in curitems:
                 itemSize = item.boundingRect()
                 if isinstance(item,ElementDiagramm)or isinstance(item,PictureElement):
+                    if (already != True and self.myMode == 11 and self.pressPos != item.scenePos() and self.pressPos != mouseEvent.scenePos()): 
+                        self.diagramChanged.emit()
+                        already = True
                     item.setPos(self.checkPos(item.scenePos(),itemSize.height(),itemSize.width()))
                 item.update()
                 if isinstance(item,ElementDiagramm):
@@ -1119,6 +1139,7 @@ class MainWindow(QtGui.QMainWindow):
             self.currentState = self.currentState + 1
             if(self.currentState == len(self.undoStack)):
                 self.redoAction.setEnabled(False)
+            if(self.currentState > 1):
                 self.undoAction.setEnabled(True)
             
         self.showScenesElements(self.undoStack[self.currentState-1])
