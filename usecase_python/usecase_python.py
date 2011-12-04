@@ -645,25 +645,25 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         return self.id
     
     def focusOutEvent(self, event):
-        #if self.myTypeElement==DiagramScene.UseCaseType or self.myTypeElement==DiagramScene.CommentType:
-        #    #
-        #    string=self.toPlainText()
-        #    string=string.encode("UTF-8")
-        #    i=0
-        #    #ищем и удаляем пробелы в строке справа
-        #    while len(string)>i and string[i]==' ':
-        #        i+=1
-        #    if i!=0:
-        #        string=string[i-1:]
-        #    i=len(string)-1
-        #    #ищем и удаляем пробелы в строке слева
-        #    while i>0 and string[i]==' ':
-        #        i-=1
-        #    if i!=len(string)-1:
-        #        string=string[:i+1]
-        #    #выравниваем по центру, если длина меньше 15, то бобавляем пробелы слева и справа
-        #    string=string.center(15)
-        #    self.setPlainText(string)
+        if self.myTypeElement==DiagramScene.UseCaseType or self.myTypeElement==DiagramScene.CommentType:
+            #
+            string=self.toPlainText()
+            string=string.encode("UTF-8")
+            i=0
+            #ищем и удаляем пробелы в строке справа
+            while len(string)>i and string[i]==' ':
+                i+=1
+            if i!=0:    
+                string=string[i-1:]
+            i=len(string)-1
+            #ищем и удаляем пробелы в строке слева
+            while i>0 and string[i]==' ':
+                i-=1
+            if i!=len(string)-1:    
+                string=string[:i+1]
+            #выравниваем по центру, если длина меньше 15, то бобавляем пробелы слева и справа
+            string=string.center(15)
+            self.setPlainText(string)
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.lostFocus.emit(self)
         
@@ -733,29 +733,14 @@ class UseCase(ElementDiagramm):
         super(UseCase, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.UseCaseType
         string=""
-        #string=string.center(20)
+        string=string.center(20)
         self.setPlainText(string)
         
-    def shape(self):
-        #path = QtGui.QPainterPath()
-        path = super(UseCase, self).shape()
-
-        bodyRect = path.boundingRect()
-        h = bodyRect.height()
-        w = bodyRect.width()
-        if w < 40:
-            w = 40
-        center = bodyRect.center()
-        w1 = w*math.sqrt(2)
-        h1 = h*math.sqrt(2)
-        p1 = QtCore.QPointF(center.x() - w1/2, center.y() - h1/2)
-        p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
-        newBodyRect = QtCore.QRectF(p1,p2)
-        QPloygonF
-        path.addPolygon(QtGui.QPolygonF(newBodyRect))
-        
-        return path
-
+    # доделать для вида по умолчанию 
+    def boundingRect(self):
+        body = super(UseCase,self).boundingRect()
+        return body
+    
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
         painter.drawEllipse(bodyRect)
@@ -767,20 +752,7 @@ class UseCase(ElementDiagramm):
         grad.setColorAt(0.5,QtCore.Qt.yellow)
         grad.setColorAt(0,QtCore.Qt.white)
         _path = QtGui.QPainterPath()
-        #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
-        h = bodyRect.height()
-        w = bodyRect.width()
-        if w < 40:
-            w = 40
-        center = bodyRect.center()
-        angle = math.atan(h/w)
-        w1 = w*math.sqrt(2)
-        h1 = h*math.sqrt(2)
-        p1 = QtCore.QPointF(center.x() - w1/2, center.y() - h1/2)
-        p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
-        newBodyRect = QtCore.QRectF(p1,p2)
-        _path.addEllipse(newBodyRect)
-
+        _path.addEllipse(bodyRect)
         painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
@@ -837,6 +809,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 
     itemSelected = QtCore.Signal(QtGui.QGraphicsItem)
     textEndInserted = QtCore.Signal()
+    diagramChanged = QtCore.Signal()
 
     elements = []
     Arrows = []
@@ -962,7 +935,6 @@ class DiagramScene(QtGui.QGraphicsScene):
             itemSize = textItem.boundingRect()
             if isinstance(textItem,ElementDiagramm):
                 textItem.setPos(self.checkPos(mouseEvent.scenePos(),itemSize.height(),itemSize.width()))
-            #self.changeFlag=True
             # увеличиваем идентификатор
             self.Id = self.Id + 1
             textItem.setId(self.Id)
@@ -972,7 +944,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         
     def addPicture(self,fString):
         pic = PictureElement(fString)
-        self.changeFlag=True
+        self.diagramChanged.emit()
         #pic.selectedChange.connect(self.itemSelected)
         pic.setPos(QtCore.QPointF(0,0))
         self.Id = self.Id+1
@@ -985,7 +957,6 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.line.setLine(newLine)
         elif self.myMode == self.MoveItem:           
             super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-        #self.changeFlag=True
         self.update()
 
     def getElements(self):
@@ -1042,13 +1013,12 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myMode = self.MoveItem
         self.textEndInserted.emit()
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
-        self.changeFlag=True
+        self.diagramChanged.emit()
         self.update()
 
     def isItemChange(self, type):
         for item in self.selectedItems():
             if isinstance(item, type):
-                #self.changeFlag=True
                 return True
         return False
     def getChangeFlag(self):
@@ -1071,6 +1041,7 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.itemInserted.connect(self.itemInserted)
         self.scene.textInserted.connect(self.textInserted)
         self.scene.textEndInserted.connect(self.textEndInserted)
+        self.scene.diagramChanged.connect(self.diagramChanged)
         self.scene.itemSelected.connect(self.itemSelected)
         self.createToolbars()
 
@@ -1161,7 +1132,12 @@ class MainWindow(QtGui.QMainWindow):
     def textEndInserted(self):
         self.falseChecked()
         self.pointer.setChecked(True)
-
+    def diagramChanged(self):
+        self.scene.setChangeFlag(True)
+        if self.currentFileName != "":
+            self.setWindowTitle(unicode("UseCaseDiagram - " + self.currentFileName + " *","UTF-8"))
+        else:
+             self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма *","UTF-8"))           
     def sceneScaleChanged(self, scale):
         newScale = int(scale[:-1]) / 100.0
         oldMatrix = self.view.matrix()
@@ -1324,7 +1300,11 @@ class MainWindow(QtGui.QMainWindow):
         if fileName:
             self.clearAll()
             self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
+            #ifdef WIN32
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            #else
+            folders = unicode(fileName).encode('UTF-8')
+            #endif
             file = QtCore.QFile(folders)
             if file.open(QtCore.QIODevice.ReadWrite) == False:
                 QtGui.QMessageBox.warning(self, 'Application', u('Cannot open file.'))
@@ -1377,7 +1357,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.toSaveAsAction()
         self.scene.setChangeFlag(False)
     def toSave(self,path):
+        #ifdef WIN32
         folders = unicode(path.replace("/","\\")).encode('UTF-8')
+        #else
+        folders = unicode(path).encode('UTF-8')
+        #endif
         file = QtCore.QFile(folders)
         if file.open(QtCore.QIODevice.WriteOnly) == False:
             QtGui.QMessageBox.warning(self, 'Application', u'Cannot write file ')
