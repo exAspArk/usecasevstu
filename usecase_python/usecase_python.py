@@ -11,7 +11,7 @@ import math
 import diagramscene_rc
 
 # класс для элемента для хранение в файле
-class ElementData:
+class ElementData:    
     def __init__(self,item=None):
         if item!=None:
             self.point = item.scenePos()
@@ -24,6 +24,7 @@ class ElementData:
                 self.text = item.toPlainText()
             elif(isinstance(item,PictureElement)):
                 self.fName = item.fileName
+                
     def save(self,stream):
         QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         stream.writeUInt32(self.type)
@@ -39,6 +40,7 @@ class ElementData:
             stream.writeQString (self.text)
         QtGui.QApplication.restoreOverrideCursor()
         return stream
+    
     def read(self,stream):
         type = stream.readInt32()
         id = stream.readInt32()
@@ -71,6 +73,32 @@ class ElementData:
             item = PictureElement(str)
         item.setId(id)
         item.setPos(pos)
+        return item
+    
+    def getItem(self):
+        if self.type == DiagramScene.ActorType or self.type == DiagramScene.CommentType \
+                or self.type == DiagramScene.UseCaseType:
+            if self.type == DiagramScene.ActorType:
+                item = Actor()
+            elif self.type == DiagramScene.CommentType:
+                item = Comment()
+            elif self.type == DiagramScene.UseCaseType:
+                item = UseCase()
+            item.setPlainText(self.text)
+        if self.type == DiagramScene.CommentLineType or self.type == DiagramScene.ArrowAssociationType \
+                or self.type == DiagramScene.ArrowGeneralizationType:
+            if self.type == DiagramScene.CommentLineType:
+                item = CommentLine()
+            elif self.type == DiagramScene.ArrowAssociationType:
+                item = ArrowAssociation()
+            elif self.type == DiagramScene.ArrowGeneralizationType:
+                item = ArrowGeneralization()
+            item.setIdStart(self.idStart)
+            item.setIdEnd(self.idEnd)
+        if self.type == DiagramScene.PictureType:
+            item = PictureElement(self.text)
+        item.setId(self.id)
+        item.setPos(self.point)
         return item
             
 def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
@@ -939,18 +967,19 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.Id = self.Id + 1
             textItem.setId(self.Id)
             self.elements.append(textItem)
+            self.diagramChanged.emit()
         super(DiagramScene, self).mousePressEvent(mouseEvent)
         self.update()
         
     def addPicture(self,fString):
         pic = PictureElement(fString)
-        self.diagramChanged.emit()
         #pic.selectedChange.connect(self.itemSelected)
         pic.setPos(QtCore.QPointF(0,0))
         self.Id = self.Id+1
         pic.setId(self.Id)
         self.pictures.append(pic)
         self.addItem(pic)
+        self.diagramChanged.emit()
     def mouseMoveEvent(self, mouseEvent):
         if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
             newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
@@ -997,6 +1026,7 @@ class DiagramScene(QtGui.QGraphicsScene):
                      endItem.addArrow(arrow)
                      self.Arrows.append(arrow)
                      arrow.updatePosition()
+            self.diagramChanged.emit()
         else:
             curitems=self.items()
             itemSize=QtCore.QRectF()
@@ -1013,7 +1043,6 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myMode = self.MoveItem
         self.textEndInserted.emit()
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
-        self.diagramChanged.emit()
         self.update()
 
     def isItemChange(self, type):
@@ -1027,9 +1056,9 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.changeFlag=flag
 
 class MainWindow(QtGui.QMainWindow):
-    InsertTextButton = 10
     currentFileName = ""
-    undoStack = [];
+    undoStack = []
+    currentState = 0
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -1061,6 +1090,8 @@ class MainWindow(QtGui.QMainWindow):
         self.pointer.setChecked(True)
         QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName("UTF-8"));
         
+        self.saveScenesElements()
+        
         #self.scene.setMode(self.pointerTypeGroup.checkedId())
     def falseChecked(self):
         self.arrowTotal.setChecked(False)
@@ -1073,17 +1104,108 @@ class MainWindow(QtGui.QMainWindow):
         self.pointer.setChecked(False)
         
     def undo(self):
-        a = 3
+        self.scene.setChangeFlag(True)
+        if(self.currentState > 1):
+            self.currentState = self.currentState - 1
+            self.redoAction.setEnabled(True)
+            if(self.currentState == 1):
+                self.undoAction.setEnabled(False)
+                         
+        self.showScenesElements(self.undoStack[self.currentState-1] )
         
     def redo(self):
-        b = 2
+        self.scene.setChangeFlag(True)
+        if(self.currentState < len(self.undoStack)): 
+            self.currentState = self.currentState + 1
+            if(self.currentState == len(self.undoStack)):
+                self.redoAction.setEnabled(False)
+                self.undoAction.setEnabled(True)
+            
+        self.showScenesElements(self.undoStack[self.currentState-1])
         
+    def saveScenesElements(self):
+        sceneElements = []
+        
+        elements = []
+        pictures = []
+        arraws = []
+        
+        for i in self.scene.getElements():
+            elements.append(ElementData(i)) 
+        for i in self.scene.pictures:
+            pictures.append(ElementData(i))
+        for i in self.scene.Arrows:
+            arraws.append(ElementData(i))
+            
+        sceneElements.append(elements)
+        sceneElements.append(pictures)
+        sceneElements.append(arraws)
+        sceneElements.append(self.scene.Id)
+        
+        i = self.currentState
+        while(i < len(self.undoStack)):
+            self.undoStack.pop()
+        self.undoStack.append(sceneElements)
+        
+        self.currentState = len(self.undoStack)
+
+        if(self.currentState == len(self.undoStack)):
+            self.redoAction.setEnabled(False) 
+        if(self.currentState > 1):
+            self.undoAction.setEnabled(True)
+        else:
+            self.undoAction.setEnabled(False)
+
+    def cleanScenesElements(self):
+        for i in self.undoStack:
+            self.undoStack.pop()
+        self.currentState = 0
+
+    def showScenesElements(self,sceneElements):
+        self.clearAll()
+        self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
+
+        elements = sceneElements[0]
+        pictures = sceneElements[1]
+        arraws = sceneElements[2]
+        self.scene.Id = sceneElements[3]
+            
+        for i in range(len(elements)):
+                item = elements[i].getItem()
+                item.setId(item.id)
+                if item.getType() == 7:
+                    string=item.toPlainText()
+                    string=string.encode("UTF-8")
+                    item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                self.scene.addItem(item)
+                self.scene.elements.append(item)
+        for i in range(len(pictures)):
+                item = pictures[i].getItem()
+                item.setId(item.id)
+                self.scene.addItem(item)
+                self.scene.pictures.append(item)
+        for i in range(len(arraws)):
+                item = arraws[i].getItem()
+                e1 = self.scene.getElementsById(item.getIdStart())
+                if e1 != None:
+                    item.setStartItem(e1)
+                e2 = self.scene.getElementsById(item.getIdEnd())
+                if e2!=None and e1!=None:
+                    item.setEndItem(e2)
+                    e1.addArrow(item)
+                    e2.addArrow(item)
+                    self.scene.addItem(item)
+                    self.scene.Arrows.append(item)
+                    item.updatePosition()
+            
     def deleteItem(self):
+        isDeleted = False
         for item in self.scene.selectedItems():
             if isinstance(item, ElementDiagramm):
                 item.removeArrows()
                 self.scene.removeItem(item)
                 self.scene.elements.remove(item)
+                isDeleted = True
         for arrow in self.scene.selectedItems():
             if isinstance(arrow, TotalLineDiagram):
                 arrow.removeArrows()
@@ -1097,11 +1219,15 @@ class MainWindow(QtGui.QMainWindow):
                     super(TotalLineDiagram,arrow.endItem()).__thisclass__.removeArrow(arrow.endItem(),arrow)
                 self.scene.removeItem(arrow)
                 self.scene.Arrows.remove(arrow)
+                isDeleted = True
         for pic in self.scene.selectedItems():
             if isinstance(pic, PictureElement):
                 self.scene.pictures.remove(pic)
                 self.scene.removeItem(pic)
-    
+                isDeleted = True
+        if(isDeleted == True):
+            self.diagramChanged()
+            
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
 
@@ -1140,12 +1266,15 @@ class MainWindow(QtGui.QMainWindow):
     def textEndInserted(self):
         self.falseChecked()
         self.pointer.setChecked(True)
+        #self.diagramChanged()
     def diagramChanged(self):
         self.scene.setChangeFlag(True)
         if self.currentFileName != "":
             self.setWindowTitle(unicode("UseCaseDiagram - " + self.currentFileName + " *","UTF-8"))
         else:
-             self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма *","UTF-8"))           
+             self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма *","UTF-8"))
+        self.saveScenesElements()
+        
     def sceneScaleChanged(self, scale):
         newScale = int(scale[:-1]) / 100.0
         oldMatrix = self.view.matrix()
@@ -1253,10 +1382,12 @@ class MainWindow(QtGui.QMainWindow):
         
         self.undoAction = QtGui.QAction(QtGui.QIcon(':/images/undo.png'),
                             unicode("Отменить действие","UTF-8"), self, shortcut="Ctrl+Z",triggered=self.undo)
-                
-        self.redoAction = QtGui.QAction(QtGui.QIcon(':/images/redo.png'),
-                            unicode("Вернуть действие","UTF-8"), self, shortcut="Ctrl+Y",triggered=self.redo)
+        self.undoAction.setEnabled(False)
         
+        self.redoAction = QtGui.QAction(QtGui.QIcon(':/images/redo.png'),
+                            unicode("Вернуть действие","UTF-8"), self, shortcut="Ctrl+Shift+Z",triggered=self.redo)
+        self.redoAction.setEnabled(False)
+
         self.exitAction = QtGui.QAction(unicode("Выход","UTF-8"), self, shortcut="Ctrl+Q",
                 statusTip="Quit Scenediagram example", triggered=self.close)
         self.aboutAction = QtGui.QAction(unicode("О программе","UTF-8"), self, shortcut="Ctrl+B",
@@ -1308,6 +1439,8 @@ class MainWindow(QtGui.QMainWindow):
         self.currentFileName=""
         self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма","UTF-8"))
         self.scene.setChangeFlag(False)
+        self.cleanScenesElements()
+        self.saveScenesElements()
     def toOpenAction(self):
         if self.scene.getChangeFlag()==True and self.askSaveMessage()==True:
             self.toSaveAsAction()
@@ -1363,7 +1496,8 @@ class MainWindow(QtGui.QMainWindow):
             self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
             file.close()
             self.scene.setChangeFlag(False)
-            
+            self.cleanScenesElements()
+            self.saveScenesElements()
     def toSaveAction(self):
         if self.scene.getChangeFlag()==True:
             if self.currentFileName:
@@ -1371,6 +1505,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.toSaveAsAction()
         self.scene.setChangeFlag(False)
+        
     def toSave(self,path):
         #ifdef WIN32
         folders = unicode(path.replace("/","\\")).encode('UTF-8')
