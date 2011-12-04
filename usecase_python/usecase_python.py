@@ -820,7 +820,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     heightWorkPlace = 1000.0
     #ширина рабочей области
     widthWorkPlace = 2000.0
-    
+        
     def __init__(self, itemMenu, parent=None):
         super(DiagramScene, self).__init__(parent)
 
@@ -1029,6 +1029,7 @@ class DiagramScene(QtGui.QGraphicsScene):
 class MainWindow(QtGui.QMainWindow):
     InsertTextButton = 10
     currentFileName = ""
+    undoStack = [];
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -1070,6 +1071,13 @@ class MainWindow(QtGui.QMainWindow):
         self.actorAction.setChecked(False)
         self.picAction.setChecked(False)
         self.pointer.setChecked(False)
+        
+    def undo(self):
+        a = 3
+        
+    def redo(self):
+        b = 2
+        
     def deleteItem(self):
         for item in self.scene.selectedItems():
             if isinstance(item, ElementDiagramm):
@@ -1172,58 +1180,58 @@ class MainWindow(QtGui.QMainWindow):
 
         self.arrowTotal = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointer.png'), unicode("Ассоциация","UTF-8"),
-                self,triggered = self.toArrowTotal
+                self,shortcut="Ctrl+6",triggered = self.toArrowTotal
         )
         self.arrowTotal.setCheckable(True)
         self.arrowComment = QtGui.QAction(
                 QtGui.QIcon(':/images/linedottedpointer.png'), unicode("Пунктирная линия","UTF-8"),
-                self,triggered = self.toArrowComment
+                self,shortcut="Ctrl+8",triggered = self.toArrowComment
         )
         self.arrowComment.setCheckable(True)
         self.arrow = QtGui.QAction(
                 QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Обобщение","UTF-8"),
-                self,triggered = self.toArrow
+                self,shortcut="Ctrl+7",triggered = self.toArrow
         )
         self.arrow.setCheckable(True)
         self.useCaseAction = QtGui.QAction(
                 QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования","UTF-8"),
-                self,triggered = self.toUseCase
+                self,shortcut="Ctrl+2",triggered = self.toUseCase
         )
         self.useCaseAction.setCheckable(True)
         self.actorAction = QtGui.QAction(
                 QtGui.QIcon(':/images/actor.png'), unicode("Участник","UTF-8"),
-                self,triggered = self.toActor
+                self,shortcut="Ctrl+3",triggered = self.toActor
         )
         self.actorAction.setCheckable(True)
         self.commentAction = QtGui.QAction(
                 QtGui.QIcon(':/images/comment.png'), unicode("Комментарий","UTF-8"),
-                self,triggered = self.toComment
+                self,shortcut="Ctrl+4",triggered = self.toComment
         )
         self.commentAction.setCheckable(True)
         self.picAction = QtGui.QAction(
                 QtGui.QIcon(':/images/pic.png'), unicode("Изображение","UTF-8"),
-                self,triggered = self.toPic
+                self,shortcut="Ctrl+5",triggered = self.toPic
         )
         self.picAction.setCheckable(True)
         self.pointer = QtGui.QAction(
                 QtGui.QIcon(':/images/pointer.png'), unicode("Выбрать","UTF-8"),
-                self,triggered = self.toPointer
+                self,shortcut="Ctrl+1",triggered = self.toPointer
         )
         self.pointer.setCheckable(True)
         self.createAction = QtGui.QAction( unicode("Создать","UTF-8"),
-                self,triggered = self.toCreateAction
+                self,shortcut="Ctrl+N",triggered = self.toCreateAction
         )
         self.openAction = QtGui.QAction( unicode("Открыть...","UTF-8"),
-                self,triggered = self.toOpenAction
+                self,shortcut="Ctrl+O",triggered = self.toOpenAction
         )
         self.saveAction = QtGui.QAction( unicode("Сохранить","UTF-8"),
-                self,triggered = self.toSaveAction
+                self,shortcut="Ctrl+S",triggered = self.toSaveAction
         )
         self.saveAsAction = QtGui.QAction( unicode("Сохранить как...","UTF-8"),
-                self,triggered = self.toSaveAsAction
+                self,shortcut="Ctrl+Shift+S",triggered = self.toSaveAsAction
         )
         self.saveToPicAction = QtGui.QAction( unicode("Сохранить в картинку...","UTF-8"),
-                self,triggered = self.toSaveToPicAction
+                self,shortcut="Ctrl+I",triggered = self.toSaveToPicAction
         )
         #self.toFrontAction = QtGui.QAction(
         #        QtGui.QIcon(':/images/bringtofront.png'), "Bring to &Front",
@@ -1241,8 +1249,15 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                unicode("Удаление","UTF-8"), self, shortcut="Delete",triggered=self.deleteItem)
-        self.exitAction = QtGui.QAction(unicode("Выход","UTF-8"), self, shortcut="Ctrl+X",
+                unicode("Удаление","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
+        
+        self.undoAction = QtGui.QAction(QtGui.QIcon(':/images/undo.png'),
+                            unicode("Отменить действие","UTF-8"), self, shortcut="Ctrl+Z",triggered=self.undo)
+                
+        self.redoAction = QtGui.QAction(QtGui.QIcon(':/images/redo.png'),
+                            unicode("Вернуть действие","UTF-8"), self, shortcut="Ctrl+Y",triggered=self.redo)
+        
+        self.exitAction = QtGui.QAction(unicode("Выход","UTF-8"), self, shortcut="Ctrl+Q",
                 statusTip="Quit Scenediagram example", triggered=self.close)
         self.aboutAction = QtGui.QAction(unicode("О программе","UTF-8"), self, shortcut="Ctrl+B",
                 triggered=self.about)
@@ -1449,12 +1464,17 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
         self.fileMenu.addAction(self.createAction)
         self.fileMenu.addAction(self.openAction)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.saveAction)
         self.fileMenu.addAction(self.saveAsAction)
         self.fileMenu.addAction(self.saveToPicAction)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
 
         self.itemMenu = self.menuBar().addMenu(unicode("Редактирование","UTF-8"))
+        self.itemMenu.addAction(self.undoAction)
+        self.itemMenu.addAction(self.redoAction)
+        self.itemMenu.addSeparator()
         self.itemMenu.addAction(self.useCaseAction)
         self.itemMenu.addAction(self.actorAction)
         self.itemMenu.addAction(self.commentAction)
@@ -1484,8 +1504,10 @@ class MainWindow(QtGui.QMainWindow):
         self.editToolBar.addAction(self.arrowComment)
         self.editToolBar.addAction(self.deleteAction)
         
-
-
+        self.editToolBar.addSeparator()
+        self.editToolBar.addAction(self.undoAction)
+        self.editToolBar.addAction(self.redoAction)
+ 
         pointerButton = QtGui.QToolButton()
         pointerButton.setCheckable(True)
         pointerButton.setChecked(True)

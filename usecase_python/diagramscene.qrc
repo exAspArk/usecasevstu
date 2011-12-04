@@ -11,5 +11,7 @@
         <file>images/comment.png</file>
         <file>images/pic.png</file>
         <file>images/usecase.png</file>
+        <file>images/undo.png</file>
+        <file>images/redo.png</file>
     </qresource>
 </RCC>
