@@ -96,7 +96,7 @@ class ElementData:
             item.setIdStart(self.idStart)
             item.setIdEnd(self.idEnd)
         if self.type == DiagramScene.PictureType:
-            item = PictureElement(self.text)
+            item = PictureElement(self.fName)
         item.setId(self.id)
         item.setPos(self.point)
         return item
@@ -944,6 +944,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         #currentPos.
         
     def mousePressEvent(self, mouseEvent):
+        self.pressed = True
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
             return
         if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine:
@@ -997,17 +998,19 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.addItem(pic)
         self.diagramChanged.emit()
     def mouseMoveEvent(self, mouseEvent):
-        if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
-            newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
-            self.line.setLine(newLine)
-        elif self.myMode == self.MoveItem:           
-            super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-        self.update()
+        if self.pressed == True:
+            if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
+                newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
+                self.line.setLine(newLine)
+            elif self.myMode == self.MoveItem:           
+                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+            self.update()
 
     def getElements(self):
         return self.elements
     
     def mouseReleaseEvent(self, mouseEvent):
+        self.pressed = False
         if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
             startItems = self.items(self.line.line().p1())
             if len(startItems) and startItems[0] == self.line:
@@ -1606,7 +1609,11 @@ class MainWindow(QtGui.QMainWindow):
     def toPic(self):
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку","UTF-8"),unicode(""),unicode("picture (*.png)"))
         if fileName:
+            #ifdef WIN32
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            #else
+            folders = unicode(fileName).encode('UTF-8')
+            #endif
             self.scene.addPicture(folders)
         self.falseChecked()
         self.picAction.setCheckable(True)
