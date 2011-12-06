@@ -1,17 +1,16 @@
-<RCC>
-    <qresource prefix="/">
-        <file>images/pointer.png</file>
-        <file>images/linepointer.png</file>
-        <file>images/linepointerwhite.png</file>
-        <file>images/linedottedpointer.png</file>
-        <file>images/delete.png</file>
-        <file>images/actor.png</file>
-        <file>images/actor1.png</file>
-        <file>images/program.png</file>
-        <file>images/comment.png</file>
-        <file>images/pic.png</file>
-        <file>images/usecase.png</file>
-        <file>images/undo.png</file>
-        <file>images/redo.png</file>
-    </qresource>
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/pointer.png</file>
+    <file>images/linepointer.png</file>
+    <file>images/linepointerwhite.png</file>
+    <file>images/linedottedpointer.png</file>
+    <file>images/delete.png</file>
+    <file>images/actor.png</file>
+    <file>images/actor1.png</file>
+    <file>images/program.png</file>
+	<file>images/usecase.png</file>
+	<file>images/comment.png</file>
+	<file>images/pic.png</file>
+</qresource>
 </RCC>
+
