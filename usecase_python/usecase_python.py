@@ -512,27 +512,48 @@ class ArrowAssociation(TotalLineDiagram):
         calcType = 4
 
         if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-                calcType = 1
+            calcType = 1
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.wideRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.wideRect().height()
+
+
         if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-                calcType = 2
+            calcType = 2
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.boundingRect().height()
+
         if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-                calcType = 3
+            calcType = 3
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
         if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-                calcType = 4
+            calcType = 4
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
 
 
 
         par1 = calcType
-        par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-        par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-        par4 = myStartItem.boundingRect().width()
-        par5 = myEndItem.boundingRect().width()
-        par6 = myStartItem.boundingRect().height()
-        par7 = myEndItem.boundingRect().height()
         points = getPoints(par1,par2,par3,par4,par5,par6,par7)
 
         centerLine = QtCore.QLineF(points[1], points[0])
-
 
         self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
@@ -558,6 +579,7 @@ class ArrowAssociation(TotalLineDiagram):
             painter.drawLine(myLine)
             myLine.translate(0,-8.0)
             painter.drawLine(myLine)
+			
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
 
@@ -694,7 +716,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
             if i!=len(string)-1:    
                 string=string[:i+1]
             #выравниваем по центру, если длина меньше 15, то бобавляем пробелы слева и справа
-            string=string.center(15)
+            #string=string.center(15)
             self.setPlainText(string)
             
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
@@ -768,7 +790,7 @@ class UseCase(ElementDiagramm):
         super(UseCase, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.UseCaseType
         string=""
-        string=string.center(20)
+        #string=string.center(20)
         self.setPlainText(string)
         
     # доделать для вида по умолчанию 
@@ -776,6 +798,22 @@ class UseCase(ElementDiagramm):
         body = super(UseCase,self).boundingRect()
         return body
     
+    def wideRect (self):
+        bodyRect = self.boundingRect()
+        #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
+        h = bodyRect.height()
+        w = bodyRect.width()
+        if w < 40:
+            w = 40
+        center = bodyRect.center()
+        angle = math.atan(h/w)
+        w1 = w*math.sqrt(2)
+        h1 = h*math.sqrt(2)
+        p1 = QtCore.QPointF(center.x() - w1/2, center.y() - h1/2)
+        p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
+        newBodyRect = QtCore.QRectF(p1,p2)
+        return newBodyRect
+        
     def paint(self, painter, option, widget=None):
         bodyRect = self.boundingRect()
         painter.drawEllipse(bodyRect)
@@ -787,7 +825,20 @@ class UseCase(ElementDiagramm):
         grad.setColorAt(0.5,QtCore.Qt.yellow)
         grad.setColorAt(0,QtCore.Qt.white)
         _path = QtGui.QPainterPath()
-        _path.addEllipse(bodyRect)
+        #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
+        h = bodyRect.height()
+        w = bodyRect.width()
+        if w < 40:
+            w = 40
+        center = bodyRect.center()
+        angle = math.atan(h/w)
+        w1 = w*math.sqrt(2)
+        h1 = h*math.sqrt(2)
+        p1 = QtCore.QPointF(center.x() - w1/2, center.y() - h1/2)
+        p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
+        newBodyRect = QtCore.QRectF(p1,p2)
+        _path.addEllipse(newBodyRect)
+
         painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
