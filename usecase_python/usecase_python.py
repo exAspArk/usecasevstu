@@ -1464,7 +1464,130 @@ class MainWindow(QtGui.QMainWindow):
                 statusTip="Quit Scenediagram example", triggered=self.close)
         self.aboutAction = QtGui.QAction(unicode("О программе","UTF-8"), self, shortcut="Ctrl+B",
                 triggered=self.about)
-        
+        self.copyAction = QtGui.QAction(unicode("Копировать","UTF-8"), self, shortcut="Ctrl+C", triggered=self.toCopy)
+        self.pasteAction = QtGui.QAction(unicode("Вставить","UTF-8"), self, shortcut="Ctrl+V", triggered=self.toPaste)
+    def toCopy(self):
+        copyStr = ""
+        mostLeft = self.scene.widthWorkPlace
+        mostTop = self.scene.heightWorkPlace
+        mostLeftId = 0
+        mostTopId = 0
+        listLineNode=[]
+        listLine=[]
+        listNotLineElem = []
+        #проверяем нет ли линий без вершин и определяем самый левый и верхний элемент из выделенных
+        for item in self.scene.selectedItems():
+            if isinstance(item,TotalLineDiagram):
+                listLine.append(item.getId())
+                listLineNode.append(item.startItem().getId())
+                listLineNode.append(item.endItem().getId())
+            if isinstance(item,ElementDiagramm) or isinstance(item,PictureElement):
+                listNotLineElem.append(item.getId())
+                if mostLeft > item.x():
+                    mostLeft = item.x()
+                    mostLeftId = item.getId()
+                if mostTop > item.y():
+                    mostTop = item.y()
+                    mostTopId = item.getId()
+        for i in listLineNode:
+            buf = i in listNotLineElem
+            if buf == False:
+                #если есть стрелка без вершины, то вывод сообщения
+                msgBox = QtGui.QMessageBox()
+                msgBox.setText(unicode("Error","UTF-8"))
+                msgBox.setIcon(QtGui.QMessageBox.Warning)
+                saveButton = msgBox.addButton(unicode("Ok","UTF-8"),QtGui.QMessageBox.YesRole)
+                msgBox.exec_()
+                return
+        copyStr = copyStr + "D_U_C_P"  #код программы
+        copyStr = copyStr + ":;:"      #разделители
+        copyStr = copyStr + str(len(self.scene.selectedItems())) #кол-во выделенных элементов
+        copyStr = copyStr + ":;:"
+        copyStr = copyStr + str(len(listNotLineElem)) #кол-во выделенных элементов
+        copyStr = copyStr + ":;:"
+        # записываем элементы не линии
+        for i in listNotLineElem:
+            copyStr = copyStr + str(self.scene.getElementsById(i).getType())
+            copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(i)
+            copyStr = copyStr + ":;:"
+            if isinstance(self.scene.getElementsById(i),PictureElement):
+                copyStr = copyStr + "1"
+                copyStr = copyStr + ":;:"
+                copyStr = copyStr + self.scene.getElementsById(i).fileName# !!!!!!!!!!!подумать на счет файла
+            else:
+                copyStr = copyStr + "0"
+                copyStr = copyStr + ":;:"
+                copyStr = copyStr + self.scene.getElementsById(i).toPlainText()
+            copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(self.scene.getElementsById(i).x() - mostLeft)
+            copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(self.scene.getElementsById(i).y() - mostTop)
+            copyStr = copyStr + ":;:"
+        for i in listLine:
+            copyStr = copyStr + str(self.scene.getElementsById(i).getType())
+            copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(self.scene.getElementsById(i).startItem().getId())
+            copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(self.scene.getElementsById(i).endItem().getId())
+            copyStr = copyStr + ":;:"
+        myClipBoard = QtGui.QApplication.clipboard()
+        myClipBoard.setText(copyStr)
+    def toPaste(self):
+        myClipBoard = QtGui.QApplication.clipboard()
+        pasteStr=myClipBoard.text()
+        pasteList = pasteStr.split(":;:")
+        if pasteList[0]=="D_U_C_P":
+            lastId = dict(a=0)
+            i = 0
+            while i < int(pasteList[2]):
+                if int(pasteList[3+i*6]) == DiagramScene.ActorType:
+                    item = Actor()
+                elif int(pasteList[3+i*6]) == DiagramScene.CommentType:
+                    item = Comment()
+                elif int(pasteList[3+i*6]) == DiagramScene.UseCaseType:
+                    item = UseCase()
+                item.setPos(QtCore.QPointF(float(pasteList[7+i*6]),float(pasteList[8+i*6])))
+                item.setPlainText(pasteList[6+i*6])
+                self.scene.Id = self.scene.Id + 1
+                item.setId(self.scene.Id)
+                lastId[int(pasteList[4+i*6])] = self.scene.Id
+                if item.getType() == 7:
+                    string=item.toPlainText()
+                    string=string.encode("UTF-8")
+                    item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                self.scene.addItem(item)
+                self.scene.elements.append(item)
+                
+                i=i+1
+            i = 0
+            while i < int(pasteList[1])-int(pasteList[2]):
+                
+                type = int(pasteList[3+int(pasteList[2])*6])
+                
+                if type == DiagramScene.CommentLineType:
+                    item = CommentLine()
+                elif type == DiagramScene.ArrowAssociationType:
+                    item = ArrowAssociation()
+                elif type == DiagramScene.ArrowGeneralizationType:
+                    item = ArrowGeneralization()
+                item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*3])])
+                item.setIdEnd(lastId[int(pasteList[5+int(pasteList[2])*6 + i*3])])
+                
+
+                e1 = self.scene.getElementsById(item.getIdStart())
+                if e1 != None:
+                    item.setStartItem(e1)
+                e2 = self.scene.getElementsById(item.getIdEnd())
+                if e2!=None and e1!=None:
+                    item.setEndItem(e2)
+                    e1.addArrow(item)
+                    e2.addArrow(item)
+                    self.scene.addItem(item)
+                    self.scene.Arrows.append(item)
+                    item.updatePosition()
+
+                i=i+1
     def clearAll(self):
         for item in self.scene.elements:
             item.removeArrows()
@@ -1671,6 +1794,9 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
         self.fileMenu.addAction(self.createAction)
         self.fileMenu.addAction(self.openAction)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.copyAction)
+        self.fileMenu.addAction(self.pasteAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.saveAction)
         self.fileMenu.addAction(self.saveAsAction)
