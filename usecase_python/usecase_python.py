@@ -679,6 +679,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         self.myTypeElement = DiagramScene.NonType
         self.arrows = []
         self.id = -1
+        self.doCopy = True
     def countArrows(self):
         print self.arrows
         
@@ -843,7 +844,10 @@ class UseCase(ElementDiagramm):
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
-
+    def copy(self):
+        new = UseCase()
+        new.setPlainText(self.toPlainText())
+        return new
 class Actor(ElementDiagramm):    
     def __init__(self, parent=None, scene=None):
         super(Actor, self).__init__(parent, scene)
@@ -908,7 +912,6 @@ class DiagramScene(QtGui.QGraphicsScene):
     heightWorkPlace = 1000.0
     #ширина рабочей области
     widthWorkPlace = 2000.0
-        
     def __init__(self, itemMenu, parent=None):
         super(DiagramScene, self).__init__(parent)
 
@@ -922,7 +925,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myFont = QtGui.QFont()
         self.picturePath = ""
         changeFlag=False
-        
+        self.doMove = True
         #self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(100,100,100,255)))
 
     def setLineColor(self, color):
@@ -1013,28 +1016,29 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.diagramChanged.connect(self.textElementChanged)
         if self.myMode == self.InsertText or self.myMode == self.InsertUseCase or \
            self.myMode == self.InsertActor:
-            textItem.setFont(self.myFont)
-            textItem.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
-            textItem.setZValue(1000.0)
-            textItem.lostFocus.connect(self.editorLostFocus)
-            textItem.selectedChange.connect(self.itemSelected)
-            #if self.myMode == self.InsertActor:
-             #   textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
-            self.addItem(textItem)
-            textItem.setDefaultTextColor(self.myTextColor)
-            itemSize=QtCore.QRectF()
-            itemSize = textItem.boundingRect()
-            if isinstance(textItem,ElementDiagramm):
-                textItem.setPos(self.checkPos(mouseEvent.scenePos(),itemSize.height(),itemSize.width()))
-            # увеличиваем идентификатор
-            self.Id = self.Id + 1
-            textItem.setId(self.Id)
-            self.elements.append(textItem)            
-            self.diagramChanged.emit()
+            self.initTextItem(textItem, mouseEvent.scenePos())
         super(DiagramScene, self).mousePressEvent(mouseEvent)
         self.update()
         self.pressPos = mouseEvent.scenePos();
-        
+    def initTextItem(self,textItem,pos):
+        textItem.setFont(self.myFont)
+        textItem.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+        textItem.setZValue(1000.0)
+        textItem.lostFocus.connect(self.editorLostFocus)
+        textItem.selectedChange.connect(self.itemSelected)
+        #if self.myMode == self.InsertActor:
+         #   textItem.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        self.addItem(textItem)
+        textItem.setDefaultTextColor(self.myTextColor)
+        itemSize=QtCore.QRectF()
+        itemSize = textItem.boundingRect()
+        if isinstance(textItem,ElementDiagramm):
+            textItem.setPos(self.checkPos(pos,itemSize.height(),itemSize.width()))
+        # увеличиваем идентификатор
+        self.Id = self.Id + 1
+        textItem.setId(self.Id)
+        self.elements.append(textItem)            
+        self.diagramChanged.emit()
     def textElementChanged(self):
             self.diagramChanged.emit()
     
@@ -1051,8 +1055,18 @@ class DiagramScene(QtGui.QGraphicsScene):
         if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
             newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
             self.line.setLine(newLine)
-        elif self.myMode == self.MoveItem:           
-            super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+        elif self.myMode == self.MoveItem:
+            if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:         
+                for item in self.selectedItems():
+                    c = item.copy()
+                    c.doCopy = False
+                    item.doCopy = False
+                    item.setSelected(False)
+                    self.initTextItem(c, item.scenePos())
+                    c.setSelected(True)
+                    self.doMove = False
+            else:
+                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
         self.update()
 
     def getElements(self):
@@ -1114,6 +1128,8 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.myMode = self.MoveItem
         self.textEndInserted.emit()
         super(DiagramScene, self).mouseReleaseEvent(mouseEvent)
+        if self.doMove == False:
+            self.doMove = True
         self.update()
 
     def isItemChange(self, type):
