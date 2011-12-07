@@ -312,7 +312,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          self.myColor = QtCore.Qt.black
          self.setPen(QtGui.QPen(self.myColor, 2, QtCore.Qt.SolidLine,
                QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-         self.arrowsComment = []
+         self.arrows = []
          self.id = -1
          self.type = DiagramScene.NonType
 
@@ -400,16 +400,16 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         return QtGui.QPolygonF(self.boundingRect())
 
     def addArrow(self,item):
-        self.arrowsComment.append(item)
+        self.arrows.append(item)
 
     def removeArrow(self,arrow):
         try:
-            self.arrowsComment.remove(arrow)
+            self.arrows.remove(arrow)
         except ValueError:
             pass
          
     def removeArrows(self):
-        for arrow in self.arrowsComment[:]:
+        for arrow in self.arrows[:]:
             arrow.startItem().removeArrow(arrow)
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
@@ -1637,7 +1637,7 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.elements[:]=[]
         for item in self.scene.Arrows:
             item.removeArrows()
-            item.arrowsComment[:]=[]
+            item.arrows[:]=[]
             self.scene.Arrows.remove(item)
         self.scene.pictures[:] = []
         self.scene.Arrows[:]=[]
