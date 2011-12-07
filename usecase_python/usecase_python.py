@@ -388,8 +388,14 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
     # определяет для начала и конца стрелки нужно ли её рисовать
     # return true - если нужно, false - если не нужно отрисовывать
     def isValid(self):
-        pass
-    
+        count = 0
+        for itemStart in self.startItem().arrows:
+            for itemEnd in self.endItem().arrows:
+                if itemStart == itemEnd:
+                    count = count + 1
+                    if count == 1:
+                        return False
+        return True
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
 
@@ -419,7 +425,7 @@ class CommentLine(TotalLineDiagram):
             isinstance(self.endItem(), TotalLineDiagram))) or \
             ((isinstance(self.startItem(), TotalLineDiagram) and \
             isinstance(self.endItem(), Comment)))):
-            return True
+            return super(CommentLine,self).isValid()
         else: return False
 
     def paint(self, painter, option, widget=None):
@@ -487,13 +493,13 @@ class ArrowAssociation(TotalLineDiagram):
             isinstance(self.endItem(), UseCase)) or \
             (isinstance(self.startItem(), UseCase) and \
             isinstance(self.endItem(), Actor))):
-            return True
+            return super(ArrowAssociation,self).isValid()
         elif ((isinstance(self.startItem(),Actor) and \
             isinstance(self.endItem(), Actor))):
-            return True
+            return super(ArrowAssociation,self).isValid()
         elif ((isinstance(self.startItem(),UseCase) and \
             isinstance(self.endItem(), UseCase))):
-            return True
+            return super(ArrowAssociation,self).isValid()
         else: return False
 
     def paint(self, painter, option, widget=None):
@@ -595,7 +601,7 @@ class ArrowGeneralization(TotalLineDiagram):
             isinstance(self.endItem(), Actor)) or \
             (isinstance(self.startItem(), UseCase) and \
             isinstance(self.endItem(), UseCase))):
-            return True
+            return super(ArrowGeneralization,self).isValid()
         else: return False
     
     def paint(self, painter, option, widget=None):
