@@ -413,6 +413,10 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
             arrow.startItem().removeArrow(arrow)
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
+    def startAndEndSelected(self):
+        self.startItem().isSelected()
+        
+        
          
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
@@ -588,6 +592,10 @@ class ArrowAssociation(TotalLineDiagram):
 			
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
+     
+    def copy(self):
+        new = ArrowAssociation()
+        return new
 
 
 # класс для отрисовки стрелки обобщения
@@ -1073,7 +1081,6 @@ class DiagramScene(QtGui.QGraphicsScene):
             if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
                 newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
                 self.line.setLine(newLine)
-                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
                     for item in self.selectedItems():
