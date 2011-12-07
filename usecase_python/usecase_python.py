@@ -315,7 +315,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
          self.arrows = []
          self.id = -1
          self.type = DiagramScene.NonType
-
+         self.doCopy = True
     def boundingRect(self):
         extra = (self.pen().width() + 20) / 2.0
         p1 = self.line().p1()
@@ -1025,6 +1025,9 @@ class ArrowGeneralization(TotalLineDiagram):
             painter.drawLine(myLine)
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
+    def copy(self):
+         new = ArrowGeneralization()
+         return new
 
 class ElementDiagramm(QtGui.QGraphicsTextItem):
 
@@ -1300,7 +1303,6 @@ class DiagramScene(QtGui.QGraphicsScene):
         changeFlag=False
         self.doMove = True
         #self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(100,100,100,255)))
-
     def setLineColor(self, color):
         self.myLineColor = color
         if self.isItemChange(Arrow):
@@ -1432,13 +1434,40 @@ class DiagramScene(QtGui.QGraphicsScene):
                 self.line.setLine(newLine)
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
-                    for item in self.selectedItems():
-                        c = item.copy()
-                        c.doCopy = False
-                        item.doCopy = False
-                        self.initTextItem(c, item.scenePos())
-                        c.setSelected(False)
-                        self.doMove = False
+                    items = self.selectedItems()
+                    items.sort()
+                    for item in items:
+                        if isinstance(item, ElementDiagramm):
+                            c = item.copy()
+                            c.doCopy = False
+                            item.doCopy = False
+                            self.initTextItem(c, item.scenePos())
+                            c.setSelected(False)
+                            self.doMove = False
+                        elif isinstance(item, TotalLineDiagram):
+                            if item.startItem().isSelected() and item.endItem().isSelected():
+                                c = item.copy()
+                                itemS = None
+                                itemE = None
+                                for i in self.selectedItems(item.startItem().boundingRect()):
+                                    if item.startItem() != i and isinstance(i, ElementDiagramm):
+                                        itemS = i
+                                        break
+                                for i in self.selectedItems(item.endItem().boundingRect()):
+                                    if item.endItem() != i and isinstance(i, ElementDiagramm):
+                                        itemE = i
+                                        break
+                                if itemE!=None and itemS!=None:
+                                    self.initArrow(c)
+                                    c.setSelected(False)
+                                    c.setStartItem(itemS)
+                                    c.setEndItem(itemE)
+                                    self.addItem(c)
+                                    self.Arrows.append(c)
+                                    arrow.updatePosition()
+                                    self.diagramChanged.emit()
+                                    self.doMove = False
+                                    
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
 
@@ -1472,10 +1501,7 @@ class DiagramScene(QtGui.QGraphicsScene):
                      arrow = ArrowGeneralization(startItem,endItem)
             
                 if arrow.isValid():
-                     self.Id = self.Id + 1
-                     arrow.setId(self.Id)
-                     arrow.setColor(self.myLineColor)
-                     arrow.setZValue(10.0)
+                     self.initArrow(arrow)
                      self.addItem(arrow)
                      startItem.addArrow(arrow)
                      endItem.addArrow(arrow)
@@ -1505,7 +1531,11 @@ class DiagramScene(QtGui.QGraphicsScene):
         if self.doMove == False:
             self.doMove = True
         self.update()
-
+    def initArrow(self,arrow):
+        self.Id = self.Id + 1
+        arrow.setId(self.Id)
+        arrow.setColor(self.myLineColor)
+        arrow.setZValue(10.0)
     def isItemChange(self, type):
         for item in self.selectedItems():
             if isinstance(item, type):
@@ -1538,6 +1568,7 @@ class MainWindow(QtGui.QMainWindow):
 
         layout = QtGui.QHBoxLayout()
         self.view = QtGui.QGraphicsView(self.scene)
+        self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
         
         layout.addWidget(self.view)
