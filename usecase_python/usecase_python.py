@@ -486,6 +486,240 @@ class CommentLine(TotalLineDiagram):
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
 
+# клас для стрелки агрегации (с ромбом)
+class AgregationLine(TotalLineDiagram):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
+        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.CommentLineType
+
+    def isValid(self):
+        if(((isinstance(self.startItem(),Comment) and \
+            isinstance(self.endItem(), TotalLineDiagram))) or \
+            ((isinstance(self.startItem(), TotalLineDiagram) and \
+            isinstance(self.endItem(), Comment)))):
+            return super(CommentLine,self).isValid()
+        else: return False
+
+    def paint(self, painter, option, widget=None):
+        if (self.myStartItem.collidesWithItem(self.myEndItem)):
+            return
+
+        myStartItem = self.myStartItem
+        myEndItem = self.myEndItem
+        myColor = self.myColor
+        myPen = self.pen()
+        myPen.setColor(self.myColor)
+        arrowSize = 10.0
+        painter.setPen(myPen)
+        painter.setBrush(self.myColor)
+
+        calcType = 4
+
+        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
+            calcType = 1
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.wideRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.wideRect().height()
+
+
+        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 2
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
+            calcType = 3
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 4
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+
+
+        par1 = calcType
+        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+
+        centerLine = QtCore.QLineF(points[1], points[0])
+
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
+        line = self.line()
+
+        angle = math.acos(line.dx() / line.length())
+        if line.dy() >= 0:
+            angle = (math.pi * 2.0) - angle
+
+        arrowP1 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi / 3) * arrowSize)
+        arrowP2 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
+        arrowP3 = arrowP1 + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
+
+        arrowP4 = arrowP2 + QtCore.QPointF(math.sin(angle + math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi / 3) * arrowSize)
+        
+        self.arrowHead.clear()
+        
+        painter.drawLine(line)
+        #painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        #painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        #painter.drawLine(QtCore.QLineF(arrowP1, arrowP3))
+        #painter.drawLine(QtCore.QLineF(arrowP2, arrowP4))
+        
+        for point in [line.p1(), arrowP1, arrowP3, arrowP4, arrowP2, line.p1()]:
+            self.arrowHead.append(point)
+        painter.setBrush(QtCore.Qt.white)
+        #painter.drawLine(line)
+        painter.drawPolygon(self.arrowHead)
+
+        
+        if self.isSelected():
+            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
+            myLine = QtCore.QLineF(line)
+            myLine.translate(0, 4.0)
+            painter.drawLine(myLine)
+            myLine.translate(0,-8.0)
+            painter.drawLine(myLine)
+
+    def polygon(self):
+         return QtGui.QPolygonF(self.boundingRect())
+		 
+		 
+		 
+# клас для отрисовки линии include
+class IncludeLine(TotalLineDiagram):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
+        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.CommentLineType
+
+    def isValid(self):
+        if(((isinstance(self.startItem(),Comment) and \
+            isinstance(self.endItem(), TotalLineDiagram))) or \
+            ((isinstance(self.startItem(), TotalLineDiagram) and \
+            isinstance(self.endItem(), Comment)))):
+            return super(CommentLine,self).isValid()
+        else: return False
+
+    def paint(self, painter, option, widget=None):
+        if (self.myStartItem.collidesWithItem(self.myEndItem)):
+            return
+
+        myStartItem = self.myStartItem
+        myEndItem = self.myEndItem
+        myColor = self.myColor
+        myPen = self.pen()
+        myPen.setColor(self.myColor)
+        arrowSize = 7.0
+        painter.setPen(myPen)
+        painter.setBrush(self.myColor)
+
+        calcType = 4
+
+        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
+            calcType = 1
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.wideRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.wideRect().height()
+
+
+        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 2
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
+            calcType = 3
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 4
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+
+
+        par1 = calcType
+        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+
+        centerLine = QtCore.QLineF(points[1], points[0])
+
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
+        line = self.line()
+
+        angle = math.acos(line.dx() / line.length())
+        if line.dy() >= 0:
+            angle = (math.pi * 2.0) - angle
+
+        arrowP1 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi / 3) * arrowSize)
+        arrowP2 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
+
+        self.arrowHead.clear()
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        myPen.setStyle(QtCore.Qt.DotLine)
+        painter.setPen(myPen)
+        painter.drawLine(line)
+        
+        lineText = "<< include >>"
+        line2 = QtCore.QLineF(line)
+        line2.setLength(line2.length()/2.0)
+        centerPoint = line2.p2()
+        centerPoint.setX(centerPoint.x() - len(lineText)*3)
+        if angle>= 2*math.pi*7.0/8.0 or angle <= math.pi/6 or angle<=math.pi*8.0/7.0 and angle>=math.pi*7.0/8.0:
+            centerPoint.setY(centerPoint.y()  - 7)
+                
+        painter.drawText(centerPoint, lineText)#QtCore.QPointF(line.p1().x() + line.dx()/2.0, line.p1().y() - line.dy()/2.0), lineText)
+        
+        
+        
+        if self.isSelected():
+            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
+            myLine = QtCore.QLineF(line)
+            myLine.translate(0, 4.0)
+            painter.drawLine(myLine)
+            myLine.translate(0,-8.0)
+            painter.drawLine(myLine)
+
+    def polygon(self):
+         return QtGui.QPolygonF(self.boundingRect())		 
+		 
+
 # класс для отрисовки стрелки ассоциации
 class ArrowAssociation(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
@@ -597,7 +831,122 @@ class ArrowAssociation(TotalLineDiagram):
         new = ArrowAssociation()
         return new
 
+# клас для отрисовки линии extend
+class ExtendLine(TotalLineDiagram):
+    def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
+        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.CommentLineType
 
+    def isValid(self):
+        if(((isinstance(self.startItem(),Comment) and \
+            isinstance(self.endItem(), TotalLineDiagram))) or \
+            ((isinstance(self.startItem(), TotalLineDiagram) and \
+            isinstance(self.endItem(), Comment)))):
+            return super(CommentLine,self).isValid()
+        else: return False
+
+    def paint(self, painter, option, widget=None):
+        if (self.myStartItem.collidesWithItem(self.myEndItem)):
+            return
+
+        myStartItem = self.myStartItem
+        myEndItem = self.myEndItem
+        myColor = self.myColor
+        myPen = self.pen()
+        myPen.setColor(self.myColor)
+        arrowSize = 7.0
+        painter.setPen(myPen)
+        painter.setBrush(self.myColor)
+
+        calcType = 4
+
+        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
+            calcType = 1
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.wideRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.wideRect().height()
+
+
+        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 2
+            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.wideRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.wideRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
+            calcType = 3
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
+            calcType = 4
+            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
+            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
+            par4 = myStartItem.boundingRect().width()
+            par5 = myEndItem.boundingRect().width()
+            par6 = myStartItem.boundingRect().height()
+            par7 = myEndItem.boundingRect().height()
+
+
+
+        par1 = calcType
+        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+
+        centerLine = QtCore.QLineF(points[1], points[0])
+
+        self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
+        line = self.line()
+
+        angle = math.acos(line.dx() / line.length())
+        if line.dy() >= 0:
+            angle = (math.pi * 2.0) - angle
+
+        arrowP1 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi / 3) * arrowSize)
+        arrowP2 = line.p1() + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3.0) * arrowSize,
+                                        math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
+
+        self.arrowHead.clear()
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        myPen.setStyle(QtCore.Qt.DotLine)
+        painter.setPen(myPen)
+        painter.drawLine(line)
+        
+        lineText = "<< extend >>"
+        line2 = QtCore.QLineF(line)
+        line2.setLength(line2.length()/2.0)
+        centerPoint = line2.p2()
+        centerPoint.setX(centerPoint.x() - len(lineText)*3)
+        if angle>= 2*math.pi*7.0/8.0 or angle <= math.pi/6 or angle<=math.pi*8.0/7.0 and angle>=math.pi*7.0/8.0:
+            centerPoint.setY(centerPoint.y()  - 7)
+                
+        painter.drawText(centerPoint, lineText)#QtCore.QPointF(line.p1().x() + line.dx()/2.0, line.p1().y() - line.dy()/2.0), lineText)
+        
+        
+        
+        if self.isSelected():
+            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
+            myLine = QtCore.QLineF(line)
+            myLine.translate(0, 4.0)
+            painter.drawLine(myLine)
+            myLine.translate(0,-8.0)
+            painter.drawLine(myLine)
+
+    def polygon(self):
+         return QtGui.QPolygonF(self.boundingRect())
+
+		
 # класс для отрисовки стрелки обобщения
 class ArrowGeneralization(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
