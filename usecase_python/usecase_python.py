@@ -96,7 +96,7 @@ class ElementData:
             item.setIdStart(self.idStart)
             item.setIdEnd(self.idEnd)
         if self.type == DiagramScene.PictureType:
-            item = PictureElement(self.text)
+            item = PictureElement(self.fName)
         item.setId(self.id)
         item.setPos(self.point)
         return item
@@ -848,7 +848,9 @@ class UseCase(ElementDiagramm):
         new = UseCase()
         new.setPlainText(self.toPlainText())
         return new
-class Actor(ElementDiagramm):    
+class Actor(ElementDiagramm):
+    actorChanged = QtCore.Signal()
+          
     def __init__(self, parent=None, scene=None):
         super(Actor, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.ActorType
@@ -865,7 +867,7 @@ class Actor(ElementDiagramm):
         return QtGui.QPolygonF(self.boundingRect())
     def focusOutEvent(self, event):
         if(self.prevStr != self.toPlainText()):
-            self.diagramChanged.emit()            
+            self.actorChanged.emit()            
         string=self.toPlainText()
         string=string.encode("UTF-8")
         imgFlag=False
@@ -998,6 +1000,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         #currentPos.
         
     def mousePressEvent(self, mouseEvent):
+        self.pressed = True
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
             return
         if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine:
@@ -1013,7 +1016,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             textItem.diagramChanged.connect(self.textElementChanged)
         elif self.myMode == self.InsertActor:
             textItem = Actor()
-            textItem.diagramChanged.connect(self.textElementChanged)
+            textItem.actorChanged.connect(self.textElementChanged)
         if self.myMode == self.InsertText or self.myMode == self.InsertUseCase or \
            self.myMode == self.InsertActor:
             self.initTextItem(textItem, mouseEvent.scenePos())
@@ -1052,27 +1055,29 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.addItem(pic)
         self.diagramChanged.emit()
     def mouseMoveEvent(self, mouseEvent):
-        if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
-            newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
-            self.line.setLine(newLine)
-        elif self.myMode == self.MoveItem:
-            if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:         
-                for item in self.selectedItems():
-                    c = item.copy()
-                    c.doCopy = False
-                    item.doCopy = False
-                    item.setSelected(False)
-                    self.initTextItem(c, item.scenePos())
-                    c.setSelected(True)
-                    self.doMove = False
-            else:
-                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-        self.update()
+        if self.pressed == True:
+            if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
+                newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
+                self.line.setLine(newLine)
+            elif self.myMode == self.MoveItem:
+                if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:         
+                    for item in self.selectedItems():
+                        c = item.copy()
+                        c.doCopy = False
+                        item.doCopy = False
+                        item.setSelected(False)
+                        self.initTextItem(c, item.scenePos())
+                        c.setSelected(True)
+                        self.doMove = False
+                else:
+                    super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+            self.update()
 
     def getElements(self):
         return self.elements
     
     def mouseReleaseEvent(self, mouseEvent):
+        self.pressed = False
         if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
             startItems = self.items(self.line.line().p1())
             if len(startItems) and startItems[0] == self.line:
@@ -1796,7 +1801,11 @@ class MainWindow(QtGui.QMainWindow):
     def toPic(self):
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Вставить картинку","UTF-8"),unicode(""),unicode("picture (*.png)"))
         if fileName:
+            #ifdef WIN32
             folders = unicode(fileName.replace("/","\\")).encode('UTF-8')
+            #else
+            folders = unicode(fileName).encode('UTF-8')
+            #endif
             self.scene.addPicture(folders)
         self.falseChecked()
         self.picAction.setCheckable(True)
