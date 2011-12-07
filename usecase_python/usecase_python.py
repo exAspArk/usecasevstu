@@ -791,6 +791,10 @@ class Comment(ElementDiagramm):
         super(Comment, self).paint(painter, option, widget)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
+    def copy(self):
+        new = Comment()
+        new.setPlainText(self.toPlainText())
+        return new
 
 class UseCase(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
@@ -898,6 +902,10 @@ class Actor(ElementDiagramm):
                 self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">"+string[pos+4:]+"</p>")
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)        
         self.lostFocus.emit(self)
+    def copy(self):
+        new = Actor()
+        new.setPlainText(self.toPlainText())
+        return new
             
 class DiagramScene(QtGui.QGraphicsScene):
    
@@ -1065,18 +1073,17 @@ class DiagramScene(QtGui.QGraphicsScene):
             if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
                 newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
                 self.line.setLine(newLine)
+                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             elif self.myMode == self.MoveItem:
-                if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:         
+                if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
                     for item in self.selectedItems():
                         c = item.copy()
                         c.doCopy = False
                         item.doCopy = False
-                        item.setSelected(False)
                         self.initTextItem(c, item.scenePos())
-                        c.setSelected(True)
+                        c.setSelected(False)
                         self.doMove = False
-                else:
-                    super(DiagramScene, self).mouseMoveEvent(mouseEvent)
+                super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
 
     def getElements(self):
