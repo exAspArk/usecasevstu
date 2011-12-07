@@ -1516,12 +1516,16 @@ class MainWindow(QtGui.QMainWindow):
         listLineNode=[]
         listLine=[]
         listNotLineElem = []
+        listComLineNode = []
         #проверяем нет ли линий без вершин и определяем самый левый и верхний элемент из выделенных
         for item in self.scene.selectedItems():
             if isinstance(item,TotalLineDiagram):
                 listLine.append(item.getId())
                 listLineNode.append(item.startItem().getId())
                 listLineNode.append(item.endItem().getId())
+                if item.getType() == DiagramScene.CommentLineType:
+                    listComLineNode.append(item.startItem().getId())
+                    listComLineNode.append(item.endItem().getId())
             if isinstance(item,ElementDiagramm) or isinstance(item,PictureElement):
                 listNotLineElem.append(item.getId())
                 if mostLeft > item.x():
@@ -1530,8 +1534,13 @@ class MainWindow(QtGui.QMainWindow):
                 if mostTop > item.y():
                     mostTop = item.y()
                     mostTopId = item.getId()
+                    
+        #listComLineNode = listComLineNode+listNotLineElem
+        #listComLineNode = listComLineNode+listLineNode   
+        allListLineNode = []
+        allListLineNode = listLine + listNotLineElem
         for i in listLineNode:
-            buf = i in listNotLineElem
+            buf = i in allListLineNode
             if buf == False:
                 #если есть стрелка без вершины, то вывод сообщения
                 msgBox = QtGui.QMessageBox()
@@ -1572,6 +1581,8 @@ class MainWindow(QtGui.QMainWindow):
             copyStr = copyStr + ":;:"
             copyStr = copyStr + str(self.scene.getElementsById(i).endItem().getId())
             copyStr = copyStr + ":;:"
+            copyStr = copyStr + str(i)
+            copyStr = copyStr + ":;:"
         myClipBoard = QtGui.QApplication.clipboard()
         myClipBoard.setText(copyStr)
     def toPaste(self):
@@ -1579,7 +1590,7 @@ class MainWindow(QtGui.QMainWindow):
         pasteStr=myClipBoard.text()
         pasteList = pasteStr.split(":;:")
         if pasteList[0]=="D_U_C_P":
-            lastId = dict(a=0)
+            lastId = dict()
             i = 0
             while i < int(pasteList[2]):
                 if int(pasteList[3+i*6]) == DiagramScene.ActorType:
@@ -1602,20 +1613,44 @@ class MainWindow(QtGui.QMainWindow):
                 
                 i=i+1
             i = 0
+            listComline = []
+            lastIdLine = dict()
             while i < int(pasteList[1])-int(pasteList[2]):
-                
-                type = int(pasteList[3+int(pasteList[2])*6])
-                
+                type = int(pasteList[3+int(pasteList[2])*6+ i*4])
                 if type == DiagramScene.CommentLineType:
-                    item = CommentLine()
+                    listComline.append(i)
                 elif type == DiagramScene.ArrowAssociationType:
                     item = ArrowAssociation()
                 elif type == DiagramScene.ArrowGeneralizationType:
                     item = ArrowGeneralization()
-                item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*3])])
-                item.setIdEnd(lastId[int(pasteList[5+int(pasteList[2])*6 + i*3])])
-                
-
+                if type != DiagramScene.CommentLineType:
+                    item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*4])])
+                    item.setIdEnd(lastId[int(pasteList[5+int(pasteList[2])*6 + i*4])])
+                    e1 = self.scene.getElementsById(item.getIdStart())
+                    if e1 != None:
+                        item.setStartItem(e1)
+                    e2 = self.scene.getElementsById(item.getIdEnd())
+                    if e2!=None and e1!=None:
+                        item.setEndItem(e2)
+                        e1.addArrow(item)
+                        e2.addArrow(item)
+                        self.scene.Id = self.scene.Id + 1
+                        item.setId(self.scene.Id)
+                        lastIdLine[int(pasteList[6+int(pasteList[2])*6 + i*4])] = self.scene.Id
+                        self.scene.addItem(item)
+                        self.scene.Arrows.append(item)
+                        item.updatePosition()
+                i=i+1
+            for i in listComline:
+                item = CommentLine()
+                if lastIdLine.has_key(int(pasteList[4+int(pasteList[2])*6 + i*4])):
+                    item.setIdStart(lastIdLine[int(pasteList[4+int(pasteList[2])*6 + i*4])])
+                else:
+                    item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*4])])
+                if lastIdLine.has_key(int(pasteList[5+int(pasteList[2])*6 + i*4])):
+                    item.setIdEnd(lastIdLine[int(pasteList[5+int(pasteList[2])*6 + i*4])])
+                else:
+                    item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*4])])
                 e1 = self.scene.getElementsById(item.getIdStart())
                 if e1 != None:
                     item.setStartItem(e1)
@@ -1624,11 +1659,12 @@ class MainWindow(QtGui.QMainWindow):
                     item.setEndItem(e2)
                     e1.addArrow(item)
                     e2.addArrow(item)
+                    self.scene.Id = self.scene.Id + 1
+                    item.setId(self.scene.Id)
+                    lastIdLine[int(6+int(pasteList[2])*6 + i*4)] = self.scene.Id
                     self.scene.addItem(item)
                     self.scene.Arrows.append(item)
                     item.updatePosition()
-
-                i=i+1
     def clearAll(self):
         for item in self.scene.elements:
             item.removeArrows()
