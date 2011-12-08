@@ -101,7 +101,47 @@ class ElementData:
         item.setPos(self.point)
         return item
             
-def getPoints(calcType, startPoint, endPoint, width1, width2, height1, height2):
+def getPoints(self, startItem, endItem):
+
+    calcType = 4
+
+    if type(startItem) == UseCase and type(endItem) == UseCase:
+        calcType = 1
+        startPoint = self.mapFromItem(startItem, startItem.wideRect().center())
+        endPoint = self.mapFromItem(endItem, endItem.wideRect().center())
+        width1 = startItem.wideRect().width()
+        width2 = endItem.wideRect().width()
+        height1 = startItem.wideRect().height()
+        height2 = endItem.wideRect().height()
+
+
+    if type(startItem) == UseCase and (type(endItem) == Comment or type(endItem) == Actor):
+        calcType = 2
+        startPoint = self.mapFromItem(startItem, startItem.wideRect().center())
+        endPoint = self.mapFromItem(endItem, endItem.boundingRect().center())
+        width1 = startItem.wideRect().width()
+        width2 = endItem.boundingRect().width()
+        height1 = startItem.wideRect().height()
+        height2 = endItem.boundingRect().height()
+
+    if (type(startItem) == Comment or type(startItem) == Actor) and type(endItem) == UseCase:
+        calcType = 3
+        startPoint = self.mapFromItem(startItem, startItem.boundingRect().center())
+        endPoint = self.mapFromItem(endItem, endItem.wideRect().center())
+        width1 = startItem.boundingRect().width()
+        width2 = endItem.wideRect().width()
+        height1 = startItem.boundingRect().height()
+        height2 = endItem.wideRect().height()
+
+    if (type(startItem) == Comment or type(startItem) == Actor) and (type(endItem) == Comment or type(endItem) == Actor):
+        calcType = 4
+        startPoint = self.mapFromItem(startItem, startItem.boundingRect().center())
+        endPoint = self.mapFromItem(endItem, endItem.boundingRect().center())
+        width1 = startItem.boundingRect().width()
+        width2 = endItem.boundingRect().width()
+        height1 = startItem.boundingRect().height()
+        height2 = endItem.boundingRect().height()
+    
 
     result = [QtCore.QPointF(0,0), QtCore.QPointF(0,0)]
 
@@ -417,7 +457,6 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         self.startItem().isSelected()
         
         
-         
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
@@ -513,49 +552,8 @@ class AgregationLine(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 4
-
-        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-            calcType = 1
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.wideRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.wideRect().height()
-
-
-        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 2
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-            calcType = 3
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 4
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-
-
-        par1 = calcType
-        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+        
+        points = getPoints(self, myStartItem, myEndItem)
 
         centerLine = QtCore.QLineF(points[1], points[0])
 
@@ -631,49 +629,7 @@ class IncludeLine(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 4
-
-        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-            calcType = 1
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.wideRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.wideRect().height()
-
-
-        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 2
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-            calcType = 3
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 4
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-
-
-        par1 = calcType
-        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+        points = getPoints(self, myStartItem, myEndItem)
 
         centerLine = QtCore.QLineF(points[1], points[0])
 
@@ -753,49 +709,7 @@ class ArrowAssociation(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 4
-
-        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-            calcType = 1
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.wideRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.wideRect().height()
-
-
-        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 2
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-            calcType = 3
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 4
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-
-
-        par1 = calcType
-        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+        points = getPoints(self, myStartItem, myEndItem)
 
         centerLine = QtCore.QLineF(points[1], points[0])
 
@@ -858,49 +772,7 @@ class ExtendLine(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 4
-
-        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-            calcType = 1
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.wideRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.wideRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.wideRect().height()
-
-
-        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 2
-            par2 = self.mapFromItem(myStartItem, myStartItem.wideRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.wideRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.wideRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-            calcType = 3
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-            calcType = 4
-            par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-            par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-            par4 = myStartItem.boundingRect().width()
-            par5 = myEndItem.boundingRect().width()
-            par6 = myStartItem.boundingRect().height()
-            par7 = myEndItem.boundingRect().height()
-
-
-
-        par1 = calcType
-        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+        points = getPoints(self, myStartItem, myEndItem)
 
         centerLine = QtCore.QLineF(points[1], points[0])
 
@@ -974,25 +846,7 @@ class ArrowGeneralization(TotalLineDiagram):
         painter.setPen(myPen)
         painter.setBrush(self.myColor)
 
-        calcType = 4
-
-        if type(myStartItem) == UseCase and type(myEndItem) == UseCase:
-                calcType = 1
-        if type(myStartItem) == UseCase and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-                calcType = 2
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and type(myEndItem) == UseCase:
-                calcType = 3
-        if (type(myStartItem) == Comment or type(myStartItem) == Actor) and (type(myEndItem) == Comment or type(myEndItem) == Actor):
-                calcType = 4
-
-        par1 = calcType
-        par2 = self.mapFromItem(myStartItem, myStartItem.boundingRect().center())
-        par3 = self.mapFromItem(myEndItem, myEndItem.boundingRect().center())
-        par4 = myStartItem.boundingRect().width()
-        par5 = myEndItem.boundingRect().width()
-        par6 = myStartItem.boundingRect().height()
-        par7 = myEndItem.boundingRect().height()
-        points = getPoints(par1,par2,par3,par4,par5,par6,par7)
+        points = getPoints(self, myStartItem, myEndItem)
 
         centerLine = QtCore.QLineF(points[1], points[0])
 
@@ -1024,10 +878,10 @@ class ArrowGeneralization(TotalLineDiagram):
             myLine.translate(0,-8.0)
             painter.drawLine(myLine)
     def polygon(self):
-         return QtGui.QPolygonF(self.boundingRect())
+        return QtGui.QPolygonF(self.boundingRect())
     def copy(self):
-         new = ArrowGeneralization()
-         return new
+        new = ArrowGeneralization()
+        return new
 
 class ElementDiagramm(QtGui.QGraphicsTextItem):
 
