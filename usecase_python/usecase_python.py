@@ -1890,6 +1890,10 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.about)
         self.copyAction = QtGui.QAction(unicode("Копировать","UTF-8"), self, shortcut="Ctrl+C", triggered=self.toCopy)
         self.pasteAction = QtGui.QAction(unicode("Вставить","UTF-8"), self, shortcut="Ctrl+V", triggered=self.toPaste)
+        self.cutAction = QtGui.QAction(unicode("Вырезать","UTF-8"), self, shortcut="Ctrl+X", triggered=self.toCut)
+    def toCut(self):
+        self.toCopy()
+        self.deleteItem()
     def toCopy(self):
         copyStr = ""
         mostLeft = self.scene.widthWorkPlace
@@ -2263,6 +2267,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.createAction)
         self.fileMenu.addAction(self.openAction)
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.cutAction)
         self.fileMenu.addAction(self.copyAction)
         self.fileMenu.addAction(self.pasteAction)
         self.fileMenu.addSeparator()
