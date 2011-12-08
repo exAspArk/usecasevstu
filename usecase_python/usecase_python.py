@@ -1284,6 +1284,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     pictures = []
     Id = 0
     changeFlag = False
+    curMouseCoord = QtCore.QPointF(0,0)
     #высота рабочей области
     heightWorkPlace = 1000.0
     #ширина рабочей области
@@ -1351,6 +1352,9 @@ class DiagramScene(QtGui.QGraphicsScene):
         for item in self.Arrows:
             if item.getId() == id:
                 return item
+        for item in self.pictures:
+            if item.getId() == id:
+                return item
         return None
     def checkPos (self,pos,height=0,width=0):
         currentPos=QtCore.QPointF()
@@ -1375,7 +1379,8 @@ class DiagramScene(QtGui.QGraphicsScene):
     def mousePressEvent(self, mouseEvent):
         self.pressed = True
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
-            return
+            self.curMouseCoord = mouseEvent.scenePos()
+            pass
         if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine:
             self.line = QtGui.QGraphicsLineItem(QtCore.QLineF(mouseEvent.scenePos(),
                                         mouseEvent.scenePos()))
@@ -1463,7 +1468,12 @@ class DiagramScene(QtGui.QGraphicsScene):
                         self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
-
+    def keyReleaseEvent (self, event):
+        self.update()
+        super(DiagramScene, self).keyReleaseEvent(event)
+    def keyPressEvent (self, event):
+        self.update()
+        super(DiagramScene, self).keyReleaseEvent(event)
     def getElements(self):
         return self.elements
     
@@ -1543,6 +1553,7 @@ class MainWindow(QtGui.QMainWindow):
     currentFileName = ""
     undoStack = []
     currentState = 0
+    coordPaste = QtCore.QPointF(0,0)
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -1563,6 +1574,8 @@ class MainWindow(QtGui.QMainWindow):
         self.view = QtGui.QGraphicsView(self.scene)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
+        self.view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.view.customContextMenuRequested.connect(self.sceneContextMenu)
         
         layout.addWidget(self.view)
         
@@ -1577,7 +1590,27 @@ class MainWindow(QtGui.QMainWindow):
         
         self.saveScenesElements()
         
-        #self.scene.setMode(self.pointerTypeGroup.checkedId())
+    def sceneContextMenu(self):
+        menu = QtGui.QMenu(self)
+        menu.addAction(self.cutAction)
+        menu.addAction(self.copyAction)
+        menu.addAction(self.pasteAction)
+        menu.addSeparator()
+        menu.addAction(self.deleteAction)
+        qwe = len(self.scene.selectedItems())
+        if len(self.scene.selectedItems()) != 0:
+            self.cutAction.setEnabled(True)
+            self.copyAction.setEnabled(True)
+            self.deleteAction.setEnabled(True)
+        else:
+            self.cutAction.setEnabled(False)
+            self.copyAction.setEnabled(False)
+            self.deleteAction.setEnabled(False)
+        self.coordPaste = self.scene.curMouseCoord
+        menu.exec_(QtGui.QCursor.pos())
+        self.cutAction.setEnabled(True)
+        self.copyAction.setEnabled(True)
+        self.deleteAction.setEnabled(True)
     def falseChecked(self):
         self.arrowTotal.setChecked(False)
         self.arrowComment.setChecked(False)
@@ -1713,6 +1746,7 @@ class MainWindow(QtGui.QMainWindow):
                 isDeleted = True
         if(isDeleted == True):
             self.diagramChanged()
+        self.scene.update()
             
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
@@ -1864,7 +1898,7 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                unicode("Удаление","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
+                unicode("Удалить","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
         
         self.undoAction = QtGui.QAction(QtGui.QIcon(':/images/undo.png'),
                             unicode("Отменить действие","UTF-8"), self, shortcut="Ctrl+Z",triggered=self.undo)
@@ -1880,6 +1914,10 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.about)
         self.copyAction = QtGui.QAction(unicode("Копировать","UTF-8"), self, shortcut="Ctrl+C", triggered=self.toCopy)
         self.pasteAction = QtGui.QAction(unicode("Вставить","UTF-8"), self, shortcut="Ctrl+V", triggered=self.toPaste)
+        self.cutAction = QtGui.QAction(unicode("Вырезать","UTF-8"), self, shortcut="Ctrl+X", triggered=self.toCut)
+    def toCut(self):
+        self.toCopy()
+        self.deleteItem()
     def toCopy(self):
         copyStr = ""
         mostLeft = self.scene.widthWorkPlace
@@ -1917,7 +1955,7 @@ class MainWindow(QtGui.QMainWindow):
             if buf == False:
                 #если есть стрелка без вершины, то вывод сообщения
                 msgBox = QtGui.QMessageBox()
-                msgBox.setText(unicode("Error","UTF-8"))
+                msgBox.setText(unicode("Невозможно копировать выбранные элементы\nСтрелка должна быть привязана к двум элементам диаграммы","UTF-8"))
                 msgBox.setIcon(QtGui.QMessageBox.Warning)
                 saveButton = msgBox.addButton(unicode("Ok","UTF-8"),QtGui.QMessageBox.YesRole)
                 msgBox.exec_()
@@ -1937,7 +1975,7 @@ class MainWindow(QtGui.QMainWindow):
             if isinstance(self.scene.getElementsById(i),PictureElement):
                 copyStr = copyStr + "1"
                 copyStr = copyStr + ":;:"
-                copyStr = copyStr + self.scene.getElementsById(i).fileName# !!!!!!!!!!!подумать на счет файла
+                copyStr = copyStr + self.scene.getElementsById(i).fileName
             else:
                 copyStr = copyStr + "0"
                 copyStr = copyStr + ":;:"
@@ -1972,20 +2010,25 @@ class MainWindow(QtGui.QMainWindow):
                     item = Comment()
                 elif int(pasteList[3+i*6]) == DiagramScene.UseCaseType:
                     item = UseCase()
-                item.setPos(QtCore.QPointF(float(pasteList[7+i*6]),float(pasteList[8+i*6])))
-                item.setPlainText(pasteList[6+i*6])
+                elif int(pasteList[3+i*6]) == DiagramScene.PictureType:
+                    item = PictureElement(pasteList[6+i*6])
+                item.setPos(QtCore.QPointF(float(pasteList[7+i*6]) + self.coordPaste.x(),float(pasteList[8+i*6])+self.coordPaste.y()))
                 self.scene.Id = self.scene.Id + 1
                 item.setId(self.scene.Id)
                 lastId[int(pasteList[4+i*6])] = self.scene.Id
-                if item.getType() == 7:
-                    string=item.toPlainText()
-                    string=string.encode("UTF-8")
-                    item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                if int(pasteList[3+i*6]) != DiagramScene.PictureType:
+                    item.setPlainText(pasteList[6+i*6])
+                    if item.getType() == 7:
+                        string=item.toPlainText()
+                        string=string.encode("UTF-8")
+                        item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                    self.scene.elements.append(item)
+                else:
+                    self.scene.pictures.append(item)
                 self.scene.addItem(item)
-                self.scene.elements.append(item)
-                
                 i=i+1
             i = 0
+            self.coordPaste = QtCore.QPointF(0,0)
             listComline = []
             lastIdLine = dict()
             while i < int(pasteList[1])-int(pasteList[2]):
@@ -2038,6 +2081,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.scene.addItem(item)
                     self.scene.Arrows.append(item)
                     item.updatePosition()
+        self.scene.update()
     def clearAll(self):
         for item in self.scene.elements:
             item.removeArrows()
@@ -2243,12 +2287,14 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.setMode(self.scene.MoveItem)
         self.falseChecked()
         self.pointer.setChecked(True)
-        
+    
+    
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
         self.fileMenu.addAction(self.createAction)
         self.fileMenu.addAction(self.openAction)
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.cutAction)
         self.fileMenu.addAction(self.copyAction)
         self.fileMenu.addAction(self.pasteAction)
         self.fileMenu.addSeparator()
