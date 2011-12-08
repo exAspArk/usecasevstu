@@ -102,11 +102,11 @@ class ElementData:
                 item = ArrowAssociation()
             elif self.type == DiagramScene.ArrowGeneralizationType:
                 item = ArrowGeneralization()
-            elif self.type == DiagramScene.ArrowGeneralizationType:
+            elif self.type == DiagramScene.ArrowAgregationType:
                 item = ArrowAgregation()
-            elif self.type == DiagramScene.ArrowGeneralizationType:
+            elif self.type == DiagramScene.ArrowExtendType:
                 item = ArrowExtend()
-            elif self.type == DiagramScene.ArrowGeneralizationType:
+            elif self.type == DiagramScene.ArrowIncludeType:
                 item = ArrowInclude()
             item.setIdStart(self.idStart)
             item.setIdEnd(self.idEnd)
