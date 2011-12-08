@@ -420,7 +420,7 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         path.addPolygon(self.arrowHead)
         path.addPolygon(self.selection())
         return path
-		
+        
     def updatePosition(self):
         line = QtCore.QLineF(self.mapFromItem(self.myStartItem, 0, 0), self.mapFromItem(self.myEndItem, 0, 0))
         self.setLine(line)
@@ -526,17 +526,17 @@ class CommentLine(TotalLineDiagram):
          return QtGui.QPolygonF(self.boundingRect())
 
 # клас для стрелки агрегации (с ромбом)
-class AgregationLine(TotalLineDiagram):
+class ArrowAgregation(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
-        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
-        self.type = DiagramScene.CommentLineType
+        super(ArrowAgregation,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.ArrowAgregationType
 
     def isValid(self):
-        if(((isinstance(self.startItem(),Comment) and \
-            isinstance(self.endItem(), TotalLineDiagram))) or \
-            ((isinstance(self.startItem(), TotalLineDiagram) and \
-            isinstance(self.endItem(), Comment)))):
-            return super(CommentLine,self).isValid()
+        if(((isinstance(self.startItem(),UseCase) and \
+            isinstance(self.endItem(), UseCase))) or \
+            ((isinstance(self.startItem(), Actor) and \
+            isinstance(self.endItem(), Actor)))):
+            return super(ArrowAgregation,self).isValid()
         else: return False
 
     def paint(self, painter, option, widget=None):
@@ -599,21 +599,21 @@ class AgregationLine(TotalLineDiagram):
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
-		 
-		 
-		 
+         
+         
+         
 # клас для отрисовки линии include
-class IncludeLine(TotalLineDiagram):
+class ArrowInclude(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
-        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
-        self.type = DiagramScene.CommentLineType
+        super(ArrowInclude,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.ArrowIncludeType
 
     def isValid(self):
-        if(((isinstance(self.startItem(),Comment) and \
-            isinstance(self.endItem(), TotalLineDiagram))) or \
-            ((isinstance(self.startItem(), TotalLineDiagram) and \
-            isinstance(self.endItem(), Comment)))):
-            return super(CommentLine,self).isValid()
+        if(((isinstance(self.startItem(),UseCase) and \
+            isinstance(self.endItem(), UseCase))) or \
+            ((isinstance(self.startItem(), Actor) and \
+            isinstance(self.endItem(), Actor)))):
+            return super(ArrowInclude,self).isValid()
         else: return False
 
     def paint(self, painter, option, widget=None):
@@ -673,8 +673,8 @@ class IncludeLine(TotalLineDiagram):
             painter.drawLine(myLine)
 
     def polygon(self):
-         return QtGui.QPolygonF(self.boundingRect())		 
-		 
+         return QtGui.QPolygonF(self.boundingRect())         
+         
 
 # класс для отрисовки стрелки ассоциации
 class ArrowAssociation(TotalLineDiagram):
@@ -737,7 +737,7 @@ class ArrowAssociation(TotalLineDiagram):
             painter.drawLine(myLine)
             myLine.translate(0,-8.0)
             painter.drawLine(myLine)
-			
+            
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
      
@@ -746,17 +746,17 @@ class ArrowAssociation(TotalLineDiagram):
         return new
 
 # клас для отрисовки линии extend
-class ExtendLine(TotalLineDiagram):
+class ArrowExtend(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
-        super(CommentLine,self).__init__(startItem,endItem,parent,scene)
-        self.type = DiagramScene.CommentLineType
+        super(ArrowExtend,self).__init__(startItem,endItem,parent,scene)
+        self.type = DiagramScene.ArrowExtendType
 
     def isValid(self):
-        if(((isinstance(self.startItem(),Comment) and \
-            isinstance(self.endItem(), TotalLineDiagram))) or \
-            ((isinstance(self.startItem(), TotalLineDiagram) and \
-            isinstance(self.endItem(), Comment)))):
-            return super(CommentLine,self).isValid()
+        if(((isinstance(self.startItem(),UseCase) and \
+            isinstance(self.endItem(), UseCase))) or \
+            ((isinstance(self.startItem(), Actor) and \
+            isinstance(self.endItem(), Actor)))):
+            return super(ArrowExtend,self).isValid()
         else: return False
 
     def paint(self, painter, option, widget=None):
@@ -817,8 +817,7 @@ class ExtendLine(TotalLineDiagram):
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
-
-		
+        
 # класс для отрисовки стрелки обобщения
 class ArrowGeneralization(TotalLineDiagram):
     def __init__(self, startItem=None, endItem=None, parent=None, scene=None):
@@ -987,7 +986,7 @@ class Comment(ElementDiagramm):
         pointStart =  QtCore.QPointF((bodyRect.topRight().x()- bodyRect.topLeft().x())*9.0/10.0,
             bodyRect.topLeft().y());
         pointEnd = QtCore.QPointF(bodyRect.topRight().x(),
-			(bodyRect.bottomRight().y() - bodyRect.topRight().y())*1.0/10.0)
+            (bodyRect.bottomRight().y() - bodyRect.topRight().y())*1.0/10.0)
 
         linearGrad = QtGui.QLinearGradient(pointEnd, bodyRect.bottomLeft())
 
@@ -1123,7 +1122,7 @@ class Actor(ElementDiagramm):
             
 class DiagramScene(QtGui.QGraphicsScene):
    
-    PictureType,ArrowGeneralizationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertActor,InsertPicture  = range(18)
+    PictureType,ArrowGeneralizationType,ArrowIncludeType,ArrowExtendType,ArrowAgregationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertArrowInclude,InsertArrowExtend,InsertArrowAgregation,InsertActor,InsertPicture  = range(24)
 
     itemInserted = QtCore.Signal(ElementDiagramm)
 
@@ -1235,7 +1234,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
             self.curMouseCoord = mouseEvent.scenePos()
             pass
-        if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine:
+        if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine or self.myMode == self.InsertArrowInclude or self.myMode == self.InsertArrowExtend or self.myMode == self.InsertArrowAgregation:
             self.line = QtGui.QGraphicsLineItem(QtCore.QLineF(mouseEvent.scenePos(),
                                         mouseEvent.scenePos()))
             self.line.setPen(QtGui.QPen(self.myLineColor, 2))
@@ -1288,7 +1287,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.diagramChanged.emit()
     def mouseMoveEvent(self, mouseEvent):
         if self.pressed == True:
-            if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine)  and self.line :
+            if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine or self.myMode == self.InsertArrowInclude or self.myMode == self.InsertArrowExtend or self.myMode == self.InsertArrowAgregation)  and self.line :
                 newLine = QtCore.QLineF(self.line.line().p1(), mouseEvent.scenePos())
                 self.line.setLine(newLine)
             elif self.myMode == self.MoveItem:
@@ -1334,7 +1333,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     
     def mouseReleaseEvent(self, mouseEvent):
         self.pressed = False
-        if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine):
+        if self.line and (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine or self.myMode == self.InsertArrowInclude or self.myMode == self.InsertArrowExtend or self.myMode == self.InsertArrowAgregation):
             startItems = self.items(self.line.line().p1())
             if len(startItems) and startItems[0] == self.line:
                 startItems.pop(0)
@@ -1357,6 +1356,12 @@ class DiagramScene(QtGui.QGraphicsScene):
                      arrow = ArrowAssociation(startItem,endItem)
                 elif self.myMode == self.InsertArrowGeneralization:
                      arrow = ArrowGeneralization(startItem,endItem)
+                elif self.myMode == self.InsertArrowInclude:
+                     arrow = ArrowInclude(startItem,endItem)
+                elif self.myMode == self.InsertArrowExtend:
+                     arrow = ArrowExtend(startItem,endItem)     
+                elif self.myMode == self.InsertArrowAgregation:
+                     arrow = ArrowAgregation(startItem,endItem)     
             
                 if arrow.isValid():
                      self.initArrow(arrow)
@@ -1470,6 +1475,9 @@ class MainWindow(QtGui.QMainWindow):
         self.arrowTotal.setChecked(False)
         self.arrowComment.setChecked(False)
         self.arrow.setChecked(False)
+        self.arrowInclude.setChecked(False)
+        self.arrowExtend.setChecked(False)
+        self.arrowAgregation.setChecked(False)
         self.useCaseAction.setChecked(False)
         self.commentAction.setChecked(False)
         self.actorAction.setChecked(False)
@@ -1697,6 +1705,26 @@ class MainWindow(QtGui.QMainWindow):
                 self,shortcut="Ctrl+7",triggered = self.toArrow
         )
         self.arrow.setCheckable(True)
+        
+        self.arrowInclude = QtGui.QAction(
+                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Include","UTF-8"),
+                self,shortcut="Ctrl+9",triggered = self.toArrowInclude
+        )
+        self.arrowInclude.setCheckable(True)
+        
+        self.arrowExtend = QtGui.QAction(
+                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Extend","UTF-8"),
+                self,shortcut="Ctrl+0",triggered = self.toArrowExtend
+        )
+        self.arrowExtend.setCheckable(True)
+        
+        self.arrowAgregation = QtGui.QAction(
+                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Agregation","UTF-8"),
+                self,shortcut="Ctrl+-",triggered = self.toArrowAgregation
+        )
+        self.arrowAgregation.setCheckable(True)
+
+        
         self.useCaseAction = QtGui.QAction(
                 QtGui.QIcon(':/images/usecase.png'), unicode("Вариант использования","UTF-8"),
                 self,shortcut="Ctrl+2",triggered = self.toUseCase
@@ -2110,6 +2138,22 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.setMode(self.scene.InsertArrowGeneralization)
         self.falseChecked()
         self.arrow.setChecked(True)
+        
+    def toArrowInclude(self):
+        self.scene.setMode(self.scene.InsertArrowInclude)
+        self.falseChecked()
+        self.arrowInclude.setChecked(True)
+    
+    def toArrowExtend(self):
+        self.scene.setMode(self.scene.InsertArrowExtend)
+        self.falseChecked()
+        self.arrowExtend.setChecked(True)
+        
+    def toArrowAgregation(self):
+        self.scene.setMode(self.scene.InsertArrowAgregation)
+        self.falseChecked()
+        self.arrowAgregation.setChecked(True)    
+        
 
     def toUseCase(self):
         self.scene.setMode(self.scene.InsertUseCase)
@@ -2190,6 +2234,10 @@ class MainWindow(QtGui.QMainWindow):
         self.editToolBar.addAction(self.arrowTotal)
         self.editToolBar.addAction(self.arrow)
         self.editToolBar.addAction(self.arrowComment)
+        self.editToolBar.addAction(self.arrowInclude)
+        self.editToolBar.addAction(self.arrowExtend)
+        self.editToolBar.addAction(self.arrowAgregation)
+        
         self.editToolBar.addAction(self.deleteAction)
         
         self.editToolBar.addSeparator()
