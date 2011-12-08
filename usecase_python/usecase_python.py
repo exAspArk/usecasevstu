@@ -1002,7 +1002,7 @@ class Comment(ElementDiagramm):
 
         linearGrad.setColorAt(0, QtCore.Qt.white)
         linearGrad.setColorAt(1, QtGui.QColor(255,130,80))
-        painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
+        #painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
 
         painter.drawLine(bodyRect.topLeft(),pointStart)
         painter.drawLine(bodyRect.topLeft(),bodyRect.bottomLeft())
@@ -1073,7 +1073,7 @@ class UseCase(ElementDiagramm):
         newBodyRect = QtCore.QRectF(p1,p2)
         _path.addEllipse(newBodyRect)
 
-        painter.fillPath(_path,QtGui.QBrush(grad))
+        #painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
