@@ -1305,14 +1305,14 @@ class DiagramScene(QtGui.QGraphicsScene):
                             item.setZValue(item.zValue()+1)
                             c.setSelected(False)
                             self.doMove = False
-                            itemElement.update({item.getId():c.getId()})
+                            itemElement.update({item:c})
                         elif isinstance(item, TotalLineDiagram):
                             if item.startItem().isSelected() and item.endItem().isSelected():
                                 itemsArrow.append(item)
                     for arr in itemsArrow:
                         c = arr.copy()
-                        c.setStartItem(self.getElementsById(itemElement[arr.startItem().getId()]))
-                        c.setEndItem(self.getElementsById(itemElement[arr.endItem().getId()]))
+                        c.setStartItem(itemElement[arr.startItem()])
+                        c.setEndItem(itemElement[arr.endItem()])
                         self.initArrow(c)
                         self.addItem(c)
                         self.Arrows.append(c)
