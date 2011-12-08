@@ -1302,31 +1302,8 @@ class DiagramScene(QtGui.QGraphicsScene):
                 self.line.setLine(newLine)
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
-                    itemsArrow = []
-                    itemElement =  {}
+                    itemsArrow,itemElement = self.processingSelectElement()
                     # сначало копируем все элементы
-                    for item in self.selectedItems():
-                        if isinstance(item, ElementDiagramm):
-                            c = item.copy()
-                            c.doCopy = False
-                            item.doCopy = False
-                            self.initTextItem(c, item.scenePos())
-                            item.setZValue(item.zValue()+1)
-                            c.setSelected(False)
-                            self.doMove = False
-                            for arr in item.arrows:
-                                if arr.isSelected() == False or arr.startAndEndSelected() == False:
-                                    c.arrows.append(arr)
-                                    if arr.startItem() == item:
-                                        arr.setStartItem(c)
-                                    elif arr.endItem() == item:
-                                        arr.setEndItem(c)
-                            for arr in c.arrows:
-                                item.arrows.remove(arr)
-                            itemElement.update({item:c})
-                        elif isinstance(item, TotalLineDiagram):
-                            if item.startItem().isSelected() and item.endItem().isSelected():
-                                itemsArrow.append(item)
                     for arr in itemsArrow:
                         c = arr.copy()
                         c.setStartItem(itemElement[arr.startItem()])
@@ -1341,6 +1318,33 @@ class DiagramScene(QtGui.QGraphicsScene):
                         self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
+    def processingSelectElement(self):
+        itemsArrow = []
+        itemElement =  {}
+        for item in self.selectedItems():
+            if isinstance(item, ElementDiagramm):
+                c = item.copy()
+                c.doCopy = False
+                item.doCopy = False
+                self.initTextItem(c, item.scenePos())
+                item.setZValue(item.zValue()+1)
+                c.setSelected(False)
+                self.doMove = False
+                for arr in item.arrows:
+                    if arr.isSelected() == False or arr.startAndEndSelected() == False:
+                        c.arrows.append(arr)
+                        if arr.startItem() == item:
+                            arr.setStartItem(c)
+                        elif arr.endItem() == item:
+                            arr.setEndItem(c)
+                for arr in c.arrows:
+                    item.arrows.remove(arr)
+                itemElement.update({item:c})
+            elif isinstance(item, TotalLineDiagram):
+                if item.startItem().isSelected() and item.endItem().isSelected():
+                    itemsArrow.append(item)
+        return itemsArrow,itemElement
+    def processingSelectArrow(self):
     def keyReleaseEvent (self, event):
         self.update()
         super(DiagramScene, self).keyReleaseEvent(event)
