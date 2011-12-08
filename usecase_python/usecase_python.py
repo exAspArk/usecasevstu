@@ -1924,7 +1924,7 @@ class MainWindow(QtGui.QMainWindow):
             if buf == False:
                 #если есть стрелка без вершины, то вывод сообщения
                 msgBox = QtGui.QMessageBox()
-                msgBox.setText(unicode("Error","UTF-8"))
+                msgBox.setText(unicode("Невозможно копировать выбранные элементы\nСтрелка должна быть привязана к двум элементам диаграммы","UTF-8"))
                 msgBox.setIcon(QtGui.QMessageBox.Warning)
                 saveButton = msgBox.addButton(unicode("Ok","UTF-8"),QtGui.QMessageBox.YesRole)
                 msgBox.exec_()
