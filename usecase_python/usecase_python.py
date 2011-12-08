@@ -1284,6 +1284,7 @@ class DiagramScene(QtGui.QGraphicsScene):
     pictures = []
     Id = 0
     changeFlag = False
+    curMouseCoord = QtCore.QPointF(0,0)
     #высота рабочей области
     heightWorkPlace = 1000.0
     #ширина рабочей области
@@ -1378,7 +1379,8 @@ class DiagramScene(QtGui.QGraphicsScene):
     def mousePressEvent(self, mouseEvent):
         self.pressed = True
         if (mouseEvent.button() != QtCore.Qt.LeftButton):
-            return
+            self.curMouseCoord = mouseEvent.scenePos()
+            pass
         if self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine:
             self.line = QtGui.QGraphicsLineItem(QtCore.QLineF(mouseEvent.scenePos(),
                                         mouseEvent.scenePos()))
@@ -1553,6 +1555,7 @@ class MainWindow(QtGui.QMainWindow):
     currentFileName = ""
     undoStack = []
     currentState = 0
+    coordPaste = QtCore.QPointF(0,0)
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -1573,6 +1576,8 @@ class MainWindow(QtGui.QMainWindow):
         self.view = QtGui.QGraphicsView(self.scene)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
+        self.view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.view.customContextMenuRequested.connect(self.sceneContextMenu)
         
         layout.addWidget(self.view)
         
@@ -1587,7 +1592,22 @@ class MainWindow(QtGui.QMainWindow):
         
         self.saveScenesElements()
         
-        #self.scene.setMode(self.pointerTypeGroup.checkedId())
+    def sceneContextMenu(self):
+        menu = QtGui.QMenu(self)
+        menu.addAction(self.cutAction)
+        menu.addAction(self.copyAction)
+        menu.addAction(self.pasteAction)
+        qwe = len(self.scene.selectedItems())
+        if len(self.scene.selectedItems()) != 0:
+            self.cutAction.setEnabled(True)
+            self.copyAction.setEnabled(True)
+        else:
+            self.cutAction.setEnabled(False)
+            self.copyAction.setEnabled(False)
+        self.coordPaste = self.scene.curMouseCoord
+        menu.exec_(QtGui.QCursor.pos())
+        self.cutAction.setEnabled(True)
+        self.copyAction.setEnabled(True)
     def falseChecked(self):
         self.arrowTotal.setChecked(False)
         self.arrowComment.setChecked(False)
@@ -1988,7 +2008,8 @@ class MainWindow(QtGui.QMainWindow):
                     item = UseCase()
                 elif int(pasteList[3+i*6]) == DiagramScene.PictureType:
                     item = PictureElement(pasteList[6+i*6])
-                item.setPos(QtCore.QPointF(float(pasteList[7+i*6]),float(pasteList[8+i*6])))
+                item.setPos(QtCore.QPointF(float(pasteList[7+i*6]) + self.coordPaste.x(),float(pasteList[8+i*6])+self.coordPaste.y()))
+                self.coordPaste = QtCore.QPointF(0,0)
                 self.scene.Id = self.scene.Id + 1
                 item.setId(self.scene.Id)
                 lastId[int(pasteList[4+i*6])] = self.scene.Id
@@ -2261,7 +2282,8 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.setMode(self.scene.MoveItem)
         self.falseChecked()
         self.pointer.setChecked(True)
-        
+    
+    
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu(unicode("Файл","UTF-8"))
         self.fileMenu.addAction(self.createAction)
