@@ -1933,6 +1933,12 @@ class MainWindow(QtGui.QMainWindow):
                     item = ArrowAssociation()
                 elif type == DiagramScene.ArrowGeneralizationType:
                     item = ArrowGeneralization()
+                elif type == DiagramScene.ArrowAgregationType:
+                    item = ArrowAgregation()
+                elif type == DiagramScene.ArrowExtendType:
+                    item = ArrowExtend()
+                elif type == DiagramScene.ArrowIncludeType:
+                    item = ArrowInclude()
                 if type != DiagramScene.CommentLineType:
                     item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*4])])
                     item.setIdEnd(lastId[int(pasteList[5+int(pasteList[2])*6 + i*4])])
