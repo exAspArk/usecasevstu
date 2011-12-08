@@ -1001,8 +1001,8 @@ class Comment(ElementDiagramm):
         linearGrad = QtGui.QLinearGradient(pointEnd, bodyRect.bottomLeft())
 
         linearGrad.setColorAt(0, QtCore.Qt.white)
-        linearGrad.setColorAt(1, QtGui.QColor(255,130,80))
-        #painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
+        linearGrad.setColorAt(1, QtGui.QColor(255,255,255))
+        painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
 
         painter.drawLine(bodyRect.topLeft(),pointStart)
         painter.drawLine(bodyRect.topLeft(),bodyRect.bottomLeft())
@@ -1055,8 +1055,8 @@ class UseCase(ElementDiagramm):
         x1 = listCoord[0]
         y1 = listCoord[1]
         grad = QtGui.QRadialGradient(QtCore.QPointF(x1,y1),bodyRect.width())
-        grad.setColorAt(1,QtGui.QColor(255,160,25))
-        grad.setColorAt(0.5,QtCore.Qt.yellow)
+        grad.setColorAt(1,QtGui.QColor(255,255,255))
+        grad.setColorAt(0.5,QtCore.Qt.white)
         grad.setColorAt(0,QtCore.Qt.white)
         _path = QtGui.QPainterPath()
         #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
@@ -1072,8 +1072,8 @@ class UseCase(ElementDiagramm):
         p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
         newBodyRect = QtCore.QRectF(p1,p2)
         _path.addEllipse(newBodyRect)
-
-        #painter.fillPath(_path,QtGui.QBrush(grad))
+        painter.drawEllipse(newBodyRect)
+        painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
