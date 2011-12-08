@@ -1773,19 +1773,19 @@ class MainWindow(QtGui.QMainWindow):
         self.arrow.setCheckable(True)
         
         self.arrowInclude = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Include","UTF-8"),
+                QtGui.QIcon(':/images/lineinclude.png'), unicode("Включение","UTF-8"),
                 self,shortcut="Ctrl+9",triggered = self.toArrowInclude
         )
         self.arrowInclude.setCheckable(True)
         
         self.arrowExtend = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Extend","UTF-8"),
+                QtGui.QIcon(':/images/lineextend.png'), unicode("Расширение","UTF-8"),
                 self,shortcut="Ctrl+0",triggered = self.toArrowExtend
         )
         self.arrowExtend.setCheckable(True)
         
         self.arrowAgregation = QtGui.QAction(
-                QtGui.QIcon(':/images/linepointerwhite.png'), unicode("Agregation","UTF-8"),
+                QtGui.QIcon(':/images/lineagregation.png'), unicode("Агрегация","UTF-8"),
                 self,shortcut="Ctrl+-",triggered = self.toArrowAgregation
         )
         self.arrowAgregation.setCheckable(True)
@@ -2286,6 +2286,9 @@ class MainWindow(QtGui.QMainWindow):
         self.itemMenu.addAction(self.arrowTotal)
         self.itemMenu.addAction(self.arrow)
         self.itemMenu.addAction(self.arrowComment)
+        self.itemMenu.addAction(self.arrowInclude)
+        self.itemMenu.addAction(self.arrowExtend)
+        self.itemMenu.addAction(self.arrowAgregation)
         self.itemMenu.addSeparator()
         self.itemMenu.addAction(self.deleteAction)
         #self.itemMenu.addAction(self.toFrontAction)
