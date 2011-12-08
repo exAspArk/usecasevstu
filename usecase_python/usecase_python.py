@@ -601,7 +601,9 @@ class ArrowAgregation(TotalLineDiagram):
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
          
-         
+    def copy(self):
+        new = ArrowAgregation()
+        return new
          
 # клас для отрисовки линии include
 class ArrowInclude(TotalLineDiagram):
@@ -674,7 +676,11 @@ class ArrowInclude(TotalLineDiagram):
             painter.drawLine(myLine)
 
     def polygon(self):
-         return QtGui.QPolygonF(self.boundingRect())         
+         return QtGui.QPolygonF(self.boundingRect())
+     
+    def copy(self):
+        new = ArrowInclude()
+        return new         
          
 
 # класс для отрисовки стрелки ассоциации
@@ -818,6 +824,9 @@ class ArrowExtend(TotalLineDiagram):
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
+    def copy(self):
+        new = ArrowExtend()
+        return new 
         
 # класс для отрисовки стрелки обобщения
 class ArrowGeneralization(TotalLineDiagram):
@@ -1307,7 +1316,6 @@ class DiagramScene(QtGui.QGraphicsScene):
                             self.doMove = False
                             for arr in item.arrows:
                                 if arr.isSelected() == False or arr.startAndEndSelected() == False:
-                                    #item.arrows.remove(arr)
                                     c.arrows.append(arr)
                                     if arr.startItem() == item:
                                         arr.setStartItem(c)
