@@ -1293,9 +1293,10 @@ class DiagramScene(QtGui.QGraphicsScene):
                 self.line.setLine(newLine)
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
-                    items = self.selectedItems()
-                    items.sort()
-                    for item in items:
+                    itemsArrow = []
+                    itemElement =  {}
+                    # сначало копируем все элементы
+                    for item in self.selectedItems():
                         if isinstance(item, ElementDiagramm):
                             c = item.copy()
                             c.doCopy = False
@@ -1303,33 +1304,30 @@ class DiagramScene(QtGui.QGraphicsScene):
                             self.initTextItem(c, item.scenePos())
                             c.setSelected(False)
                             self.doMove = False
+                            itemElement.update({item.getId():c.getId()})
                         elif isinstance(item, TotalLineDiagram):
                             if item.startItem().isSelected() and item.endItem().isSelected():
-                                c = item.copy()
-                                itemS = None
-                                itemE = None
-                                for i in self.selectedItems(item.startItem().boundingRect()):
-                                    if item.startItem() != i and isinstance(i, ElementDiagramm):
-                                        itemS = i
-                                        break
-                                for i in self.selectedItems(item.endItem().boundingRect()):
-                                    if item.endItem() != i and isinstance(i, ElementDiagramm):
-                                        itemE = i
-                                        break
-                                if itemE!=None and itemS!=None:
-                                    self.initArrow(c)
-                                    c.setSelected(False)
-                                    c.setStartItem(itemS)
-                                    c.setEndItem(itemE)
-                                    self.addItem(c)
-                                    self.Arrows.append(c)
-                                    arrow.updatePosition()
-                                    self.diagramChanged.emit()
-                                    self.doMove = False
-                                    
+                                itemsArrow.append(item)
+                    for arr in itemsArrow:
+                        c = arr.copy()
+                        c.setStartItem(self.getElementsById(itemElement[arr.startItem().getId()]))
+                        c.setEndItem(self.getElementsById(itemElement[arr.endItem().getId()]))
+                        self.initArrow(c)
+                        self.addItem(c)
+                        self.Arrows.append(c)
+                        c.setSelected(False)
+                        arr.setSelected(True)
+                        c.updatePosition()
+                        self.diagramChanged.emit()
+                        self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
-
+    def keyReleaseEvent (self, event):
+        self.update()
+        super(DiagramScene, self).keyReleaseEvent(event)
+    def keyPressEvent (self, event):
+        self.update()
+        super(DiagramScene, self).keyReleaseEvent(event)
     def getElements(self):
         return self.elements
     
@@ -1451,17 +1449,22 @@ class MainWindow(QtGui.QMainWindow):
         menu.addAction(self.cutAction)
         menu.addAction(self.copyAction)
         menu.addAction(self.pasteAction)
+        menu.addSeparator()
+        menu.addAction(self.deleteAction)
         qwe = len(self.scene.selectedItems())
         if len(self.scene.selectedItems()) != 0:
             self.cutAction.setEnabled(True)
             self.copyAction.setEnabled(True)
+            self.deleteAction.setEnabled(True)
         else:
             self.cutAction.setEnabled(False)
             self.copyAction.setEnabled(False)
+            self.deleteAction.setEnabled(False)
         self.coordPaste = self.scene.curMouseCoord
         menu.exec_(QtGui.QCursor.pos())
         self.cutAction.setEnabled(True)
         self.copyAction.setEnabled(True)
+        self.deleteAction.setEnabled(True)
     def falseChecked(self):
         self.arrowTotal.setChecked(False)
         self.arrowComment.setChecked(False)
@@ -1597,6 +1600,7 @@ class MainWindow(QtGui.QMainWindow):
                 isDeleted = True
         if(isDeleted == True):
             self.diagramChanged()
+        self.scene.update()
             
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.pointerTypeGroup.checkedId())
@@ -1748,7 +1752,7 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                unicode("Удаление","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
+                unicode("Удалить","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
         
         self.undoAction = QtGui.QAction(QtGui.QIcon(':/images/undo.png'),
                             unicode("Отменить действие","UTF-8"), self, shortcut="Ctrl+Z",triggered=self.undo)
@@ -1863,7 +1867,6 @@ class MainWindow(QtGui.QMainWindow):
                 elif int(pasteList[3+i*6]) == DiagramScene.PictureType:
                     item = PictureElement(pasteList[6+i*6])
                 item.setPos(QtCore.QPointF(float(pasteList[7+i*6]) + self.coordPaste.x(),float(pasteList[8+i*6])+self.coordPaste.y()))
-                self.coordPaste = QtCore.QPointF(0,0)
                 self.scene.Id = self.scene.Id + 1
                 item.setId(self.scene.Id)
                 lastId[int(pasteList[4+i*6])] = self.scene.Id
@@ -1879,6 +1882,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.scene.addItem(item)
                 i=i+1
             i = 0
+            self.coordPaste = QtCore.QPointF(0,0)
             listComline = []
             lastIdLine = dict()
             while i < int(pasteList[1])-int(pasteList[2]):
@@ -1931,6 +1935,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.scene.addItem(item)
                     self.scene.Arrows.append(item)
                     item.updatePosition()
+        self.scene.update()
     def clearAll(self):
         for item in self.scene.elements:
             item.removeArrows()
