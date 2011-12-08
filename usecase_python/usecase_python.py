@@ -1344,7 +1344,6 @@ class DiagramScene(QtGui.QGraphicsScene):
                 if item.startItem().isSelected() and item.endItem().isSelected():
                     itemsArrow.append(item)
         return itemsArrow,itemElement
-    def processingSelectArrow(self):
     def keyReleaseEvent (self, event):
         self.update()
         super(DiagramScene, self).keyReleaseEvent(event)
