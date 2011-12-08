@@ -1351,6 +1351,9 @@ class DiagramScene(QtGui.QGraphicsScene):
         for item in self.Arrows:
             if item.getId() == id:
                 return item
+        for item in self.pictures:
+            if item.getId() == id:
+                return item
         return None
     def checkPos (self,pos,height=0,width=0):
         currentPos=QtCore.QPointF()
@@ -1944,7 +1947,7 @@ class MainWindow(QtGui.QMainWindow):
             if isinstance(self.scene.getElementsById(i),PictureElement):
                 copyStr = copyStr + "1"
                 copyStr = copyStr + ":;:"
-                copyStr = copyStr + self.scene.getElementsById(i).fileName# !!!!!!!!!!!подумать на счет файла
+                copyStr = copyStr + self.scene.getElementsById(i).fileName
             else:
                 copyStr = copyStr + "0"
                 copyStr = copyStr + ":;:"
@@ -1979,18 +1982,22 @@ class MainWindow(QtGui.QMainWindow):
                     item = Comment()
                 elif int(pasteList[3+i*6]) == DiagramScene.UseCaseType:
                     item = UseCase()
+                elif int(pasteList[3+i*6]) == DiagramScene.PictureType:
+                    item = PictureElement(pasteList[6+i*6])
                 item.setPos(QtCore.QPointF(float(pasteList[7+i*6]),float(pasteList[8+i*6])))
-                item.setPlainText(pasteList[6+i*6])
                 self.scene.Id = self.scene.Id + 1
                 item.setId(self.scene.Id)
                 lastId[int(pasteList[4+i*6])] = self.scene.Id
-                if item.getType() == 7:
-                    string=item.toPlainText()
-                    string=string.encode("UTF-8")
-                    item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                if int(pasteList[3+i*6]) != DiagramScene.PictureType:
+                    item.setPlainText(pasteList[6+i*6])
+                    if item.getType() == 7:
+                        string=item.toPlainText()
+                        string=string.encode("UTF-8")
+                        item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
+                    self.scene.elements.append(item)
+                else:
+                    self.scene.pictures.append(item)
                 self.scene.addItem(item)
-                self.scene.elements.append(item)
-                
                 i=i+1
             i = 0
             listComline = []
