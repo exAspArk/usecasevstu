@@ -1444,8 +1444,8 @@ class DiagramScene(QtGui.QGraphicsScene):
             for item in curitems:
                 itemSize = item.boundingRect()
                 if isinstance(item,ElementDiagramm)or isinstance(item,PictureElement):
-                    if (already != True and self.myMode == 11 and self.pressPos != item.scenePos() and self.pressPos != mouseEvent.scenePos()): 
-                        self.diagramChanged.emit()
+                    if (already != True and self.myMode == 14 and self.pressPos != item.scenePos() and self.pressPos != mouseEvent.scenePos()): 
+                        self.diagramChanged.emit()  #действие перемещение
                         already = True
                     item.setPos(self.checkPos(item.scenePos(),itemSize.height(),itemSize.width()))
                 item.update()
@@ -2036,6 +2036,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.scene.addItem(item)
                     self.scene.Arrows.append(item)
                     item.updatePosition()
+        self.diagramChanged()
         self.scene.update()
     def clearAll(self):
         for item in self.scene.elements:
