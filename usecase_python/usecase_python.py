@@ -540,6 +540,9 @@ class CommentLine(TotalLineDiagram):
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
+    def copy(self):
+        new = CommentLine()
+        return new
 
 # клас для стрелки агрегации (с ромбом)
 class ArrowAgregation(TotalLineDiagram):
@@ -1318,19 +1321,39 @@ class DiagramScene(QtGui.QGraphicsScene):
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
                     itemsArrow,itemElement = self.processingSelectElement()
+                    newArrows = {}
                     # сначало копируем все элементы
                     for arr in itemsArrow:
-                        c = arr.copy()
-                        c.setStartItem(itemElement[arr.startItem()])
-                        c.setEndItem(itemElement[arr.endItem()])
-                        self.initArrow(c)
-                        self.addItem(c)
-                        self.Arrows.append(c)
-                        c.setSelected(False)
-                        arr.setSelected(True)
-                        c.updatePosition()
-                        self.diagramChanged.emit()
-                        self.doMove = False
+                        if isinstance(arr,CommentLine) == False:
+                            c = arr.copy()
+                            c.setStartItem(itemElement[arr.startItem()])
+                            c.setEndItem(itemElement[arr.endItem()])
+                            newArrows.update({arr:c})
+                            self.initArrow(c)
+                            self.addItem(c)
+                            self.Arrows.append(c)
+                            c.setSelected(False)
+                            arr.setSelected(True)
+                            c.updatePosition()
+                            self.diagramChanged.emit()
+                            self.doMove = False
+                    for arr in itemsArrow:
+                        if isinstance(arr,CommentLine) == True:
+                            c = arr.copy()
+                            if isinstance(arr.startItem(),TotalLineDiagram):
+                                c.setStartItem(newArrows[arr.startItem()])
+                                c.setEndItem(itemElement[arr.endItem()])
+                            else:
+                                c.setStartItem(itemElement[arr.startItem()])
+                                c.setEndItem(newArrows[arr.endItem()])
+                            self.initArrow(c)
+                            self.addItem(c)
+                            self.Arrows.append(c)
+                            c.setSelected(False)
+                            arr.setSelected(True)
+                            c.updatePosition()
+                            self.diagramChanged.emit()
+                            self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
     def processingSelectElement(self):
@@ -1355,6 +1378,12 @@ class DiagramScene(QtGui.QGraphicsScene):
                 for arr in c.arrows:
                     item.arrows.remove(arr)
                 itemElement.update({item:c})
+            elif isinstance(item, CommentLine):
+                if isinstance(item.startItem(),TotalLineDiagram):
+                      line = item.startItem()
+                else: line = item.endItem()
+                if line.startItem().isSelected() and line.endItem().isSelected():
+                    itemsArrow.append(item)
             elif isinstance(item, TotalLineDiagram):
                 if item.startItem().isSelected() and item.endItem().isSelected():
                     itemsArrow.append(item)
