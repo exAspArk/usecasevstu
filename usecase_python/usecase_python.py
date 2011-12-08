@@ -469,8 +469,9 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
             arrow.endItem().removeArrow(arrow)
             self.scene().removeItem(arrow)
     def startAndEndSelected(self):
-        self.startItem().isSelected()
-        
+        if self.startItem().isSelected() and self.endItem().isSelected():
+            return True
+        else: return False        
         
 # клас для отрисовки линии комментария
 class CommentLine(TotalLineDiagram):
@@ -615,7 +616,9 @@ class ArrowAgregation(TotalLineDiagram):
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
          
-         
+    def copy(self):
+        new = ArrowAgregation()
+        return new
          
 # клас для отрисовки линии include
 class ArrowInclude(TotalLineDiagram):
@@ -688,7 +691,11 @@ class ArrowInclude(TotalLineDiagram):
             painter.drawLine(myLine)
 
     def polygon(self):
-         return QtGui.QPolygonF(self.boundingRect())         
+         return QtGui.QPolygonF(self.boundingRect())
+     
+    def copy(self):
+        new = ArrowInclude()
+        return new         
          
 
 # класс для отрисовки стрелки ассоциации
@@ -832,6 +839,9 @@ class ArrowExtend(TotalLineDiagram):
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
+    def copy(self):
+        new = ArrowExtend()
+        return new 
         
 # класс для отрисовки стрелки обобщения
 class ArrowGeneralization(TotalLineDiagram):
@@ -1006,7 +1016,7 @@ class Comment(ElementDiagramm):
         linearGrad = QtGui.QLinearGradient(pointEnd, bodyRect.bottomLeft())
 
         linearGrad.setColorAt(0, QtCore.Qt.white)
-        linearGrad.setColorAt(1, QtGui.QColor(255,130,80))
+        linearGrad.setColorAt(1, QtGui.QColor(255,255,255))
         painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
 
         painter.drawLine(bodyRect.topLeft(),pointStart)
@@ -1060,8 +1070,8 @@ class UseCase(ElementDiagramm):
         x1 = listCoord[0]
         y1 = listCoord[1]
         grad = QtGui.QRadialGradient(QtCore.QPointF(x1,y1),bodyRect.width())
-        grad.setColorAt(1,QtGui.QColor(255,160,25))
-        grad.setColorAt(0.5,QtCore.Qt.yellow)
+        grad.setColorAt(1,QtGui.QColor(255,255,255))
+        grad.setColorAt(0.5,QtCore.Qt.white)
         grad.setColorAt(0,QtCore.Qt.white)
         _path = QtGui.QPainterPath()
         #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
@@ -1077,7 +1087,7 @@ class UseCase(ElementDiagramm):
         p2 = QtCore.QPointF(center.x() + w1/2, center.y() + h1/2)
         newBodyRect = QtCore.QRectF(p1,p2)
         _path.addEllipse(newBodyRect)
-
+        painter.drawEllipse(newBodyRect)
         painter.fillPath(_path,QtGui.QBrush(grad))
         super(UseCase, self).paint(painter, option, widget)
     def polygon(self):
@@ -1307,22 +1317,8 @@ class DiagramScene(QtGui.QGraphicsScene):
                 self.line.setLine(newLine)
             elif self.myMode == self.MoveItem:
                 if mouseEvent.modifiers() == QtCore.Qt.AltModifier and self.doMove == True:   
-                    itemsArrow = []
-                    itemElement =  {}
+                    itemsArrow,itemElement = self.processingSelectElement()
                     # сначало копируем все элементы
-                    for item in self.selectedItems():
-                        if isinstance(item, ElementDiagramm):
-                            c = item.copy()
-                            c.doCopy = False
-                            item.doCopy = False
-                            self.initTextItem(c, item.scenePos())
-                            item.setZValue(item.zValue()+1)
-                            c.setSelected(False)
-                            self.doMove = False
-                            itemElement.update({item:c})
-                        elif isinstance(item, TotalLineDiagram):
-                            if item.startItem().isSelected() and item.endItem().isSelected():
-                                itemsArrow.append(item)
                     for arr in itemsArrow:
                         c = arr.copy()
                         c.setStartItem(itemElement[arr.startItem()])
@@ -1337,6 +1333,32 @@ class DiagramScene(QtGui.QGraphicsScene):
                         self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
             self.update()
+    def processingSelectElement(self):
+        itemsArrow = []
+        itemElement =  {}
+        for item in self.selectedItems():
+            if isinstance(item, ElementDiagramm):
+                c = item.copy()
+                c.doCopy = False
+                item.doCopy = False
+                self.initTextItem(c, item.scenePos())
+                item.setZValue(item.zValue()+1)
+                c.setSelected(False)
+                self.doMove = False
+                for arr in item.arrows:
+                    if arr.isSelected() == False or arr.startAndEndSelected() == False:
+                        c.arrows.append(arr)
+                        if arr.startItem() == item:
+                            arr.setStartItem(c)
+                        elif arr.endItem() == item:
+                            arr.setEndItem(c)
+                for arr in c.arrows:
+                    item.arrows.remove(arr)
+                itemElement.update({item:c})
+            elif isinstance(item, TotalLineDiagram):
+                if item.startItem().isSelected() and item.endItem().isSelected():
+                    itemsArrow.append(item)
+        return itemsArrow,itemElement
     def keyReleaseEvent (self, event):
         self.update()
         super(DiagramScene, self).keyReleaseEvent(event)
