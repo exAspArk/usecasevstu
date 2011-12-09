@@ -1225,7 +1225,9 @@ class DiagramScene(QtGui.QGraphicsScene):
 
         if not item.toPlainText():
             self.removeItem(item)
-            item.deleteLater()
+            for it in self.elements:        # удаляем из памяти
+                if it.getId() == item.getId():
+                    self.elements.remove(it)
         self.update()
         
     def getElementsById(self,id):
