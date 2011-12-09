@@ -933,7 +933,8 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedChange:
             for i in self.arrows:
-                i.update()
+                pass
+                #i.update()
             # self.selectedChange.emit(self)
         return value
     
@@ -1231,11 +1232,14 @@ class DiagramScene(QtGui.QGraphicsScene):
         item.setTextCursor(cursor)
 
         if not item.toPlainText():
+            rect = QtCore.QRectF(item.scenePos(),item.boundingRect().size())
+            rect.setWidth(rect.width()+ rect.width()/2.0)
+            rect.setHeight(rect.height()+ rect.height()/2.0)
             self.removeItem(item)
+            self.update(rect)
             for it in self.elements:        # удаляем из памяти
                 if it.getId() == item.getId():
                     self.elements.remove(it)
-        self.update()
         
     def getElementsById(self,id):
         for item in self.elements:
@@ -1366,7 +1370,20 @@ class DiagramScene(QtGui.QGraphicsScene):
                             self.diagramChanged.emit()
                             self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-            self.update()
+            count = 0
+            rect = QtCore.QRectF()
+            for item in self.selectedItems():
+                    pos = item.scenePos()
+                    height = item.boundingRect().height()
+                    pos.setX(pos.x() - height*4)
+                    pos.setY(pos.y()- height*3)
+                    rect = QtCore.QRectF(pos,item.boundingRect().size())
+                    rect.setWidth(rect.width()*14.0)
+                    rect.setHeight(rect.height()*14.0)
+                    rect.setBottomRight(rect.center())
+                    #r = QtGui.QGraphicsRectItem(rect)
+                    #self.addItem(r)
+                    self.update(rect)
     def processingSelectElement(self):
         itemsArrow = []
         itemElement =  {}
