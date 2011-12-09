@@ -1015,9 +1015,9 @@ class Comment(ElementDiagramm):
             bodyRect.topLeft().y());
         pointEnd = QtCore.QPointF(bodyRect.topRight().x(),
             (bodyRect.bottomRight().y() - bodyRect.topRight().y())*1.0/10.0)
-
+        dLength = QtCore.QLineF(pointStart,pointEnd).length()
         linearGrad = QtGui.QLinearGradient(pointEnd, bodyRect.bottomLeft())
-
+        
         linearGrad.setColorAt(0, QtCore.Qt.white)
         linearGrad.setColorAt(0.2, QtGui.QColor(255,210,205))
         linearGrad.setColorAt(0.6, QtGui.QColor(255,167,157))
@@ -1108,7 +1108,7 @@ class Actor(ElementDiagramm):
         super(Actor, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.ActorType
         self.setTextWidth(70)
-        self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">Actor</p>");
+        self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">Actor</p>")
         textcursor=self.textCursor()
         textcursor.movePosition(QtGui.QTextCursor.Down,QtGui.QTextCursor.MoveAnchor,1)
         textcursor.movePosition(QtGui.QTextCursor.EndOfLine,QtGui.QTextCursor.KeepAnchor,5)
@@ -1148,7 +1148,7 @@ class Actor(ElementDiagramm):
         
     def copy(self):
         new = Actor()
-        new.setPlainText(self.toPlainText())
+        new.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">"+self.toPlainText()+"</p>")
         return new
 class DiagrammView(QtGui.QGraphicsView):
     def __init__(self,scene,parent = None):
