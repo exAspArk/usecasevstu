@@ -1370,9 +1370,9 @@ class DiagramScene(QtGui.QGraphicsScene):
                             self.diagramChanged.emit()
                             self.doMove = False
                 super(DiagramScene, self).mouseMoveEvent(mouseEvent)
-            count = 0
-            rect = QtCore.QRectF()
-            for item in self.selectedItems():
+            self.update()
+    def optimizationScene(self):
+        for item in self.selectedItems():
                     pos = item.scenePos()
                     height = item.boundingRect().height()
                     pos.setX(pos.x() - height*4)
@@ -1381,8 +1381,6 @@ class DiagramScene(QtGui.QGraphicsScene):
                     rect.setWidth(rect.width()*14.0)
                     rect.setHeight(rect.height()*14.0)
                     rect.setBottomRight(rect.center())
-                    #r = QtGui.QGraphicsRectItem(rect)
-                    #self.addItem(r)
                     self.update(rect)
     def processingSelectElement(self):
         itemsArrow = []
