@@ -1513,6 +1513,7 @@ class MainWindow(QtGui.QMainWindow):
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
         self.view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.view.customContextMenuRequested.connect(self.sceneContextMenu)
+        self.view.scrollContentsBy(0,0)
         layout.addWidget(self.view)
         
         self.widget = QtGui.QWidget()
