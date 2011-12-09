@@ -917,6 +917,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
     
     diagramChanged = QtCore.Signal()
     
+    
     def __init__(self, parent=None, scene=None):
         super(ElementDiagramm, self).__init__(parent, scene)
         
@@ -1373,15 +1374,15 @@ class DiagramScene(QtGui.QGraphicsScene):
             self.update()
     def optimizationScene(self):
         for item in self.selectedItems():
-                    pos = item.scenePos()
-                    height = item.boundingRect().height()
-                    pos.setX(pos.x() - height*4)
-                    pos.setY(pos.y()- height*3)
-                    rect = QtCore.QRectF(pos,item.boundingRect().size())
-                    rect.setWidth(rect.width()*14.0)
-                    rect.setHeight(rect.height()*14.0)
-                    rect.setBottomRight(rect.center())
-                    self.update(rect)
+            pos = item.scenePos()
+            height = item.boundingRect().height()
+            pos.setX(pos.x() - height*4)
+            pos.setY(pos.y()- height*3)
+            rect = QtCore.QRectF(pos,item.boundingRect().size())
+            rect.setWidth(rect.width()*14.0)
+            rect.setHeight(rect.height()*14.0)
+            rect.setBottomRight(rect.center())
+            self.update(rect)
     def processingSelectElement(self):
         itemsArrow = []
         itemElement =  {}
@@ -1420,10 +1421,22 @@ class DiagramScene(QtGui.QGraphicsScene):
                     itemsArrow.append(item)
         return itemsArrow,itemElement
     def keyReleaseEvent (self, event):
-        self.update()
+        items = self.selectedItems()
+        if len(items)>0:
+            for item in items:
+                rect = QtCore.QRectF(item.scenePos(),item.boundingRect().size())
+                rect.setWidth(rect.width()+ rect.width()/2.0)
+                rect.setHeight(rect.height()+ rect.height()/2.0)
+                self.update(rect)
         super(DiagramScene, self).keyReleaseEvent(event)
     def keyPressEvent (self, event):
-        self.update()
+        items = self.selectedItems()
+        if len(items)>0:
+            for item in items:
+                rect = QtCore.QRectF(item.scenePos(),item.boundingRect().size())
+                rect.setWidth(rect.width()+ rect.width()/2.0)
+                rect.setHeight(rect.height()+ rect.height()/2.0)
+                self.update(rect)
         super(DiagramScene, self).keyReleaseEvent(event)
     def getElements(self):
         return self.elements
