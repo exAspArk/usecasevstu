@@ -1143,6 +1143,7 @@ class Actor(ElementDiagramm):
                 self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">"+string[pos+4:]+"</p>")
         self.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)        
         self.lostFocus.emit(self)
+        
     def copy(self):
         new = Actor()
         new.setPlainText(self.toPlainText())
@@ -1159,7 +1160,8 @@ class DiagramScene(QtGui.QGraphicsScene):
     itemSelected = QtCore.Signal(QtGui.QGraphicsItem)
     textEndInserted = QtCore.Signal()
     diagramChanged = QtCore.Signal()
-
+    pressed = False
+    
     elements = []
     Arrows = []
     pictures = []
@@ -1300,7 +1302,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.Id = self.Id + 1
         textItem.setId(self.Id)
         self.elements.append(textItem)            
-        self.diagramChanged.emit()
+        # self.diagramChanged.emit()
     def textElementChanged(self):
             self.diagramChanged.emit()
     
@@ -1444,7 +1446,7 @@ class DiagramScene(QtGui.QGraphicsScene):
             for item in curitems:
                 itemSize = item.boundingRect()
                 if isinstance(item,ElementDiagramm)or isinstance(item,PictureElement):
-                    if (already != True and self.myMode == 14 and self.pressPos != item.scenePos() and self.pressPos != mouseEvent.scenePos()): 
+                    if (already != True and self.myMode == self.MoveItem and self.pressPos != item.scenePos() and self.pressPos != mouseEvent.scenePos()): 
                         self.diagramChanged.emit()  #действие перемещение
                         already = True
                     item.setPos(self.checkPos(item.scenePos(),itemSize.height(),itemSize.width()))
@@ -1621,7 +1623,7 @@ class MainWindow(QtGui.QMainWindow):
         for i in range(len(elements)):
                 item = elements[i].getItem()
                 item.setId(item.id)
-                if item.getType() == 7:
+                if item.getType() == DiagramScene.ActorType:
                     string=item.toPlainText()
                     string=string.encode("UTF-8")
                     item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
@@ -1967,7 +1969,7 @@ class MainWindow(QtGui.QMainWindow):
                 lastId[int(pasteList[4+i*6])] = self.scene.Id
                 if int(pasteList[3+i*6]) != DiagramScene.PictureType:
                     item.setPlainText(pasteList[6+i*6])
-                    if item.getType() == 7:
+                    if item.getType() == DiagramScene.ActorType:
                         string=item.toPlainText()
                         string=string.encode("UTF-8")
                         item.setHtml("<img src=\":/images/actor1.png\" />"+"<p align=\"center\">"+string+"</p>")
