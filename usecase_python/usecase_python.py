@@ -2026,7 +2026,7 @@ class MainWindow(QtGui.QMainWindow):
                 if lastIdLine.has_key(int(pasteList[5+int(pasteList[2])*6 + i*4])):
                     item.setIdEnd(lastIdLine[int(pasteList[5+int(pasteList[2])*6 + i*4])])
                 else:
-                    item.setIdStart(lastId[int(pasteList[4+int(pasteList[2])*6 + i*4])])
+                    item.setIdEnd(lastId[int(pasteList[5+int(pasteList[2])*6 + i*4])])
                 e1 = self.scene.getElementsById(item.getIdStart())
                 if e1 != None:
                     item.setStartItem(e1)
