@@ -1150,7 +1150,12 @@ class Actor(ElementDiagramm):
         new = Actor()
         new.setPlainText(self.toPlainText())
         return new
-            
+class DiagrammView(QtGui.QGraphicsView):
+    def __init__(self,scene,parent = None):
+        super(DiagrammView,self).__init__(scene,parent)
+    def scrollContentsBy ( self,dx,dy ):
+        self.scene().update()
+        super(DiagrammView,self).scrollContentsBy(dx,dy)
 class DiagramScene(QtGui.QGraphicsScene):
    
     PictureType,ArrowGeneralizationType,ArrowIncludeType,ArrowExtendType,ArrowAgregationType,CommentLineType, ArrowAssociationType,NonType,CommentType,UseCaseType,ActorType,InsertItem, InsertLine, InsertText, MoveItem,InsertCommentLine,InsertUseCase,InsertArrowAssociation,InsertArrowGeneralization,InsertArrowInclude,InsertArrowExtend,InsertArrowAgregation,InsertActor,InsertPicture  = range(24)
@@ -1503,7 +1508,7 @@ class MainWindow(QtGui.QMainWindow):
         self.createToolbars()
 
         layout = QtGui.QHBoxLayout()
-        self.view = QtGui.QGraphicsView(self.scene)
+        self.view = DiagrammView(self.scene)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
         self.view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
