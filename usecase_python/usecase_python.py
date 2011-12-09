@@ -351,7 +351,6 @@ class PictureElement(QtGui.QGraphicsPixmapItem):
         pixmap = QtGui.QPixmap(self.fileName,'PNG')
         self.setPixmap(pixmap)
         self.update()
-    
 # базовый класс для линии
 class TotalLineDiagram(QtGui.QGraphicsLineItem):
     # типы линий
@@ -1328,6 +1327,7 @@ class DiagramScene(QtGui.QGraphicsScene):
         self.pictures.append(pic)
         self.addItem(pic)
         self.diagramChanged.emit()
+        return pic
     def mouseMoveEvent(self, mouseEvent):
         if self.pressed == True:
             if (self.myMode == self.InsertArrowAssociation or self.myMode == self.InsertArrowGeneralization or self.myMode == self.InsertCommentLine or self.myMode == self.InsertArrowInclude or self.myMode == self.InsertArrowExtend or self.myMode == self.InsertArrowAgregation)  and self.line :
@@ -1406,6 +1406,11 @@ class DiagramScene(QtGui.QGraphicsScene):
                 for arr in c.arrows:
                     item.arrows.remove(arr)
                 itemElement.update({item:c})
+            elif isinstance(item,PictureElement):
+                c = self.addPicture(item.fileName)
+                c.setPos(item.scenePos())
+                c.setSelected(False)
+                self.doMove = False
             elif isinstance(item, CommentLine):
                 if isinstance(item.startItem(),TotalLineDiagram):
                       line = item.startItem()
