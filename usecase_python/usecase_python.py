@@ -1073,8 +1073,8 @@ class UseCase(ElementDiagramm):
         x1 = listCoord[0]
         y1 = listCoord[1]
         grad = QtGui.QRadialGradient(QtCore.QPointF(x1,y1),bodyRect.width())
-        grad.setColorAt(1,QtGui.QColor(255,255,255))
-        grad.setColorAt(0.5,QtCore.Qt.white)
+        grad.setColorAt(1,QtGui.QColor(255,238,80))
+        grad.setColorAt(0.5,QtGui.QColor(255,245,151))
         grad.setColorAt(0,QtCore.Qt.white)
         _path = QtGui.QPainterPath()
         #изменяем bodyrect, чтобы овал отрисовывался вокруг текста
@@ -1506,7 +1506,6 @@ class MainWindow(QtGui.QMainWindow):
         self.view.setRenderHint(QtGui.QPainter.Antialiasing,True)
         self.view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.view.customContextMenuRequested.connect(self.sceneContextMenu)
-        
         layout.addWidget(self.view)
         
         self.widget = QtGui.QWidget()
