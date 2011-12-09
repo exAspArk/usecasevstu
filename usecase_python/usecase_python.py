@@ -1376,11 +1376,12 @@ class DiagramScene(QtGui.QGraphicsScene):
         for item in self.selectedItems():
             pos = item.scenePos()
             height = item.boundingRect().height()
-            pos.setX(pos.x() - height*4)
-            pos.setY(pos.y()- height*3)
+            width = item.boundingRect().width()
+            pos.setX(pos.x() - width*3)
+            pos.setY(pos.y() - height*3)
             rect = QtCore.QRectF(pos,item.boundingRect().size())
-            rect.setWidth(rect.width()*14.0)
-            rect.setHeight(rect.height()*14.0)
+            rect.setWidth(rect.width()*15.0)
+            rect.setHeight(rect.height()*15.0)
             rect.setBottomRight(rect.center())
             self.update(rect)
     def processingSelectElement(self):
@@ -1423,20 +1424,12 @@ class DiagramScene(QtGui.QGraphicsScene):
     def keyReleaseEvent (self, event):
         items = self.selectedItems()
         if len(items)>0:
-            for item in items:
-                rect = QtCore.QRectF(item.scenePos(),item.boundingRect().size())
-                rect.setWidth(rect.width()+ rect.width()/2.0)
-                rect.setHeight(rect.height()+ rect.height()/2.0)
-                self.update(rect)
+                self.optimizationScene()
         super(DiagramScene, self).keyReleaseEvent(event)
     def keyPressEvent (self, event):
         items = self.selectedItems()
         if len(items)>0:
-            for item in items:
-                rect = QtCore.QRectF(item.scenePos(),item.boundingRect().size())
-                rect.setWidth(rect.width()+ rect.width()/2.0)
-                rect.setHeight(rect.height()+ rect.height()/2.0)
-                self.update(rect)
+            self.optimizationScene()
         super(DiagramScene, self).keyReleaseEvent(event)
     def getElements(self):
         return self.elements
