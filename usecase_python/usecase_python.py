@@ -1019,7 +1019,9 @@ class Comment(ElementDiagramm):
         linearGrad = QtGui.QLinearGradient(pointEnd, bodyRect.bottomLeft())
 
         linearGrad.setColorAt(0, QtCore.Qt.white)
-        linearGrad.setColorAt(1, QtGui.QColor(255,255,255))
+        linearGrad.setColorAt(0.2, QtGui.QColor(255,210,205))
+        linearGrad.setColorAt(0.6, QtGui.QColor(255,167,157))
+        linearGrad.setColorAt(1, QtGui.QColor(255,119,104))
         painter.fillRect(bodyRect,QtGui.QBrush(linearGrad))
 
         painter.drawLine(bodyRect.topLeft(),pointStart)
