@@ -1107,7 +1107,7 @@ class Actor(ElementDiagramm):
     def __init__(self, parent=None, scene=None):
         super(Actor, self).__init__(parent, scene)
         self.myTypeElement = DiagramScene.ActorType
-        self.setTextWidth(65);
+        self.setTextWidth(70)
         self.setHtml("<img src=\":/images/actor1.png\" /><p align=\"center\">Actor</p>");
         textcursor=self.textCursor()
         textcursor.movePosition(QtGui.QTextCursor.Down,QtGui.QTextCursor.MoveAnchor,1)
@@ -1388,7 +1388,7 @@ class DiagramScene(QtGui.QGraphicsScene):
                 if isinstance(item.startItem(),TotalLineDiagram):
                       line = item.startItem()
                 else: line = item.endItem()
-                if line.startItem().isSelected() and line.endItem().isSelected():
+                if line.startItem().isSelected() and line.endItem().isSelected() and item.startItem().isSelected() and item.endItem().isSelected():
                     itemsArrow.append(item)
             elif isinstance(item, TotalLineDiagram):
                 if item.startItem().isSelected() and item.endItem().isSelected():
@@ -1572,7 +1572,7 @@ class MainWindow(QtGui.QMainWindow):
             if(self.currentState == len(self.undoStack)):
                 self.redoAction.setEnabled(False)
             if(self.currentState > 1):
-                self.undoAction.setEnabled(True)
+               self.undoAction.setEnabled(True)
             
         self.showScenesElements(self.undoStack[self.currentState-1])
         
