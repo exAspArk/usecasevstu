@@ -1903,7 +1903,7 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.sendToBack)
 
         self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
-                unicode("Удалить","UTF-8"), self, shortcut="Backspace",triggered=self.deleteItem)
+                unicode("Удалить","UTF-8"), self, shortcut="Del",triggered=self.deleteItem)
         
         self.undoAction = QtGui.QAction(QtGui.QIcon(':/images/undo.png'),
                             unicode("Отменить действие","UTF-8"), self, shortcut="Ctrl+Z",triggered=self.undo)
