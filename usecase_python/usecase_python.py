@@ -1130,7 +1130,8 @@ class DiagrammView(QtGui.QGraphicsView):
     def __init__(self,scene,parent = None):
         super(DiagrammView,self).__init__(scene,parent)
     def scrollContentsBy ( self,dx,dy ):
-        self.scene().update()
+        if self.scene()!=None:
+            self.scene().update()
         super(DiagrammView,self).scrollContentsBy(dx,dy)
 class DiagramScene(QtGui.QGraphicsScene):
    
@@ -1472,6 +1473,43 @@ class DiagramScene(QtGui.QGraphicsScene):
         if self.doMove == False:
             self.doMove = True
         self.update()
+        
+    def dragMoveEvent(self,event):
+        event.acceptProposedAction()
+        
+    def dropEvent(self,event):
+        
+        data = event.mimeData().urls()
+        if len(data)<=0:
+            return
+        fileName = data[0].toLocalFile()
+        if len(fileName)<=0 or fileName.find('.vox') == -1:
+            if fileName.find('.png') != -1 or fileName.find('.PNG') != -1:
+                for img in data:
+                    f = img.toLocalFile()
+                    if f.find('.png') != -1 or f.find('.PNG') != -1:
+                        c = self.addPicture(f)
+                        c.setPos(event.scenePos())
+                return    
+            else: return
+        parent = self.views()[0].window()
+        if parent:
+            if isinstance(parent,MainWindow):
+                if self.getChangeFlag()==True:
+                    messFlag = parent.askSaveMessage()
+                    if messFlag!= QtGui.QMessageBox.DestructiveRole:
+                        if messFlag == QtGui.QMessageBox.AcceptRole:
+                            if parent.currentFileName:
+                                parent.toSave(self.currentFileName)
+                            else:
+                                parent.toSaveAsAction()
+                    else:
+                        return
+                parent.toOpen(fileName)
+                event.accept()
+    def dragEnterEvent(self,event):
+        if event.mimeData().hasFormat(u'text/uri-list') or event.mimeData().hasImage():
+            event.acceptProposedAction()
     def initArrow(self,arrow):
         self.Id = self.Id + 1
         arrow.setId(self.Id)
@@ -1731,9 +1769,15 @@ class MainWindow(QtGui.QMainWindow):
     def diagramChanged(self):
         self.scene.setChangeFlag(True)
         if self.currentFileName != "":
-            self.setWindowTitle(unicode("UseCaseDiagram - " + self.currentFileName + " *","UTF-8"))
+            try:
+                self.setWindowTitle(unicode("UseCaseDiagram - " + self.currentFileName + " *","UTF-8"))
+            except TypeError:
+                self.setWindowTitle("UseCaseDiagram - " + self.currentFileName + " *")
         else:
-             self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма *","UTF-8"))
+            try:
+                self.setWindowTitle(unicode("UseCaseDiagram - Диаграмма *","UTF-8"))
+            except TypeError:
+                self.setWindowTitle("UseCaseDiagram - Диаграмма *")
         self.saveScenesElements()
         
     def sceneScaleChanged(self, scale):
@@ -2124,6 +2168,8 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 return
         fileName,other=QtGui.QFileDialog.getOpenFileName(self,unicode("Открыть файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
+        self.toOpen(fileName)
+    def toOpen(self,fileName):
         if fileName:
             self.clearAll()
             self.scene.addRect(0.0,0.0, self.scene.widthWorkPlace, self.scene.heightWorkPlace,QtGui.QPen(QtGui.QBrush(QtGui.QColor(0,0,0,255)),4.0),QtGui.QBrush(QtGui.QColor(255,255,255,255)))
@@ -2187,9 +2233,12 @@ class MainWindow(QtGui.QMainWindow):
         
     def toSave(self,path):
         #ifdef WIN32
-        folders = unicode(path.replace("/","\\")).encode('UTF-8')
+        try:
+            folders = unicode(path.replace("/","\\")).encode('UTF-8')
+        except UnicodeDecodeError:
+            folders = unicode(path.replace("/","\\"),'UTF-8')
         #else
-        folders = unicode(path).encode('UTF-8')
+        #folders = unicode(path).encode('UTF-8')
         #endif
         file = QtCore.QFile(folders)
         if file.open(QtCore.QIODevice.WriteOnly) == False:
@@ -2213,7 +2262,10 @@ class MainWindow(QtGui.QMainWindow):
             _out = elem.save(_out)
         _out.writeInt32(self.scene.Id)
         self.currentFileName=folders
-        self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
+        try:
+            self.setWindowTitle(unicode("UseCaseDiagram - "+self.currentFileName,"UTF-8"))
+        except TypeError:
+            self.setWindowTitle("UseCaseDiagram - "+self.currentFileName)
         file.close()
     def toSaveAsAction(self):
         fileName,other=QtGui.QFileDialog.getSaveFileName(self,unicode("Сохранение в файл","UTF-8"),unicode(""),unicode("Use case by CommandBrain (*.vox)"))
