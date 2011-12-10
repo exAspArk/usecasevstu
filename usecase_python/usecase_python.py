@@ -544,9 +544,9 @@ class ArrowAgregation(TotalLineDiagram):
         self.type = DiagramScene.ArrowAgregationType
 
     def isValid(self):
-        if(((isinstance(self.startItem(),UseCase) and \
-            isinstance(self.endItem(), UseCase))) or \
-            ((isinstance(self.startItem(), Actor) and \
+        if(((isinstance(self.startItem(),UseCase) or \
+            isinstance(self.startItem(), Actor))) and \
+            ((isinstance(self.endItem(), UseCase) or \
             isinstance(self.endItem(), Actor)))):
             return super(ArrowAgregation,self).isValid()
         else: return False
@@ -617,9 +617,7 @@ class ArrowInclude(TotalLineDiagram):
 
     def isValid(self):
         if(((isinstance(self.startItem(),UseCase) and \
-            isinstance(self.endItem(), UseCase))) or \
-            ((isinstance(self.startItem(), Actor) and \
-            isinstance(self.endItem(), Actor)))):
+            isinstance(self.endItem(), UseCase)))):
             return super(ArrowInclude,self).isValid()
         else: return False
 
@@ -758,9 +756,7 @@ class ArrowExtend(TotalLineDiagram):
 
     def isValid(self):
         if(((isinstance(self.startItem(),UseCase) and \
-            isinstance(self.endItem(), UseCase))) or \
-            ((isinstance(self.startItem(), Actor) and \
-            isinstance(self.endItem(), Actor)))):
+            isinstance(self.endItem(), UseCase)))):
             return super(ArrowExtend,self).isValid()
         else: return False
 
