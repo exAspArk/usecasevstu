@@ -417,10 +417,10 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         size = 17
         if self.line().dy() >= 0:
             angle = (math.pi * 2) - angle
-        p1 = self.line().p1() - QtCore.QPointF(math.sin(angle + math.pi / 3) * size, math.cos(angle + math.pi / 3) * size)
-        p2 = self.line().p1() - QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3) * size, math.cos(angle + math.pi - math.pi / 3) * size)
-        p3 = self.line().p2() + QtCore.QPointF(math.sin(angle + math.pi / 3) * size, math.cos(angle + math.pi / 3) * size)
-        p4 = self.line().p2() + QtCore.QPointF(math.sin(angle + math.pi - math.pi / 3) * size, math.cos(angle + math.pi - math.pi / 3) * size)
+        p1 = QtCore.QPointF(self.line().p1().x() - size*math.sin(angle), self.line().p1().y() - size*math.cos(angle))
+        p2 = QtCore.QPointF(self.line().p1().x() + size*math.sin(angle), self.line().p1().y() + size*math.cos(angle))
+        p3 = QtCore.QPointF(self.line().p2().x() + size*math.sin(angle), self.line().p2().y() + size*math.cos(angle))
+        p4 = QtCore.QPointF(self.line().p2().x() - size*math.sin(angle), self.line().p2().y() - size*math.cos(angle))
         p = QtGui.QPolygonF()
         p.push_back(p1)
         p.push_back(p2)
@@ -525,18 +525,12 @@ class CommentLine(TotalLineDiagram):
         
         self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
-
-        painter.drawLine(line)
-        # убрали отрисовку бошки у стрелки
-        # painter.drawPolygon(self.arrowHead)
         if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
-
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
+        
+        painter.drawLine(line)
+    
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
     def copy(self):
@@ -593,6 +587,9 @@ class ArrowAgregation(TotalLineDiagram):
                                         math.cos(angle + math.pi / 3) * arrowSize)
         
         self.arrowHead.clear()
+        if self.isSelected():
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
         
         painter.drawLine(line)
         #painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
@@ -603,17 +600,7 @@ class ArrowAgregation(TotalLineDiagram):
         for point in [line.p1(), arrowP1, arrowP3, arrowP4, arrowP2, line.p1()]:
             self.arrowHead.append(point)
         painter.setBrush(QtCore.Qt.white)
-        #painter.drawLine(line)
         painter.drawPolygon(self.arrowHead)
-
-        
-        if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
@@ -655,6 +642,7 @@ class ArrowInclude(TotalLineDiagram):
 
         self.setLine(centerLine)#QtCore.QLineF(intersectPoint, myStartItem.pos()))
         line = self.line()
+        
 
         angle = math.acos(line.dx() / line.length())
         if line.dy() >= 0:
@@ -666,11 +654,6 @@ class ArrowInclude(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
-        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
-        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
-        myPen.setStyle(QtCore.Qt.DotLine)
-        painter.setPen(myPen)
-        painter.drawLine(line)
         
         lineText = "<< include >>"
         line2 = QtCore.QLineF(line)
@@ -682,15 +665,17 @@ class ArrowInclude(TotalLineDiagram):
                 
         painter.drawText(centerPoint, lineText)#QtCore.QPointF(line.p1().x() + line.dx()/2.0, line.p1().y() - line.dy()/2.0), lineText)
         
-        
-        
         if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
+        
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        myPen.setStyle(QtCore.Qt.DotLine)
+        painter.setPen(myPen)
+        
+        
+        painter.drawLine(line)
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
@@ -750,17 +735,13 @@ class ArrowAssociation(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
-        
+        if self.isSelected():
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
         painter.drawLine(line)
         painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
         painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
-        if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
+        
             
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
@@ -813,11 +794,6 @@ class ArrowExtend(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
-        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
-        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
-        myPen.setStyle(QtCore.Qt.DotLine)
-        painter.setPen(myPen)
-        painter.drawLine(line)
         
         lineText = "<< extend >>"
         line2 = QtCore.QLineF(line)
@@ -832,12 +808,15 @@ class ArrowExtend(TotalLineDiagram):
         
         
         if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
+
+        
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP1))
+        painter.drawLine(QtCore.QLineF(line.p1(), arrowP2))
+        myPen.setStyle(QtCore.Qt.DotLine)
+        painter.setPen(myPen)
+        painter.drawLine(line)
 
     def polygon(self):
          return QtGui.QPolygonF(self.boundingRect())
@@ -890,19 +869,18 @@ class ArrowGeneralization(TotalLineDiagram):
                                         math.cos(angle + math.pi - math.pi / 3.0) * arrowSize)
 
         self.arrowHead.clear()
+        
+        if self.isSelected():
+            myPen.setColor(QtCore.Qt.red)
+            painter.setPen(myPen)
+
+        
         for point in [line.p1(), arrowP1, arrowP2]:
             self.arrowHead.append(point)
         painter.setBrush(QtCore.Qt.white)
         painter.drawLine(line)
         painter.drawPolygon(self.arrowHead)
 
-        if self.isSelected():
-            painter.setPen(QtGui.QPen(myColor, 1, QtCore.Qt.DashLine))
-            myLine = QtCore.QLineF(line)
-            myLine.translate(0, 4.0)
-            painter.drawLine(myLine)
-            myLine.translate(0,-8.0)
-            painter.drawLine(myLine)
     def polygon(self):
         return QtGui.QPolygonF(self.boundingRect())
     def copy(self):
