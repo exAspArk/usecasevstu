@@ -930,6 +930,7 @@ class ElementDiagramm(QtGui.QGraphicsTextItem):
         return self.id
     
     def focusInEvent(self, event):
+        super(ElementDiagramm, self).focusInEvent(event)
         self.prevStr = self.toPlainText()
     
     def focusOutEvent(self, event):
