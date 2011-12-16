@@ -413,21 +413,24 @@ class TotalLineDiagram(QtGui.QGraphicsLineItem):
         self.myEndItem = item
         
     def selection(self):
-        angle = math.acos(self.line().dx() / self.line().length())
-        size = 17
-        if self.line().dy() >= 0:
-            angle = (math.pi * 2) - angle
-        p1 = QtCore.QPointF(self.line().p1().x() - size*math.sin(angle), self.line().p1().y() - size*math.cos(angle))
-        p2 = QtCore.QPointF(self.line().p1().x() + size*math.sin(angle), self.line().p1().y() + size*math.cos(angle))
-        p3 = QtCore.QPointF(self.line().p2().x() + size*math.sin(angle), self.line().p2().y() + size*math.cos(angle))
-        p4 = QtCore.QPointF(self.line().p2().x() - size*math.sin(angle), self.line().p2().y() - size*math.cos(angle))
-        p = QtGui.QPolygonF()
-        p.push_back(p1)
-        p.push_back(p2)
-        p.push_back(p3)
-        p.push_back(p4)
-        p.push_back(p1)
-        return p
+        if self.line().length() != 0:
+            angle = math.acos(self.line().dx() / self.line().length())
+            size = 17
+            if self.line().dy() >= 0:
+                angle = (math.pi * 2) - angle
+            p1 = QtCore.QPointF(self.line().p1().x() - size*math.sin(angle), self.line().p1().y() - size*math.cos(angle))
+            p2 = QtCore.QPointF(self.line().p1().x() + size*math.sin(angle), self.line().p1().y() + size*math.cos(angle))
+            p3 = QtCore.QPointF(self.line().p2().x() + size*math.sin(angle), self.line().p2().y() + size*math.cos(angle))
+            p4 = QtCore.QPointF(self.line().p2().x() - size*math.sin(angle), self.line().p2().y() - size*math.cos(angle))
+            p = QtGui.QPolygonF()
+            p.push_back(p1)
+            p.push_back(p2)
+            p.push_back(p3)
+            p.push_back(p4)
+            p.push_back(p1)
+            return p
+        else:
+            return 0
 
     def shape(self):
         path = super(TotalLineDiagram, self).shape()
@@ -2238,7 +2241,7 @@ class MainWindow(QtGui.QMainWindow):
         except UnicodeDecodeError:
             folders = unicode(path.replace("/","\\"),'UTF-8')
         #else
-        #folders = unicode(path).encode('UTF-8')
+        folders = unicode(path).encode('UTF-8')
         #endif
         file = QtCore.QFile(folders)
         if file.open(QtCore.QIODevice.WriteOnly) == False:
